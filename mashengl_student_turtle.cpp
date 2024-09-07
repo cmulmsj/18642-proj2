@@ -29,20 +29,20 @@ float z, atEnd, mod, isBumped, q;
 // and NO other turtle methods or maze methods (no peeking at the maze!)
 int updateOrientation(int orientation, bool isBumped, float& currentState) {
     if (orientation == 0) {
+        if (currentState == 2) { orientation = 1; currentState = 1; }  // Try right
+        else if (isBumped)     { orientation = 3; currentState = 0; }  // If bumped, go left
+        else currentState = 2;                                          // Otherwise, go straight
+    } else if (orientation == 1) {
+        if (currentState == 2) { orientation = 2; currentState = 1; }
+        else if (isBumped)     { orientation = 0; currentState = 0; }
+        else currentState = 2;
+    } else if (orientation == 2) {
         if (currentState == 2) { orientation = 3; currentState = 1; }
         else if (isBumped)     { orientation = 1; currentState = 0; }
         else currentState = 2;
-    } else if (orientation == 1) {
+    } else if (orientation == 3) {
         if (currentState == 2) { orientation = 0; currentState = 1; }
         else if (isBumped)     { orientation = 2; currentState = 0; }
-        else currentState = 2;
-    } else if (orientation == 2) {
-        if (currentState == 2) { orientation = 1; currentState = 1; }
-        else if (isBumped)     { orientation = 3; currentState = 0; }
-        else currentState = 2;
-    } else if (orientation == 3) {
-        if (currentState == 2) { orientation = 2; currentState = 1; }
-        else if (isBumped)     { orientation = 0; currentState = 0; }
         else currentState = 2;
     }
     return orientation;
@@ -69,7 +69,7 @@ bool studentMoveTurtle(QPointF& pos_, int& nw_or)
         isBumped = bumped(futureX, futureY, futureX2, futureY2);
         atEnd = atend(pos_.x(), pos_.y());
 
-        // Use the helper function for orientation and state transitions
+        // Use the helper function for right-hand rule orientation and state transitions
         nw_or = updateOrientation(nw_or, isBumped, currentState);
 
         ROS_INFO("Orientation=%f  STATE=%f", nw_or, currentState);
