@@ -27,6 +27,27 @@ float z, atEnd, mod, isBumped, q;
 // true=submit changes, false=do not submit changes
 // Ground rule -- you are only allowed to call the helper functions "bumped(..)" and "atend(..)",
 // and NO other turtle methods or maze methods (no peeking at the maze!)
+int updateOrientation(int orientation, bool isBumped, float& currentState) {
+    if (orientation == 0) {
+        if (currentState == 2) { orientation = 3; currentState = 1; }
+        else if (isBumped)     { orientation = 1; currentState = 0; }
+        else currentState = 2;
+    } else if (orientation == 1) {
+        if (currentState == 2) { orientation = 0; currentState = 1; }
+        else if (isBumped)     { orientation = 2; currentState = 0; }
+        else currentState = 2;
+    } else if (orientation == 2) {
+        if (currentState == 2) { orientation = 1; currentState = 1; }
+        else if (isBumped)     { orientation = 3; currentState = 0; }
+        else currentState = 2;
+    } else if (orientation == 3) {
+        if (currentState == 2) { orientation = 2; currentState = 1; }
+        else if (isBumped)     { orientation = 0; currentState = 0; }
+        else currentState = 2;
+    }
+    return orientation;
+}
+
 bool studentMoveTurtle(QPointF& pos_, int& nw_or) 
 {
     ROS_INFO("Turtle update Called timeoutCounter=%f", timeoutCounter);
@@ -48,23 +69,8 @@ bool studentMoveTurtle(QPointF& pos_, int& nw_or)
         isBumped = bumped(futureX, futureY, futureX2, futureY2);
         atEnd = atend(pos_.x(), pos_.y());
 
-        if (nw_or == 0) {
-            if (currentState == 2)  { nw_or = 3; currentState = 1; }
-            else if (isBumped)      { nw_or = 1; currentState = 0; }
-            else currentState = 2;
-        } else if (nw_or == 1) {
-            if (currentState == 2)  { nw_or = 0; currentState = 1; }
-            else if (isBumped)      { nw_or = 2; currentState = 0; }
-            else currentState = 2;
-        } else if (nw_or == 2) {
-            if (currentState == 2)  { nw_or = 1; currentState = 1; }
-            else if (isBumped)      { nw_or = 3; currentState = 0; }
-            else currentState = 2;
-        } else if (nw_or == 3) {
-            if (currentState == 2)  { nw_or = 2; currentState = 1; }
-            else if (isBumped)      { nw_or = 0; currentState = 0; }
-            else currentState = 2;
-        }
+        // Use the helper function for orientation and state transitions
+        nw_or = updateOrientation(nw_or, isBumped, currentState);
 
         ROS_INFO("Orientation=%f  STATE=%f", nw_or, currentState);
         z = currentState == 2;
