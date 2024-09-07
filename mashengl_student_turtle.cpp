@@ -69,30 +69,26 @@ bool studentMoveTurtle(QPointF& pos_, int& nw_or)
         isBumped = bumped(futureX, futureY, futureX2, futureY2);
         atEnd = atend(pos_.x(), pos_.y());
 
-        // Use the helper function for right-hand rule orientation and state transitions
         nw_or = updateOrientation(nw_or, isBumped, currentState);
 
         ROS_INFO("Orientation=%f  STATE=%f", nw_or, currentState);
-        z = currentState == 2;
-        mod = true;
 
-        if (z == true && atEnd == false) {
-            if (nw_or == 1) pos_.setY(pos_.y() - 1);
-            if (nw_or == 2) pos_.setX(pos_.x() + 1);
-            if (nw_or == 3) pos_.setY(pos_.y() + 1);
-            if (nw_or == 0) pos_.setX(pos_.x() - 1);
-
-            z = false;
+        if (currentState == 2 && !atEnd) {
+            switch (nw_or) {
+                case 0: pos_.setX(pos_.x() - 1); break;  // Move left
+                case 1: pos_.setY(pos_.y() - 1); break;  // Move up
+                case 2: pos_.setX(pos_.x() + 1); break;  // Move right
+                case 3: pos_.setY(pos_.y() + 1); break;  // Move down
+            }
             mod = true;
         }
+
+        if (atEnd) return false;
+
+        timeoutCounter = TIMEOUT;
+    } else {
+        timeoutCounter -= 1;
     }
 
-    if (atEnd) return false;
-
-    if (timeoutCounter == 0) timeoutCounter = TIMEOUT;
-    else timeoutCounter -= 1;
-
-    if (timeoutCounter == TIMEOUT) return true;
-
-    return false;
+    return (timeoutCounter == TIMEOUT);
 }
