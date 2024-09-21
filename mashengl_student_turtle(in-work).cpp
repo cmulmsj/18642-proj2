@@ -18,6 +18,10 @@
 // Ignore this line until project 5
 turtleMove studentTurtleStep(bool bumped) { return MOVE; }
 
+#include "student.h"
+#include <stdint.h>
+#include <ros/ros.h>
+
 // Constants
 const int32_t TIMEOUT = 40;
 const int32_t MAZE_SIZE = 23;
@@ -37,18 +41,24 @@ const int32_t STATE_TURNED = 1;
 const int32_t STATE_BUMPED = 0;
 
 // Global variables
-static int32_t timeoutCounter;
-static int32_t currentState;
-static bool atEnd;
+static int32_t timeoutCounter = 0;
+static int32_t currentState = STATE_MOVING;
+static bool atEnd = false;
 static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
 static int32_t currentX = START_POS;
 static int32_t currentY = START_POS;
 
-// Getter and setter for visit map
+// Function prototypes
+int32_t getVisitCount(int32_t x, int32_t y);
+void setVisitCount(int32_t x, int32_t y, int32_t count);
+int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentState);
+
+// Getter for visit map
 int32_t getVisitCount(int32_t x, int32_t y) {
     return visitMap[y][x];
 }
 
+// Setter for visit map
 void setVisitCount(int32_t x, int32_t y, int32_t count) {
     visitMap[y][x] = count;
     displayVisits(count);
@@ -78,6 +88,12 @@ int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentSt
 
 bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or) 
 {
+    static bool firstCall = true;
+    if (firstCall) {
+        setVisitCount(currentX, currentY, 1);
+        firstCall = false;
+    }
+
     ROS_INFO("Turtle update Called timeoutCounter=%d", timeoutCounter);
 
     if (timeoutCounter == 0) {
