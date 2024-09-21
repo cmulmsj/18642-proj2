@@ -121,6 +121,9 @@ bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or)
                 case UP:    pos_.setY(pos_.y() - 1); currentY--; break;
                 case RIGHT: pos_.setX(pos_.x() + 1); currentX++; break;
                 case DOWN:  pos_.setY(pos_.y() + 1); currentY++; break;
+                default:
+                    ROS_ERROR("Invalid orientation: %d", nw_or);
+                    break;
             }
             int32_t visits = getVisitCount(currentX, currentY) + 1;
             setVisitCount(currentX, currentY, visits);
