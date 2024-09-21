@@ -1,4 +1,4 @@
-/*
+/* 
  * Originally by Philip Koopman (koopman@cmu.edu)
  * and Milda Zizyte (milda@cmu.edu)
  *
@@ -7,167 +7,130 @@
  * LAST UPDATE: 09/21/2024
  *
  * This file is an algorithm to solve the ece642rtle maze
- * using the left-hand rule.
+ * using the left-hand rule. The code is intentionaly left obfuscated.
  *
  */
 
 #include "student.h"
 #include <stdint.h>
 #include <ros/ros.h>
-#include <array>
 
 // Ignore this line until project 5
 turtleMove studentTurtleStep(bool bumped) { return MOVE; }
 
 // OK TO MODIFY BELOW THIS LINE
 
+
 // Constants
-const int32_t MOVE_DELAY = 40;
-const int32_t GRID_SIZE = 23;
-const int32_t INIT_POS = GRID_SIZE / 2;
+const int32_t TIMEOUT = 40;
+const int32_t MAZE_SIZE = 23;
+const int32_t START_POS = MAZE_SIZE / 2;
 
-// Enums for stronger typing and switch statement usage
-enum class Heading : int8_t
-{
-    West,
-    North,
-    East,
-    South
-};
-enum class Action : int8_t
-{
-    Advance,
-    RotateClockwise,
-    RotateCounterClockwise
+// Enum for directions
+enum Direction {
+    LEFT = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3
 };
 
-// Typedef for geometric pairs
-typedef struct
-{
-    int32_t x;
-    int32_t y;
-} Coordinate;
+// States
+const int32_t STATE_MOVING = 2;
+const int32_t STATE_TURNED = 1;
+const int32_t STATE_BUMPED = 0;
 
-// Struct to encapsulate turtle data
-struct TurtleData
-{
-    Coordinate position;
-    Heading facing;
-    Action nextAction;
-    int32_t delayCounter;
-    bool reachedGoal;
-};
+// Global variables
+static int32_t timeoutCounter = 0;
+static int32_t currentState = STATE_MOVING;
+static bool atEnd = false;
+static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
+static int32_t currentX = START_POS;
+static int32_t currentY = START_POS;
 
-// Global variables (minimized)
-static std::array<std::array<int32_t, GRID_SIZE>, GRID_SIZE> cellVisits = {0};
-static TurtleData turtle = {{INIT_POS, INIT_POS}, Heading::North, Action::Advance, 0, false};
+// Function prototypes
+int32_t getVisitCount(int32_t x, int32_t y);
+void setVisitCount(int32_t x, int32_t y, int32_t count);
+int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentState);
+bool studentMoveTurtle(QPointF& pos_, int32_t  * nw_or);
 
-// Const array for movement offsets
-const std::array<Coordinate, 4> MOVE_OFFSETS = {{{-1, 0}, {0, -1}, {1, 0}, {0, 1}}};
-
-/**
- * Updates the turtle's state based on its current action and whether it hit an obstacle.
- *
- * @param hitObstacle Boolean indicating if the turtle hit an obstacle.
- */
-void updateTurtleState(bool hitObstacle)
-{
-    switch (turtle.nextAction)
-    {
-    case Action::Advance:
-        turtle.nextAction = Action::RotateClockwise;
-        break;
-    case Action::RotateClockwise:
-    case Action::RotateCounterclockwise:
-        if (hitObstacle)
-        {
-            turtle.nextAction = Action::RotateCounterclockwise;
-            turtle.facing = static_cast<Heading>((static_cast<int8_t>(turtle.facing) + 3) % 4);
-        }
-        else
-        {
-            turtle.nextAction = Action::Advance;
-        }
-        break;
-    default:
-        ROS_ERROR("Unexpected turtle action: %d", static_cast<int8_t>(turtle.nextAction));
-        turtle.nextAction = Action::Advance;
-        break;
-    }
-    if (turtle.nextAction == Action::RotateClockwise)
-    {
-        turtle.facing = static_cast<Heading>((static_cast<int8_t>(turtle.facing) + 1) % 4);
-    }
+// Getter for visit map
+int32_t getVisitCount(int32_t x, int32_t y) {
+    return visitMap[y][x];
 }
 
-/**
- * Checks if the turtle will collide with an obstacle in its next move.
- *
- * @param pos Current position of the turtle.
- * @return Boolean indicating if a collision will occur.
- */
-bool checkCollision(const QPointF &pos)
-{
-    int32_t checkX = static_cast<int32_t>(pos.x()) + MOVE_OFFSETS[static_cast<int8_t>(turtle.facing)].x;
-    int32_t checkY = static_cast<int32_t>(pos.y()) + MOVE_OFFSETS[static_cast<int8_t>(turtle.facing)].y;
-    return bumped(checkX, checkY,
-                  checkX + (turtle.facing == Heading::East ? 1 : 0),
-                  checkY + (turtle.facing == Heading::South ? 1 : 0));
+// Setter for visit map
+void setVisitCount(int32_t x, int32_t y, int32_t count) {
+    visitMap[y][x] = count;
+    displayVisits(count);
 }
 
-/**
- * Moves the turtle to its next position and updates the visit count.
- *
- * @param pos Reference to the turtle's position to be updated.
- */
-void moveTurtle(QPointF &pos)
-{
-    Coordinate offset = MOVE_OFFSETS[static_cast<int8_t>(turtle.facing)];
-    pos.setX(pos.x() + offset.x);
-    pos.setY(pos.y() + offset.y);
-    turtle.position.x += offset.x;
-    turtle.position.y += offset.y;
-
-    if (turtle.position.x >= 0 && turtle.position.x < GRID_SIZE &&
-        turtle.position.y >= 0 && turtle.position.y < GRID_SIZE)
-    {
-        cellVisits[turtle.position.y][turtle.position.x]++;
-        displayVisits(cellVisits[turtle.position.y][turtle.position.x]);
+// Update orientation function
+int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentState) {
+    if (orientation == LEFT) {
+        if (currentState == STATE_MOVING) { orientation = UP; currentState = STATE_TURNED; }
+        else if (isBumped)                { orientation = DOWN; currentState = STATE_BUMPED; }
+        else currentState = STATE_MOVING;
+    } else if (orientation == UP) {
+        if (currentState == STATE_MOVING) { orientation = RIGHT; currentState = STATE_TURNED; }
+        else if (isBumped)                { orientation = LEFT; currentState = STATE_BUMPED; }
+        else currentState = STATE_MOVING;
+    } else if (orientation == RIGHT) {
+        if (currentState == STATE_MOVING) { orientation = DOWN; currentState = STATE_TURNED; }
+        else if (isBumped)                { orientation = UP; currentState = STATE_BUMPED; }
+        else currentState = STATE_MOVING;
+    } else if (orientation == DOWN) {
+        if (currentState == STATE_MOVING) { orientation = LEFT; currentState = STATE_TURNED; }
+        else if (isBumped)                { orientation = RIGHT; currentState = STATE_BUMPED; }
+        else currentState = STATE_MOVING;
     }
-    else
-    {
-        ROS_ERROR("Turtle position out of bounds: (%d, %d)", turtle.position.x, turtle.position.y);
-    }
+    return orientation;
 }
 
-/**
- * Main function to move the turtle through the maze.
- *
- * @param pos Reference to the turtle's position.
- * @param orientation Reference to the turtle's orientation.
- * @return Boolean indicating if the turtle should continue moving.
- */
-bool studentMoveTurtle(QPointF &pos, int32_t &orientation)
+bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or) 
 {
-    if (turtle.delayCounter == 0)
-    {
-        bool hitObstacle = checkCollision(pos);
-        turtle.reachedGoal = atend(pos.x(), pos.y());
+    static bool firstCall = true;
+    if (firstCall) {
+        setVisitCount(currentX, currentY, 1);
+        firstCall = false;
+    }
 
-        updateTurtleState(hitObstacle);
+    ROS_INFO("Turtle update Called timeoutCounter=%d", timeoutCounter);
 
-        if (turtle.nextAction == Action::Advance && !turtle.reachedGoal)
-        {
-            moveTurtle(pos);
+    if (timeoutCounter == 0) {
+        int32_t futureX = pos_.x(), futureY = pos_.y();
+        int32_t futureX2 = pos_.x(), futureY2 = pos_.y();
+
+        if (nw_or < RIGHT) {  
+            if (nw_or == LEFT) futureY2 += 1;
+            else               futureX2 += 1;
+        } else {  
+            futureX2 += 1; futureY2 += 1;
+            if (nw_or == RIGHT) futureX += 1;
+            else                futureY += 1;
         }
 
-        orientation = static_cast<int32_t>(turtle.facing);
-        turtle.delayCounter = MOVE_DELAY;
-    }
-    else
-    {
-        turtle.delayCounter--;
+        bool isBumped = bumped(futureX, futureY, futureX2, futureY2);
+        atEnd = atend(pos_.x(), pos_.y());
+
+        nw_or = updateOrientation(nw_or, isBumped, currentState);
+        ROS_INFO("Orientation=%d  STATE=%d", nw_or, currentState);
+
+        if (currentState == STATE_MOVING && !atEnd) {
+            switch (nw_or) {
+                case LEFT:  pos_.setX(pos_.x() - 1); currentX--; break;
+                case UP:    pos_.setY(pos_.y() - 1); currentY--; break;
+                case RIGHT: pos_.setX(pos_.x() + 1); currentX++; break;
+                case DOWN:  pos_.setY(pos_.y() + 1); currentY++; break;
+            }
+            int32_t visits = getVisitCount(currentX, currentY) + 1;
+            setVisitCount(currentX, currentY, visits);
+        }
+
+        if (atEnd) return false;
+        timeoutCounter = TIMEOUT;
+    } else {
+        timeoutCounter--;
     }
 
-    return !turtle.reachedGoal;
+    return (timeoutCounter == TIMEOUT);
 }
