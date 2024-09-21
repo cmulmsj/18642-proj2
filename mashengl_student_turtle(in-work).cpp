@@ -1,3 +1,16 @@
+/* 
+ * Originally by Philip Koopman (koopman@cmu.edu)
+ * and Milda Zizyte (milda@cmu.edu)
+ *
+ * STUDENT NAME: Mashengjun Li
+ * ANDREW ID: mashengl
+ * LAST UPDATE: 09/21/2024
+ *
+ * This file is an algorithm to solve the ece642rtle maze
+ * using the left-hand rule. The code is intentionaly left obfuscated.
+ *
+ */
+
 #include "student.h"
 #include <stdint.h>
 #include <ros/ros.h>
