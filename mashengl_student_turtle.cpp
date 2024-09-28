@@ -56,43 +56,39 @@ void setVisitCount(int32_t x, int32_t y, int32_t count) {
 turtleMove studentTurtleStep(bool bumped) {
     static int orientation = 0; // 0: RIGHT, 1: DOWN, 2: LEFT, 3: UP
     static turtleMove lastMove = FORWARD;
-    static int state = 0; // 0: Try right, 1: Try forward, 2: Try left
+    static int state = 0; // 0: Try right, 1: Try forward, 2: Try left, 3: Turn around
 
     ROS_INFO("Turtle Input - Bumped: %d, Last Move: %d, Orientation: %d, Position: (%d, %d), State: %d",
              bumped, lastMove, orientation, currentX, currentY, state);
 
     turtleMove nextMove;
 
-    if (state == 0) {
-        // Try to turn right
-        nextMove = TURN_RIGHT;
-        orientation = (orientation + 1) % 4;
-        state = 1;
-    } else if (state == 1) {
-        // Try to move forward
-        if (!bumped) {
-            nextMove = FORWARD;
-            state = 0; // Reset to try right again
-        } else {
-            // If bumped, move to next state
-            nextMove = TURN_LEFT;
-            orientation = (orientation + 3) % 4;
-            state = 2;
-        }
-    } else if (state == 2) {
-        // Try to turn left
-        if (!bumped) {
-            nextMove = FORWARD;
-            state = 0; // Reset to try right again
-        } else {
-            nextMove = TURN_LEFT;
-            orientation = (orientation + 3) % 4;
-            // Stay in state 2
-        }
+    if (bumped) {
+        // If we hit a wall, go to the next state
+        state = (state + 1) % 4;
     }
 
-    // Update position if moving forward
-    if (nextMove == FORWARD) {
+    switch (state) {
+        case 0: // Try right
+            nextMove = TURN_RIGHT;
+            orientation = (orientation + 1) % 4;
+            break;
+        case 1: // Try forward
+            nextMove = FORWARD;
+            break;
+        case 2: // Try left
+            nextMove = TURN_LEFT;
+            orientation = (orientation + 3) % 4;
+            break;
+        case 3: // Turn around
+            nextMove = TURN_LEFT;
+            orientation = (orientation + 3) % 4;
+            state = 0; // Reset to try right after turning around
+            break;
+    }
+
+    // Only update position if we're actually moving forward
+    if (nextMove == FORWARD && !bumped) {
         switch (orientation) {
             case 0: currentX++; break;
             case 1: currentY++; break;
