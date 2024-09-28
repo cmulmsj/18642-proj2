@@ -51,7 +51,8 @@ turtleMove studentTurtleStep(bool bumped) {
         firstCall = false;
     }
 
-    static int turnCount = 0;  // Count how many times we've turned in place
+    static int turnCount = 0;       // Count how many times we've turned in place
+    static bool justMovedForward = false;  // Flag to track if we just moved forward
 
     ROS_INFO("studentTurtleStep called with bumped = %d", bumped);
 
@@ -61,7 +62,6 @@ turtleMove studentTurtleStep(bool bumped) {
         turnCount++;
         if (turnCount >= 4) {
             // We've turned all the way around and can't move forward
-            // Implement logic to handle this, e.g., stop or backtrack
             turnCount = 0;
             ROS_WARN("Surrounded by walls, stopping.");
             return STOP;  // Or another appropriate action
@@ -72,25 +72,31 @@ turtleMove studentTurtleStep(bool bumped) {
         // Reset turn count when we can move forward
         turnCount = 0;
 
-        // Move forward
-        switch (orientation) {
-            case LEFT: currentX -= 1; break;
-            case UP:   currentY -= 1; break;
-            case RIGHT: currentX += 1; break;
-            case DOWN: currentY += 1; break;
-            default:
-                ROS_ERROR("Invalid orientation: %d", orientation);
-                break;
+        if (justMovedForward) {
+            // After moving forward, turn left to keep the wall on the left
+            orientation = static_cast<Direction>((orientation + 3) % 4);  // Equivalent to -1 mod 4
+            ROS_INFO("Turning left to keep wall on the left. New orientation: %d", orientation);
+            justMovedForward = false;  // Reset the flag
+            return TURN_LEFT;
+        } else {
+            // Move forward
+            switch (orientation) {
+                case LEFT: currentX -= 1; break;
+                case UP:   currentY -= 1; break;
+                case RIGHT: currentX += 1; break;
+                case DOWN: currentY += 1; break;
+                default:
+                    ROS_ERROR("Invalid orientation: %d", orientation);
+                    break;
+            }
+            int32_t visits = getVisitCount(currentX, currentY) + 1;
+            setVisitCount(currentX, currentY, visits);
+
+            ROS_INFO("Moved forward to position (%d, %d). Visits: %d", currentX, currentY, visits);
+
+            justMovedForward = true;  // Set the flag to turn left on next tick
+            return MOVE_FORWARD;
         }
-        int32_t visits = getVisitCount(currentX, currentY) + 1;
-        setVisitCount(currentX, currentY, visits);
-
-        ROS_INFO("Moved forward to position (%d, %d). Visits: %d", currentX, currentY, visits);
-
-        // Then turn left to keep wall on the left
-        orientation = static_cast<Direction>((orientation + 3) % 4);  // Equivalent to -1 mod 4
-        ROS_INFO("Turning left to keep wall on the left. New orientation: %d", orientation);
-        return TURN_LEFT;
     }
 }
 
@@ -98,5 +104,4 @@ turtleMove studentTurtleStep(bool bumped) {
 int getCurrentVisitCount() {
     return getVisitCount(currentX, currentY);
 }
-
 
