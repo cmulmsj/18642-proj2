@@ -1,6 +1,12 @@
-#ifndef STUDENT_H
-#define STUDENT_H
-
+#include <ros/ros.h>
+#include <boost/bind.hpp>
+#include <ece642rtle/timeInt8.h>
+#include <std_msgs/Empty.h>
+#include <ece642rtle/RTIbump.h>
+#include <ece642rtle/RTIatend.h>
+#include <ece642rtle/PoseOrntBundle.h>
+#include <ece642rtle/bumpEcho.h>
+#include <ece642rtle/aendEcho.h>
 #include <QPointF>
 
 // Enum to define turtle's possible moves
