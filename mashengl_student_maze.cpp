@@ -26,7 +26,6 @@
 
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
-    // Determine if the turtle is facing a wall
     int x1 = pos_.x(), y1 = pos_.y();
     int x2 = x1, y2 = y1;
 
@@ -52,29 +51,11 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         nw_or = (nw_or + 3) % 4;
     } else if (nextMove == TURN_RIGHT) {
         nw_or = (nw_or + 1) % 4;
-    }
-
-    // Update the position if the turtle wants to move forward
-    if (nextMove == FORWARD && !isBumped) {
-        // Recalculate the new position based on the updated orientation
-        switch (nw_or) {
-            case 0: x2 = x1 + 1; break; // RIGHT
-            case 1: y2 = y1 + 1; break; // DOWN
-            case 2: x2 = x1 - 1; break; // LEFT
-            case 3: y2 = y1 - 1; break; // UP
-        }
-
-        // Double-check if moving to the new position would result in a collision
-        bool wouldBump = bumped(x1, y1, x2, y2);
-
-        if (!wouldBump) {
-            // Update position
-            pos_.setX(x2);
-            pos_.setY(y2);
-            ROS_INFO("Maze - Moved to (%d, %d)", x2, y2);
-        } else {
-            ROS_WARN("Maze - Cannot move forward; wall detected ahead.");
-        }
+    } else if (nextMove == FORWARD && !isBumped) {
+        // Only update position if moving forward and not bumped
+        pos_.setX(x2);
+        pos_.setY(y2);
+        ROS_INFO("Maze - Moved to (%d, %d)", x2, y2);
     }
 
     // Check if the turtle has reached the end
@@ -86,6 +67,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     // Return true to continue, false to stop the turtle
     return !atEnd;
 }
+
 
 int translateOrnt(int orientation, turtleMove nextMove) {
     if (nextMove == TURN_LEFT) {
