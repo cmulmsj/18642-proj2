@@ -26,29 +26,37 @@
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     static int count_down = 0;
-    static State current_state = INIT;
+    static State current_state = EXPLORE;
+    static int rotation_count = 0;
 
     if (count_down == 0) {
-        if (current_state == INIT) {
-            record_visited(pos_);
-            displayVisits(get_visited(pos_));
-        }
+        record_visited(pos_);
+        displayVisits(get_visited(pos_));
 
-        bool has_wall = check_bumped(pos_, static_cast<Orientation>(nw_or));
+        bool has_wall = check_bumped(pos_, nw_or);
         bool at_goal = atend(pos_.x(), pos_.y());
 
         turtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_state);
+        
+        int prev_orientation = nw_or;
         nw_or = translateOrnt(nw_or, nextMove);
 
-        ROS_INFO("Orientation=%d  State=%d  NextMove=%d", nw_or, current_state, nextMove);
+        if (prev_orientation != nw_or) {
+            rotation_count++;
+        } else {
+            rotation_count = 0;
+        }
 
-        if (nextMove == MOVE) {
-            pos_ = translatePos(pos_, static_cast<Orientation>(nw_or));
+        ROS_INFO("Orientation=%d  State=%d  NextMove=%d  RotationCount=%d", 
+                 nw_or, current_state, nextMove, rotation_count);
+
+        if (nextMove == FORWARD && !has_wall) {
+            pos_ = translatePos(pos_, nw_or);
             record_visited(pos_);
             displayVisits(get_visited(pos_));
         }
 
-        if (current_state == GOAL) {
+        if (current_state == FINISH) {
             return false;
         }
 
@@ -60,12 +68,12 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return false;
 }
 
-QPointF translatePos(QPointF pos_, Orientation orientation) {
-    switch (orientation) {
+QPointF translatePos(QPointF pos_, int orientation) {
+    switch (static_cast<Orientation>(orientation)) {
         case LEFT:  pos_.setX(pos_.x() - 1); break;
-        case DOWN:  pos_.setY(pos_.y() - 1); break;
+        case DOWN:  pos_.setY(pos_.y() + 1); break;
         case RIGHT: pos_.setX(pos_.x() + 1); break;
-        case UP:    pos_.setY(pos_.y() + 1); break;
+        case UP:    pos_.setY(pos_.y() - 1); break;
         default:    ROS_ERROR("Invalid Orientation"); break;
     }
     return pos_;
@@ -73,23 +81,23 @@ QPointF translatePos(QPointF pos_, Orientation orientation) {
 
 int translateOrnt(int orientation, turtleMove nextMove) {
     switch (nextMove) {
-        case TURNRIGHT: return (orientation + 1) % NUM_ORIENTATIONS;
-        case TURNLEFT:  return (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
-        case MOVE:
-        case STOP:      return orientation;
-        default:        ROS_ERROR("Invalid Move"); return orientation;
+        case TURN_RIGHT: return (orientation + 1) % NUM_ORIENTATIONS;
+        case TURN_LEFT:  return (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
+        case FORWARD:
+        case STOP:       return orientation;
+        default:         ROS_ERROR("Invalid Move"); return orientation;
     }
 }
 
-bool check_bumped(QPointF pos_, Orientation orient) {
+bool check_bumped(QPointF pos_, int orient) {
     int x1 = pos_.x(), y1 = pos_.y();
     int x2 = x1, y2 = y1;
 
-    switch (orient) {
-        case LEFT:  y2++; break;
-        case DOWN:  x2++; break;
-        case RIGHT: x2++; y2++; x1++; break;
-        case UP:    x2++; y2++; y1++; break;
+    switch (static_cast<Orientation>(orient)) {
+        case LEFT:  x2--; break;
+        case DOWN:  y2++; break;
+        case RIGHT: x2++; break;
+        case UP:    y2--; break;
         default:    ROS_ERROR("Invalid Orientation"); return false;
     }
 
