@@ -12,110 +12,51 @@
  */
 
 #include "student.h"
-#include <stdint.h>
-#include <ros/ros.h>
 
-// Constants
-static const int32_t MAZE_SIZE = 23;
-static const int32_t START_POS = MAZE_SIZE / 2;
+static int8_t visited[MAZE_SIZE][MAZE_SIZE] = {0};
 
-// Global variables
-static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0}; // Initialize visit map
-static int32_t currentX = START_POS; // Turtle's current X position in local map
-static int32_t currentY = START_POS; // Turtle's current Y position in local map
-
-// Turtle's orientation (relative)
-enum Direction { LEFT = 0, DOWN = 1, RIGHT = 2, UP = 3 };
-static Direction orientation = LEFT; 
-
-// Function prototypes
-int32_t getVisitCount(int32_t x, int32_t y);
-void setVisitCount(int32_t x, int32_t y, int32_t count);
-
-// Variable to store the last move made
-static turtleMove lastMove = FORWARD;
-
-/**
- * Retrieves the visit count for a specific cell in the local map.
- */
-int32_t getVisitCount(int32_t x, int32_t y) {
-    return visitMap[y][x];
+void record_visited(QPointF& pos_) {
+    visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())]++;
 }
 
-/**
- * Updates the visit count for a specific cell and calls displayVisits().
- */
-void setVisitCount(int32_t x, int32_t y, int32_t count) {
-    visitMap[y][x] = count;
-    displayVisits(count);
+uint8_t get_visited(QPointF& pos_) {
+    return visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())];
 }
 
-/**
- * Determines the turtle's next move based on whether it has bumped into a wall.
- */
-turtleMove studentTurtleStep(bool bumped) {
-    static int state = 0; // 0: Initial move, 1: Move forward, 2: Turn right, 3: Turn left
-    static bool firstMove = true;
-
-    ROS_INFO("Turtle Input - Bumped: %d, State: %d, First Move: %d, Orientation: %d",
-             bumped, state, firstMove, orientation);
-
+turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
     turtleMove nextMove;
 
-    if (firstMove) {
-        nextMove = FORWARD; // Initially move forward (which is left in the maze)
-        firstMove = false;
-        state = 1; // Next, we'll follow the right-hand rule
-    } else {
-        switch (state) {
-            case 1: // Moving forward
-                if (bumped) {
-                    nextMove = TURN_RIGHT;
-                    state = 2;
-                } else {
-                    nextMove = FORWARD;
-                    state = 2; // Always try to turn right after moving forward
-                }
-                break;
-            case 2: // Turning right
-                if (bumped) {
-                    nextMove = TURN_LEFT;
-                    state = 3;
-                } else {
-                    nextMove = FORWARD;
-                    state = 1;
-                }
-                break;
-            case 3: // Turning left
-                nextMove = FORWARD;
-                state = 1; // After turning left, try to move forward
-                break;
-        }
+    switch (*cur_state) {
+        case INIT:
+        case GO:
+            if (goal) {
+                *cur_state = GOAL;
+                nextMove = STOP;
+            } else {
+                *cur_state = TURN;
+                nextMove = TURNRIGHT;
+            }
+            break;
+
+        case TURN:
+            if (bumped) {
+                *cur_state = TURN;
+                nextMove = TURNLEFT;
+            } else {
+                *cur_state = GO;
+                nextMove = MOVE;
+            }
+            break;
+
+        case GOAL:
+            nextMove = STOP;
+            break;
+
+        default:
+            ROS_ERROR("Invalid State");
+            nextMove = STOP;
+            break;
     }
-
-    // Update orientation based on turn
-    if (nextMove == TURN_LEFT) {
-        orientation = static_cast<Direction>((orientation + 3) % 4);
-    } else if (nextMove == TURN_RIGHT) {
-        orientation = static_cast<Direction>((orientation + 1) % 4);
-    }
-
-    // Update local position based on move (only if actually moving forward and not bumped)
-    if (nextMove == FORWARD && !bumped) {
-        switch (orientation) {
-            case LEFT: currentX--; break;
-            case RIGHT: currentX++; break;
-            case UP: currentY--; break;
-            case DOWN: currentY++; break;
-        }
-    }
-
-    // Update visit count
-    int visits = getVisitCount(currentX, currentY) + 1;
-    setVisitCount(currentX, currentY, visits);
-
-    ROS_INFO("Turtle Decision - Next Move: %d, New State: %d, Local Pos: (%d, %d), New Orientation: %d",
-             nextMove, state, currentX, currentY, orientation);
 
     return nextMove;
 }
