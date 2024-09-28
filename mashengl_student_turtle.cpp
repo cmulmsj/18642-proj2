@@ -61,20 +61,35 @@ turtleMove studentTurtleStep(bool bumped) {
     switch (state) {
         case STATE_INIT:
             // Start by attempting to turn right
-            orientation = static_cast<Direction>((orientation + 1) % 4); // Turn right
-            state = STATE_CHECK_RIGHT;
+            state = STATE_TURN_RIGHT;
             return TURN_RIGHT;
 
-        case STATE_CHECK_RIGHT:
-            if (!bumped) {
+        case STATE_TURN_RIGHT:
+            // Just turned right, now check if there's a wall ahead
+            if (bumped) {
+                // Wall to the right, turn left to original orientation
+                state = STATE_TURN_LEFT;
+                return TURN_LEFT;
+            } else {
                 // No wall to the right, move forward
                 state = STATE_MOVE_FORWARD;
                 return MOVE_FORWARD;
-            } else {
-                // Wall to the right, turn left to original orientation
-                orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
+            }
+
+        case STATE_TURN_LEFT:
+            // After turning left, check if we can move forward
+            state = STATE_CHECK_FORWARD;
+            return TURN_LEFT;
+
+        case STATE_CHECK_FORWARD:
+            if (bumped) {
+                // Wall ahead, need to turn left again
                 state = STATE_TURN_LEFT;
                 return TURN_LEFT;
+            } else {
+                // No wall ahead, move forward
+                state = STATE_MOVE_FORWARD;
+                return MOVE_FORWARD;
             }
 
         case STATE_MOVE_FORWARD:
@@ -93,29 +108,6 @@ turtleMove studentTurtleStep(bool bumped) {
             // After moving forward, attempt to turn right again
             state = STATE_TURN_RIGHT;
             return MOVE_FORWARD;
-
-        case STATE_TURN_LEFT:
-            // After turning left, check forward
-            state = STATE_CHECK_FORWARD;
-            return TURN_LEFT;
-
-        case STATE_CHECK_FORWARD:
-            if (!bumped) {
-                // No wall ahead, move forward
-                state = STATE_MOVE_FORWARD;
-                return MOVE_FORWARD;
-            } else {
-                // Wall ahead, turn left
-                orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
-                state = STATE_TURN_LEFT;
-                return TURN_LEFT;
-            }
-
-        case STATE_TURN_RIGHT:
-            // Turn right to check for a wall on the right
-            orientation = static_cast<Direction>((orientation + 1) % 4); // Turn right
-            state = STATE_CHECK_RIGHT;
-            return TURN_RIGHT;
 
         default:
             ROS_ERROR("Invalid state in studentTurtleStep");
