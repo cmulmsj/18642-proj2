@@ -25,23 +25,17 @@ void updatePosition() {
 turtleMove studentTurtleStep(bool bumped, int& newOrientation) {
     ROS_INFO("studentTurtleStep called with bumped: %s", bumped ? "true" : "false");
 
-    if (!bumped) {
-        // Try to turn right
-        currentOrientation = (currentOrientation + 1) % 4;
-        ROS_INFO("Turned right, new orientation: %d", currentOrientation);
-    } else {
+    if (bumped) {
         // If bumped, turn left
         currentOrientation = (currentOrientation - 1 + 4) % 4;
         ROS_INFO("Bumped, turned left, new orientation: %d", currentOrientation);
+    } else {
+        // If not bumped, try to move forward
+        updatePosition();
+        ROS_INFO("Moved forward, new position: (%d, %d)", currentX, currentY);
     }
 
     newOrientation = currentOrientation;
-    
-    // Only update position if not bumped
-    if (!bumped) {
-        updatePosition();
-    }
-    
     return MOVE;
 }
 
