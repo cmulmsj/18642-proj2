@@ -33,7 +33,7 @@ uint8_t get_visited(QPointF& pos_) {
 }
 
 turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
-    static int consecutive_turns = 0;
+    static int turns = 0;
 
     if (goal) {
         *cur_state = FINISH;
@@ -42,32 +42,32 @@ turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
 
     switch (*cur_state) {
         case EXPLORE:
-            if (bumped) {
-                *cur_state = ROTATE;
-                consecutive_turns = 1;
-                return TURN_RIGHT;
-            } else {
+            if (!bumped) {
+                turns = 0;
                 return FORWARD;
+            } else {
+                *cur_state = ROTATE;
+                turns = 1;
+                return TURN_RIGHT;
             }
 
         case ROTATE:
             if (bumped) {
-                consecutive_turns++;
-                if (consecutive_turns >= 4) {
+                turns++;
+                if (turns >= 4) {
                     *cur_state = BACKTRACK;
-                    consecutive_turns = 0;
                     return TURN_LEFT;
                 }
                 return TURN_RIGHT;
             } else {
                 *cur_state = EXPLORE;
-                consecutive_turns = 0;
                 return FORWARD;
             }
 
         case BACKTRACK:
             if (!bumped) {
                 *cur_state = EXPLORE;
+                turns = 0;
                 return FORWARD;
             } else {
                 return TURN_LEFT;
