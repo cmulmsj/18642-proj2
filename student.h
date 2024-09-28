@@ -19,9 +19,9 @@ void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
 
 enum turtleMove : int8_t {
-    MOVE,
-    TURNRIGHT,
-    TURNLEFT,
+    FORWARD,
+    TURN_RIGHT,
+    TURN_LEFT,
     STOP
 };
 
@@ -33,17 +33,17 @@ enum Orientation : int8_t {
 };
 
 enum State : int8_t {
-    INIT,
-    GO,
-    TURN,
-    GOAL
+    EXPLORE,
+    ROTATE,
+    BACKTRACK,
+    FINISH
 };
 
-QPointF translatePos(QPointF pos_, Orientation orientation);
+QPointF translatePos(QPointF pos_, int orientation);
 int translateOrnt(int orientation, turtleMove nextMove);
 turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state);
 
-bool check_bumped(QPointF pos_, Orientation orient);
+bool check_bumped(QPointF pos_, int orient);
 void record_visited(QPointF& pos_);
 uint8_t get_visited(QPointF& pos_);
 
