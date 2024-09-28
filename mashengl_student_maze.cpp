@@ -21,10 +21,14 @@
  *
  */
 
+// mashengl_student_maze.cpp
+
 #include "student.h"
 
 /*
  * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
+ * Ground rule -- you are only allowed to call the three helper functions defined in student.h, and NO other turtle methods or maze methods (no peeking at the maze!)
+ * This file interfaces with functions in student_turtle.cpp
  */
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
@@ -38,19 +42,26 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         case 1: y2 = y1 - 1; break; // UP
         case 2: x2 = x1 + 1; break; // RIGHT
         case 3: y2 = y1 + 1; break; // DOWN
+        default:
+            ROS_ERROR("Invalid orientation: %d", nw_or);
+            return false;
     }
 
-    bool bumped = bumped(x1, y1, x2, y2);
+    // Use a different variable name to avoid conflict with the function 'bumped'
+    bool isBumped = bumped(x1, y1, x2, y2);
 
     // Call the turtle's decision-making function
-    turtleMove nextMove = studentTurtleStep(bumped);
+    turtleMove nextMove = studentTurtleStep(isBumped);
 
     // Update the position and orientation based on the move
     pos_ = translatePos(pos_, nextMove, nw_or);
     nw_or = translateOrnt(nw_or, nextMove);
 
     // Check if the turtle has reached the end
-    return !atend(pos_.x(), pos_.y());
+    bool atEnd = atend(pos_.x(), pos_.y());
+
+    // Return true to accept changes, or false to stop the turtle if it has reached the end
+    return !atEnd;
 }
 
 /*
@@ -64,9 +75,12 @@ QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
             case 1: pos_.setY(pos_.y() - 1); break; // UP
             case 2: pos_.setX(pos_.x() + 1); break; // RIGHT
             case 3: pos_.setY(pos_.y() + 1); break; // DOWN
+            default:
+                ROS_ERROR("Invalid orientation: %d", orientation);
+                break;
         }
     }
-    // No position change for turns
+    // No position change for turns or stop
     return pos_;
 }
 
@@ -76,10 +90,11 @@ QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
  */
 int translateOrnt(int orientation, turtleMove nextMove) {
     if (nextMove == TURN_LEFT) {
-        orientation = (orientation + 3) % 4;
+        orientation = (orientation + 3) % 4; // Turn left
     } else if (nextMove == TURN_RIGHT) {
-        orientation = (orientation + 1) % 4;
+        orientation = (orientation + 1) % 4; // Turn right
     }
-    // No orientation change for FORWARD
+    // No orientation change for FORWARD or STOP
     return orientation;
 }
+
