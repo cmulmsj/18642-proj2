@@ -22,4 +22,4 @@ QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation);
 int translateOrnt(int orientation, turtleMove nextMove);
 
 // OK to change below this line
-bool studentMoveTurtle(QPointF& pos_, int& nw_or);
+// bool studentMoveTurtle(QPointF& pos_, int& nw_or);
