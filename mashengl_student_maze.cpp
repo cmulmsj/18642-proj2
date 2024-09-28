@@ -23,34 +23,55 @@
 
 #include "student.h"
 
-/*
- * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
- * Ground rule -- you are only allowed to call the three helper functions defined in student.h, and NO other turtle methods or maze methods (no peeking at the maze!)
- * This file interfaces with functions in student_turtle.cpp
- */
-bool moveTurtle(QPointF& pos_, int& nw_or)
-{
-  bool bumped = true; // Replace with your own procedure
-  turtleMove nextMove = studentTurtleStep(bumped); // define your own turtleMove enum or structure
-  pos_ = translatePos(pos_, nextMove);
-  nw_or = translateOrnt(nw_or, nextMove);
+// Translates relative move requests to absolute coordinates and updates the maze display.
+bool moveTurtle(QPointF& pos_, int& nw_or) {
+    bool bumped = checkWall(pos_, nw_or); // Check if the turtle is facing a wall
+    turtleMove nextMove = studentTurtleStep(bumped); // Get the next move from the turtle logic
 
-  // REPLACE THE FOLLOWING LINE IN PROJECT 5
-  return studentMoveTurtle(pos_, nw_or);
+    // Translate the relative move to absolute coordinates
+    pos_ = translatePos(pos_, nextMove);
+    nw_or = translateOrnt(nw_or, nextMove);
+
+    // Update display based on the number of visits in the current cell
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    int visits = getVisitCount(x, y);
+    displayVisits(visits); // Display the number of visits
+
+    // If turtle reaches the goal, stop moving
+    if (atEnd(x, y)) {
+        return false;
+    }
+
+    return true; // Turtle continues to move
 }
 
-/*
- * Takes a position and a turtleMove and returns a new position
- * based on the move
- */
+// Translates turtleMove (e.g., forward, left, right) to new absolute position
 QPointF translatePos(QPointF pos_, turtleMove nextMove) {
-  return pos_;
+    switch (nextMove) {
+        case FORWARD:
+            if (nw_or == NORTH) pos_.setY(pos_.y() - 1);
+            if (nw_or == SOUTH) pos_.setY(pos_.y() + 1);
+            if (nw_or == EAST) pos_.setX(pos_.x() + 1);
+            if (nw_or == WEST) pos_.setX(pos_.x() - 1);
+            break;
+        default:
+            break;
+    }
+    return pos_;
 }
 
-/*
- * Takes an orientation and a turtleMove and returns a new orienation
- * based on the move
- */
+// Translates turtleMove (e.g., left, right) to new orientation (NORTH, SOUTH, EAST, WEST)
 int translateOrnt(int orientation, turtleMove nextMove) {
-  return orientation;
+    switch (nextMove) {
+        case LEFT:
+            orientation = (orientation + 3) % 4; // Turning left
+            break;
+        case RIGHT:
+            orientation = (orientation + 1) % 4; // Turning right
+            break;
+        default:
+            break;
+    }
+    return orientation;
 }
