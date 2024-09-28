@@ -1,3 +1,6 @@
+#ifndef STUDENT_H
+#define STUDENT_H
+
 #include <ros/ros.h>
 #include <boost/bind.hpp>
 #include <ece642rtle/timeInt8.h>
@@ -21,5 +24,4 @@ QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation);
 int translateOrnt(int orientation, turtleMove nextMove);
 turtleMove studentTurtleStep(bool bumped);
 
-// OK to change below this line
-// (No need for studentMoveTurtle() anymore)
+#endif // STUDENT_H
