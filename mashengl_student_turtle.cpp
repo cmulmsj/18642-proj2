@@ -1,101 +1,165 @@
+/* 
+ * Originally by Philip Koopman (koopman@cmu.edu)
+ * and Milda Zizyte (milda@cmu.edu)
+ *
+ * STUDENT NAME: Mashengjun Li
+ * ANDREW ID: mashengl
+ * LAST UPDATE: 09/21/2024
+ *
+ * This file is an algorithm to solve the ece642rtle maze
+ * using the left-hand rule. The code is intentionaly left obfuscated.
+ *
+ */
+
 #include "student.h"
-#include "mashengl_turtle_state.h"
-#include <ros/ros.h>
 #include <stdint.h>
+#include <ros/ros.h>
 
-// Define global variables
-int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
-int32_t currentX = START_POS;
-int32_t currentY = START_POS;
-Direction orientation = LEFT; // Start facing left
+// Ignore this line until project 5
+turtleMove studentTurtleStep(bool bumped) { return MOVE; }
 
-turtleMove studentTurtleStep(bool bumped) {
-    static enum TurtleState {
-        CHECK_RIGHT,
-        MOVE_FORWARD,
-        TURN_LEFT
-    } state = CHECK_RIGHT;
+// OK TO MODIFY BELOW THIS LINE
 
-    ROS_INFO("Current state: %d, Orientation: %d, Bumped: %s", 
-             state, static_cast<int>(orientation), bumped ? "true" : "false");
+// Constants
+const int32_t TIMEOUT = 40;
+const int32_t MAZE_SIZE = 23;
+const int32_t START_POS = MAZE_SIZE / 2;
 
-    turtleMove move;
+// Enum for directions
+enum Direction {
+    LEFT = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3
+};
 
-    switch (state) {
-        case CHECK_RIGHT:
-            // Always try to turn right first
-            move = TURN_RIGHT;
-            state = MOVE_FORWARD;
-            break;
+// States
+const int32_t STATE_MOVING = 2;
+const int32_t STATE_TURNED = 1;
+const int32_t STATE_BUMPED = 0;
 
-        case MOVE_FORWARD:
-            if (!bumped) {
-                // No wall in front, move forward
-                move = MOVE_FORWARD;
-                // Update position in the turtle's local coordinate system
-                switch (orientation) {
-                    case UP:    currentY--; break;
-                    case RIGHT: currentX++; break;
-                    case DOWN:  currentY++; break;
-                    case LEFT:  currentX--; break;
-                }
-                setVisitCount(currentX, currentY, getVisitCount(currentX, currentY) + 1);
-                state = CHECK_RIGHT; // After moving, check right again
-            } else {
-                // Wall in front, turn left
-                move = TURN_LEFT;
-                state = TURN_LEFT;
-            }
-            break;
+// Global variables
+static int32_t timeoutCounter = 0;
+static int32_t currentState = STATE_MOVING;
+static bool atEnd = false;
+static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
+static int32_t currentX = START_POS;
+static int32_t currentY = START_POS;
 
-        case TURN_LEFT:
-            // We've turned left, now try to move forward
-            move = MOVE_FORWARD;
-            state = MOVE_FORWARD;
-            break;
+// Function prototypes
+int32_t getVisitCount(int32_t x, int32_t y);
+void setVisitCount(int32_t x, int32_t y, int32_t count);
+int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentState);
+bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or);
 
-        default:
-            ROS_ERROR("Invalid state in studentTurtleStep");
-            move = STOP;
-            state = CHECK_RIGHT;
-            break;
-    }
-
-    // Update orientation based on the move
-    if (move == TURN_RIGHT) {
-        orientation = static_cast<Direction>((static_cast<int>(orientation) + 1) % 4);
-    } else if (move == TURN_LEFT) {
-        orientation = static_cast<Direction>((static_cast<int>(orientation) + 3) % 4);
-    }
-
-    ROS_INFO("Next move: %d, New state: %d, New orientation: %d", 
-             static_cast<int>(move), state, static_cast<int>(orientation));
-    return move;
-}
-
+/**
+ * Retrieves the visit count for a specific cell in the maze.
+ *
+ * @param x The x-coordinate of the cell.
+ * @param y The y-coordinate of the cell.
+ * @return The number of times the cell has been visited.
+ */
 int32_t getVisitCount(int32_t x, int32_t y) {
-    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
-        return visitMap[y][x];
-    }
-    ROS_WARN("Attempted to get visit count for invalid position (%d, %d)", x, y);
-    return 0;
+    return visitMap[y][x];
 }
 
+/**
+ * Updates the visit count for a specific cell in the maze and displays it.
+ *
+ * @param x The x-coordinate of the cell.
+ * @param y The y-coordinate of the cell.
+ * @param count The new visit count for the cell.
+ */
 void setVisitCount(int32_t x, int32_t y, int32_t count) {
-    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
-        visitMap[y][x] = count;
-        ROS_INFO("Updated visit count at (%d, %d) to %d", x, y, count);
-    } else {
-        ROS_WARN("Attempted to set visit count for invalid position (%d, %d)", x, y);
+    visitMap[y][x] = count;
+    displayVisits(count);
+}
+
+/**
+ * Updates the turtle's orientation based on its current state and whether it has bumped into a wall.
+ *
+ * @param orientation The current orientation of the turtle.
+ * @param isBumped Whether the turtle has bumped into a wall.
+ * @param currentState Reference to the current state of the turtle.
+ * @return The new orientation of the turtle.
+ */
+int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentState) {
+    if (orientation == LEFT) {
+        if (currentState == STATE_MOVING) { orientation = UP; currentState = STATE_TURNED; }
+        else if (isBumped)                { orientation = DOWN; currentState = STATE_BUMPED; }
+        else currentState = STATE_MOVING;
+    } else if (orientation == UP) {
+        if (currentState == STATE_MOVING) { orientation = RIGHT; currentState = STATE_TURNED; }
+        else if (isBumped)                { orientation = LEFT; currentState = STATE_BUMPED; }
+        else currentState = STATE_MOVING;
+    } else if (orientation == RIGHT) {
+        if (currentState == STATE_MOVING) { orientation = DOWN; currentState = STATE_TURNED; }
+        else if (isBumped)                { orientation = UP; currentState = STATE_BUMPED; }
+        else currentState = STATE_MOVING;
+    } else if (orientation == DOWN) {
+        if (currentState == STATE_MOVING) { orientation = LEFT; currentState = STATE_TURNED; }
+        else if (isBumped)                { orientation = RIGHT; currentState = STATE_BUMPED; }
+        else currentState = STATE_MOVING;
     }
+    return orientation;
 }
 
-int getCurrentVisitCount() {
-    return getVisitCount(currentX, currentY);
-}
+/**
+ * Main function to move the turtle through the maze.
+ * Implements the left-hand rule for maze navigation and tracks cell visits.
+ *
+ * @param pos_ Reference to the current position of the turtle.
+ * @param nw_or Reference to the current orientation of the turtle.
+ * @return true if the turtle should continue moving, false if it has reached the end.
+ */
+bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or) 
+{
+    static bool firstCall = true;
+    if (firstCall) {
+        setVisitCount(currentX, currentY, 1);
+        firstCall = false;
+    }
 
-// This function is no longer needed, but kept for compatibility
-bool studentMoveTurtle(QPointF& pos_, int& nw_or) {
-    ROS_WARN("studentMoveTurtle called, but it's not being used in the current implementation");
-    return true;
+    ROS_INFO("Turtle update Called timeoutCounter=%d", timeoutCounter);
+
+    if (timeoutCounter == 0) {
+        int32_t futureX = pos_.x(), futureY = pos_.y();
+        int32_t futureX2 = pos_.x(), futureY2 = pos_.y();
+
+        if (nw_or < RIGHT) {  
+            if (nw_or == LEFT) futureY2 += 1;
+            else               futureX2 += 1;
+        } else {  
+            futureX2 += 1; futureY2 += 1;
+            if (nw_or == RIGHT) futureX += 1;
+            else                futureY += 1;
+        }
+
+        bool isBumped = bumped(futureX, futureY, futureX2, futureY2);
+        atEnd = atend(pos_.x(), pos_.y());
+
+        nw_or = updateOrientation(nw_or, isBumped, currentState);
+        ROS_INFO("Orientation=%d  STATE=%d", nw_or, currentState);
+
+        if (currentState == STATE_MOVING && !atEnd) {
+            switch (nw_or) {
+                case LEFT:  pos_.setX(pos_.x() - 1); currentX--; break;
+                case UP:    pos_.setY(pos_.y() - 1); currentY--; break;
+                case RIGHT: pos_.setX(pos_.x() + 1); currentX++; break;
+                case DOWN:  pos_.setY(pos_.y() + 1); currentY++; break;
+                default:
+                    ROS_ERROR("Invalid orientation: %d", nw_or);
+                    break;
+            }
+            int32_t visits = getVisitCount(currentX, currentY) + 1;
+            setVisitCount(currentX, currentY, visits);
+        }
+
+        if (atEnd) return false;
+        timeoutCounter = TIMEOUT;
+    } else {
+        timeoutCounter--;
+    }
+
+    return (timeoutCounter == TIMEOUT);
 }
