@@ -3,7 +3,7 @@
  * ANDREW ID: mashengl
  * LAST UPDATE: 09/21/2024
  *
- * This file contains the turtle's movement logic using the left-hand rule.
+ * This file contains the turtle's movement logic using the right-hand rule.
  * The turtle operates based on its local perception without knowledge of
  * absolute positions or orientations.
  */
@@ -45,7 +45,7 @@ int getCurrentVisitCount() {
     return getVisitCount(currentX, currentY);
 }
 
-// The turtle's movement logic implementing the left-hand rule
+// The turtle's movement logic implementing the right-hand rule
 turtleMove studentTurtleStep(bool bumped) {
     static bool firstCall = true;
     if (firstCall) {
@@ -54,35 +54,81 @@ turtleMove studentTurtleStep(bool bumped) {
         firstCall = false;
     }
 
-    static bool justMovedForward = false; // To track if we need to turn left after moving forward
+    // State machine to manage the turtle's actions
+    enum TurtleState {
+        STATE_INIT,
+        STATE_TURN_RIGHT,
+        STATE_CHECK_RIGHT,
+        STATE_TURN_LEFT_BACK,
+        STATE_MOVE_FORWARD,
+        STATE_CHECK_FORWARD,
+        STATE_TURN_LEFT
+    };
+    static TurtleState state = STATE_INIT;
 
-    if (bumped) {
-        // Turn right if we bumped into a wall
-        orientation = static_cast<Direction>((orientation + 1) % 4);
-        justMovedForward = false;
-        return TURN_RIGHT;
-    } else {
-        if (justMovedForward) {
-            // After moving forward, turn left to keep the wall on the left
-            orientation = static_cast<Direction>((orientation + 3) % 4); // Equivalent to -1 mod 4
-            justMovedForward = false;
+    switch (state) {
+        case STATE_INIT:
+            // Turn right to check for a wall
+            orientation = static_cast<Direction>((orientation + 1) % 4); // Turn right
+            state = STATE_CHECK_RIGHT;
+            return TURN_RIGHT;
+
+        case STATE_CHECK_RIGHT:
+            // Now facing right, check for a wall
+            if (bumped) {
+                // Wall to the right, turn back to original orientation (left)
+                orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
+                state = STATE_TURN_LEFT_BACK;
+                return TURN_LEFT;
+            } else {
+                // No wall to the right, proceed to move forward in that direction
+                state = STATE_MOVE_FORWARD;
+                return MOVE_FORWARD;
+            }
+
+        case STATE_TURN_LEFT_BACK:
+            // Now back to facing left
+            state = STATE_CHECK_FORWARD;
             return TURN_LEFT;
-        } else {
-            // Move forward
+
+        case STATE_CHECK_FORWARD:
+            // Check if we can move forward (still facing left)
+            if (bumped) {
+                // Wall ahead, need to turn left
+                orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
+                state = STATE_TURN_LEFT;
+                return TURN_LEFT;
+            } else {
+                // No wall ahead, move forward
+                state = STATE_MOVE_FORWARD;
+                return MOVE_FORWARD;
+            }
+
+        case STATE_MOVE_FORWARD:
+            // Move forward in the current orientation
             switch (orientation) {
                 case UP:    currentY -= 1; break;
                 case RIGHT: currentX += 1; break;
                 case DOWN:  currentY += 1; break;
                 case LEFT:  currentX -= 1; break;
-                default:
-                    ROS_ERROR("Invalid orientation in studentTurtleStep");
-                    break;
             }
             // Increment visit count
-            int visits = getVisitCount(currentX, currentY) + 1;
-            setVisitCount(currentX, currentY, visits);
-            justMovedForward = true;
+            {
+                int visits = getVisitCount(currentX, currentY) + 1;
+                setVisitCount(currentX, currentY, visits);
+            }
+            // After moving forward, start over
+            state = STATE_INIT;
             return MOVE_FORWARD;
-        }
+
+        case STATE_TURN_LEFT:
+            // After turning left, start the process again
+            state = STATE_INIT;
+            return TURN_LEFT;
+
+        default:
+            ROS_ERROR("Invalid state in studentTurtleStep");
+            state = STATE_INIT;
+            return STOP;
     }
 }
