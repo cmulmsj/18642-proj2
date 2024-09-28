@@ -47,47 +47,48 @@ int getCurrentVisitCount() {
 
 // The turtle's movement logic implementing a modified right-hand rule
 turtleMove studentTurtleStep(bool bumped) {
+    // Prefix the enumerators in the State enum to avoid conflicts
     static enum State {
-        INITIAL_TURN_RIGHT,
-        CHECK_RIGHT,
-        MOVE_FORWARD,
-        TURN_LEFT,
-        TURN_RIGHT,
-        CHECK_FORWARD
-    } state = INITIAL_TURN_RIGHT;
+        STATE_INITIAL_TURN_RIGHT,
+        STATE_CHECK_RIGHT,
+        STATE_MOVE_FORWARD,
+        STATE_TURN_LEFT,
+        STATE_TURN_RIGHT,
+        STATE_CHECK_FORWARD
+    } state = STATE_INITIAL_TURN_RIGHT;
 
     switch (state) {
-        case INITIAL_TURN_RIGHT:
+        case STATE_INITIAL_TURN_RIGHT:
             // Turn right to start following the right-hand rule
-            state = CHECK_RIGHT;
+            state = STATE_CHECK_RIGHT;
             return TURN_RIGHT;
 
-        case CHECK_RIGHT:
+        case STATE_CHECK_RIGHT:
             if (bumped) {
                 // Wall to the right, turn back to original orientation
                 orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
-                state = CHECK_FORWARD;
+                state = STATE_CHECK_FORWARD;
                 return TURN_LEFT;
             } else {
                 // No wall to the right, proceed forward
-                state = MOVE_FORWARD;
+                state = STATE_MOVE_FORWARD;
                 return MOVE_FORWARD;
             }
 
-        case CHECK_FORWARD:
+        case STATE_CHECK_FORWARD:
             if (bumped) {
                 // Wall ahead, turn left to find a new path
                 orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
-                state = TURN_LEFT;
+                state = STATE_TURN_LEFT;
                 return TURN_LEFT;
             } else {
                 // No wall ahead, move forward
-                state = MOVE_FORWARD;
+                state = STATE_MOVE_FORWARD;
                 return MOVE_FORWARD;
             }
 
-        case MOVE_FORWARD:
-            // Update position
+        case STATE_MOVE_FORWARD:
+            // Move forward in the current orientation
             switch (orientation) {
                 case UP:    currentY -= 1; break;
                 case RIGHT: currentX += 1; break;
@@ -100,23 +101,23 @@ turtleMove studentTurtleStep(bool bumped) {
                 setVisitCount(currentX, currentY, visits);
             }
             // After moving forward, try to turn right again
-            state = TURN_RIGHT;
+            state = STATE_TURN_RIGHT;
             return MOVE_FORWARD;
 
-        case TURN_LEFT:
+        case STATE_TURN_LEFT:
             // After turning left, check forward
-            state = CHECK_FORWARD;
+            state = STATE_CHECK_FORWARD;
             return TURN_LEFT;
 
-        case TURN_RIGHT:
+        case STATE_TURN_RIGHT:
             // Turn right to check for a wall on the right
             orientation = static_cast<Direction>((orientation + 1) % 4); // Turn right
-            state = CHECK_RIGHT;
+            state = STATE_CHECK_RIGHT;
             return TURN_RIGHT;
 
         default:
             ROS_ERROR("Invalid state in studentTurtleStep");
-            state = INITIAL_TURN_RIGHT;
+            state = STATE_INITIAL_TURN_RIGHT;
             return STOP;
     }
 }
