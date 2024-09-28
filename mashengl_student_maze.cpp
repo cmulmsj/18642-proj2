@@ -55,7 +55,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     }
 
     // Update the position if the turtle wants to move forward
-    if (nextMove == FORWARD) {
+    if (nextMove == FORWARD && !isBumped) {
         // Recalculate the new position based on the updated orientation
         switch (nw_or) {
             case 0: x2 = x1 + 1; break; // RIGHT
@@ -64,7 +64,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
             case 3: y2 = y1 - 1; break; // UP
         }
 
-        // Check if moving to the new position would result in a collision
+        // Double-check if moving to the new position would result in a collision
         bool wouldBump = bumped(x1, y1, x2, y2);
 
         if (!wouldBump) {
