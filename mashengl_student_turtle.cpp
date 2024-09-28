@@ -25,8 +25,8 @@ static int32_t currentX = START_POS; // Turtle's current X position in local map
 static int32_t currentY = START_POS; // Turtle's current Y position in local map
 
 // Turtle's orientation (relative)
-enum Direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
-static Direction orientation = UP; // Assuming the turtle starts facing UP
+enum Direction { LEFT = 0, DOWN = 1, RIGHT = 2, UP = 3 };
+static Direction orientation = LEFT; // Turtle starts facing LEFT
 
 // Function prototypes
 int32_t getVisitCount(int32_t x, int32_t y);
@@ -79,10 +79,10 @@ turtleMove studentTurtleStep(bool bumped) {
             // Move forward
             // Update the turtle's internal position
             switch (orientation) {
-                case UP:    currentY--; break;
-                case RIGHT: currentX++; break;
-                case DOWN:  currentY++; break;
                 case LEFT:  currentX--; break;
+                case DOWN:  currentY++; break;
+                case RIGHT: currentX++; break;
+                case UP:    currentY--; break;
             }
 
             // Update visit count
@@ -103,10 +103,10 @@ turtleMove studentTurtleStep(bool bumped) {
             // Move forward
             // Update the turtle's internal position
             switch (orientation) {
-                case UP:    currentY--; break;
-                case RIGHT: currentX++; break;
-                case DOWN:  currentY++; break;
                 case LEFT:  currentX--; break;
+                case DOWN:  currentY++; break;
+                case RIGHT: currentX++; break;
+                case UP:    currentY--; break;
             }
 
             // Update visit count
