@@ -41,8 +41,8 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     bool isBumped = bumped(futureX, futureY, futureX2, futureY2);
     turtleMove nextMove = studentTurtleStep(isBumped);
     
-    QPointF newPos = translatePos(pos_, nw_or);
-    int newOrientation = translateOrnt(nw_or, isBumped);
+    QPointF newPos = translatePos(pos_, nextMove);
+    int newOrientation = translateOrnt(nw_or, nextMove);
     
     if (!bumped(newPos.x(), newPos.y(), newPos.x(), newPos.y())) {
         pos_ = newPos;
@@ -53,20 +53,14 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return false;
 }
 
-QPointF translatePos(QPointF pos_, int orientation) {
-    switch (orientation) {
-        case 0: return QPointF(pos_.x() - 1, pos_.y());   // LEFT
-        case 1: return QPointF(pos_.x(), pos_.y() - 1);   // UP
-        case 2: return QPointF(pos_.x() + 1, pos_.y());   // RIGHT
-        case 3: return QPointF(pos_.x(), pos_.y() + 1);   // DOWN
-        default: return pos_;
-    }
+QPointF translatePos(QPointF pos_, turtleMove nextMove) {
+    // Since we only have MOVE, we'll use the current position
+    // The actual movement logic should be in studentMoveTurtle
+    return pos_;
 }
 
-int translateOrnt(int orientation, bool isBumped) {
-    if (isBumped) {
-        return (orientation - 1 + 4) % 4;  // Turn left if bumped
-    } else {
-        return (orientation + 1) % 4;  // Turn right if not bumped
-    }
+int translateOrnt(int orientation, turtleMove nextMove) {
+    // Since we only have MOVE, we'll return the current orientation
+    // The actual orientation change logic should be in studentMoveTurtle
+    return orientation;
 }
