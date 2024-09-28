@@ -11,22 +11,26 @@ Direction orientation = LEFT; // Start facing left
 
 turtleMove studentTurtleStep(bool bumped) {
     static enum TurtleState {
-        STATE_TURN_RIGHT,
-        STATE_MOVE_FORWARD,
-        STATE_TURN_LEFT
-    } state = STATE_TURN_RIGHT;
+        CHECK_RIGHT,
+        MOVE_FORWARD,
+        TURN_LEFT
+    } state = CHECK_RIGHT;
 
-    ROS_INFO("Current state: %d, Bumped: %s", state, bumped ? "true" : "false");
+    ROS_INFO("Current state: %d, Orientation: %d, Bumped: %s", 
+             state, static_cast<int>(orientation), bumped ? "true" : "false");
 
     turtleMove move;
+
     switch (state) {
-        case STATE_TURN_RIGHT:
+        case CHECK_RIGHT:
+            // Always try to turn right first
             move = TURN_RIGHT;
-            state = STATE_MOVE_FORWARD;
+            state = MOVE_FORWARD;
             break;
 
-        case STATE_MOVE_FORWARD:
+        case MOVE_FORWARD:
             if (!bumped) {
+                // No wall in front, move forward
                 move = MOVE_FORWARD;
                 // Update position in the turtle's local coordinate system
                 switch (orientation) {
@@ -36,16 +40,18 @@ turtleMove studentTurtleStep(bool bumped) {
                     case LEFT:  currentX--; break;
                 }
                 setVisitCount(currentX, currentY, getVisitCount(currentX, currentY) + 1);
-                state = STATE_TURN_RIGHT;
+                state = CHECK_RIGHT; // After moving, check right again
             } else {
-                state = STATE_TURN_LEFT;
+                // Wall in front, turn left
                 move = TURN_LEFT;
+                state = TURN_LEFT;
             }
             break;
 
-        case STATE_TURN_LEFT:
-            move = TURN_LEFT;
-            state = STATE_MOVE_FORWARD;
+        case TURN_LEFT:
+            // We've turned left, now try to move forward
+            move = MOVE_FORWARD;
+            state = MOVE_FORWARD;
             break;
     }
 
