@@ -32,11 +32,6 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     // Check if there's a wall ahead
     bool isBumped = bumped(pos_.x(), pos_.y(), nextPos.x(), nextPos.y());
 
-    // Additional check for bottom wall
-    if (nextPos.y() < 0) {
-        isBumped = true;
-    }
-
     ROS_INFO("Maze - Current Pos: (%.0f, %.0f), Orientation: %d, Next Pos: (%.0f, %.0f), Bumped: %d",
              pos_.x(), pos_.y(), nw_or, nextPos.x(), nextPos.y(), isBumped);
 
@@ -63,6 +58,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     // Return true to continue, false to stop the turtle
     return !atEnd;
 }
+
 
 QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
     if (nextMove == FORWARD) {
