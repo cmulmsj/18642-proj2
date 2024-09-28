@@ -12,51 +12,71 @@
  */
 
 #include "student.h"
-#include <vector>
+#include <stdint.h>
+#include <ros/ros.h>
 
-const int MAZE_SIZE = 23;
-const int START_POS = MAZE_SIZE / 2;
+// Constants
+const int32_t MAZE_SIZE = 50;  // Increased size to handle negative coordinates
+const int32_t START_POS = MAZE_SIZE / 2;
 
-static std::vector<std::vector<int>> visitMap(MAZE_SIZE, std::vector<int>(MAZE_SIZE, 0));
-static int currentX = START_POS;
-static int currentY = START_POS;
-static int currentOrientation = 1; // Start facing up (0: Left, 1: Up, 2: Right, 3: Down)
+// Enum for directions (matching maze orientations)
+enum Direction {
+    LEFT = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3
+};
 
-turtleMove studentTurtleStep(bool bumped)
-{
+// Global variables
+static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
+static int32_t currentX = START_POS;
+static int32_t currentY = START_POS;
+static Direction orientation = UP;  // Start facing UP
+
+// Function to get visit count
+int32_t getVisitCount(int32_t x, int32_t y) {
+    return visitMap[y][x];
+}
+
+// Function to set visit count
+void setVisitCount(int32_t x, int32_t y, int32_t count) {
+    visitMap[y][x] = count;
+}
+
+// The turtle's movement logic
+turtleMove studentTurtleStep(bool bumped) {
+    static bool firstCall = true;
+    if (firstCall) {
+        setVisitCount(currentX, currentY, 1);
+        firstCall = false;
+    }
+
+    // Left-hand rule logic
     if (bumped) {
-        // Turn right when bumped
-        currentOrientation = (currentOrientation + 1) % 4;
+        // If bumped, turn right
+        orientation = static_cast<Direction>((orientation + 1) % 4);
+        return TURN_RIGHT;
     } else {
         // Move forward
-        switch (currentOrientation) {
-            case 0: currentX--; break; // Left
-            case 1: currentY--; break; // Up
-            case 2: currentX++; break; // Right
-            case 3: currentY++; break; // Down
+        // Update position
+        switch (orientation) {
+            case LEFT: currentX -= 1; break;
+            case UP:   currentY -= 1; break;
+            case RIGHT: currentX += 1; break;
+            case DOWN: currentY += 1; break;
         }
-        
-        visitMap[currentY][currentX]++;
+        // Increment visit count
+        int32_t visits = getVisitCount(currentX, currentY) + 1;
+        setVisitCount(currentX, currentY, visits);
+
+        // Then turn left to keep the wall on the left
+        orientation = static_cast<Direction>((orientation + 3) % 4);  // Equivalent to -1 mod 4
+        return TURN_LEFT;
     }
-    
-    return MOVE;
 }
 
-int getVisitsFromTurtle(int x, int y)
-{
-    // Convert absolute coordinates to turtle's local coordinates
-    int localX = x - START_POS + currentX;
-    int localY = y - START_POS + currentY;
-    
-    // Check if the coordinates are within the visitMap bounds
-    if (localX >= 0 && localX < MAZE_SIZE && localY >= 0 && localY < MAZE_SIZE) {
-        return visitMap[localY][localX];
-    }
-    return 0; // Return 0 for out-of-bounds coordinates
+// Function to get the current number of visits for the display
+int getCurrentVisitCount() {
+    return getVisitCount(currentX, currentY);
 }
 
-bool studentMoveTurtle(QPointF& pos_, int& nw_or)
-{
-    // This function is now empty as its functionality has been moved to moveTurtle in mashengl_student_maze.cpp
-    return true;
-}
