@@ -16,47 +16,65 @@
 static int8_t visited[MAZE_SIZE][MAZE_SIZE] = {0};
 
 void record_visited(QPointF& pos_) {
-    visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())]++;
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        visited[x][y]++;
+    }
 }
 
 uint8_t get_visited(QPointF& pos_) {
-    return visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())];
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        return visited[x][y];
+    }
+    return 0;
 }
 
 turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
-    turtleMove nextMove;
+    static int consecutive_turns = 0;
+
+    if (goal) {
+        *cur_state = FINISH;
+        return STOP;
+    }
 
     switch (*cur_state) {
-        case INIT:
-        case GO:
-            if (goal) {
-                *cur_state = GOAL;
-                nextMove = STOP;
-            } else {
-                *cur_state = TURN;
-                nextMove = TURNRIGHT;
-            }
-            break;
-
-        case TURN:
+        case EXPLORE:
             if (bumped) {
-                *cur_state = TURN;
-                nextMove = TURNLEFT;
+                *cur_state = ROTATE;
+                consecutive_turns = 1;
+                return TURN_RIGHT;
             } else {
-                *cur_state = GO;
-                nextMove = MOVE;
+                return FORWARD;
             }
-            break;
 
-        case GOAL:
-            nextMove = STOP;
-            break;
+        case ROTATE:
+            if (bumped) {
+                consecutive_turns++;
+                if (consecutive_turns >= 4) {
+                    *cur_state = BACKTRACK;
+                    consecutive_turns = 0;
+                    return TURN_LEFT;
+                }
+                return TURN_RIGHT;
+            } else {
+                *cur_state = EXPLORE;
+                consecutive_turns = 0;
+                return FORWARD;
+            }
+
+        case BACKTRACK:
+            if (!bumped) {
+                *cur_state = EXPLORE;
+                return FORWARD;
+            } else {
+                return TURN_LEFT;
+            }
 
         default:
             ROS_ERROR("Invalid State");
-            nextMove = STOP;
-            break;
+            return STOP;
     }
-
-    return nextMove;
 }
