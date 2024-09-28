@@ -1,5 +1,6 @@
 #include "student.h"
 #include <ros/ros.h>
+#include <cmath>
 
 // Forward declarations
 turtleMove studentTurtleStep(bool bumped, int& newOrientation);
@@ -45,11 +46,11 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
         
         QPointF newPos = translatePos(pos_, newOrientation, nextMove);
         
-        if (!checkBump(oldPos, newOrientation)) {
+        if (!isBumped) {
             pos_ = newPos;
             nw_or = newOrientation;
             
-            int visits = getVisitCount(round(pos_.x()), round(pos_.y()));
+            int visits = getVisitCount(std::round(pos_.x()), std::round(pos_.y()));
             displayVisits(visits);
 
             ROS_INFO("Turtle moved from (%f, %f) to (%f, %f), orientation: %d -> %d, visits: %d",
