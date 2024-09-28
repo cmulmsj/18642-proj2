@@ -24,11 +24,6 @@
 #include "student.h"
 #include <ros/ros.h>
 
-/*
- * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
- * Ground rule -- you are only allowed to call the three helper functions defined in student.h, and NO other turtle methods or maze methods (no peeking at the maze!)
- * This file interfaces with functions in student_turtle.cpp
- */
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     int32_t futureX = pos_.x(), futureY = pos_.y();
@@ -46,8 +41,8 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     bool isBumped = bumped(futureX, futureY, futureX2, futureY2);
     turtleMove nextMove = studentTurtleStep(isBumped);
     
-    QPointF newPos = translatePos(pos_, nextMove);
-    int newOrientation = translateOrnt(nw_or, nextMove);
+    QPointF newPos = translatePos(pos_, nw_or);
+    int newOrientation = translateOrnt(nw_or, isBumped);
     
     if (!bumped(newPos.x(), newPos.y(), newPos.x(), newPos.y())) {
         pos_ = newPos;
@@ -58,30 +53,20 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return false;
 }
 
-/*
- * Takes a position and a turtleMove and returns a new position
- * based on the move
- */
-QPointF translatePos(QPointF pos_, turtleMove nextMove) {
-    switch (nextMove) {
-        case MOVE_LEFT:   return QPointF(pos_.x() - 1, pos_.y());
-        case MOVE_UP:     return QPointF(pos_.x(), pos_.y() - 1);
-        case MOVE_RIGHT:  return QPointF(pos_.x() + 1, pos_.y());
-        case MOVE_DOWN:   return QPointF(pos_.x(), pos_.y() + 1);
-        default:          return pos_;
+QPointF translatePos(QPointF pos_, int orientation) {
+    switch (orientation) {
+        case 0: return QPointF(pos_.x() - 1, pos_.y());   // LEFT
+        case 1: return QPointF(pos_.x(), pos_.y() - 1);   // UP
+        case 2: return QPointF(pos_.x() + 1, pos_.y());   // RIGHT
+        case 3: return QPointF(pos_.x(), pos_.y() + 1);   // DOWN
+        default: return pos_;
     }
 }
 
-/*
- * Takes an orientation and a turtleMove and returns a new orientation
- * based on the move
- */
-int translateOrnt(int orientation, turtleMove nextMove) {
-    switch (nextMove) {
-        case MOVE_LEFT:   return 0;
-        case MOVE_UP:     return 1;
-        case MOVE_RIGHT:  return 2;
-        case MOVE_DOWN:   return 3;
-        default:          return orientation;
+int translateOrnt(int orientation, bool isBumped) {
+    if (isBumped) {
+        return (orientation - 1 + 4) % 4;  // Turn left if bumped
+    } else {
+        return (orientation + 1) % 4;  // Turn right if not bumped
     }
 }
