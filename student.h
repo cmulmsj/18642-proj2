@@ -18,7 +18,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or);
 // Scope-preserving changes to these lines permitted (see p5 writeup)
 enum turtleMove { FORWARD, TURN_LEFT, TURN_RIGHT, STOP };
 turtleMove studentTurtleStep(bool bumped);
-QPointF translatePos(QPointF pos_, turtleMove nextMove);
+QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation);
 int translateOrnt(int orientation, turtleMove nextMove);
 
 // OK to change below this line
