@@ -49,17 +49,7 @@ int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentSt
 
 turtleMove studentTurtleStep(bool bumped) {
     currentOrientation = updateOrientation(currentOrientation, bumped, currentState);
-    
-    if (currentState == STATE_MOVING) {
-        switch (currentOrientation) {
-            case LEFT:  return MOVE_LEFT;
-            case UP:    return MOVE_UP;
-            case RIGHT: return MOVE_RIGHT;
-            case DOWN:  return MOVE_DOWN;
-        }
-    }
-    
-    return MOVE; // This will be ignored in the maze file if the turtle doesn't actually move
+    return MOVE;
 }
 
 /**
