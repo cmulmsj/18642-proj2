@@ -1,6 +1,3 @@
-#ifndef STUDENT_H
-#define STUDENT_H
-
 #include <ros/ros.h>
 #include <boost/bind.hpp>
 #include <ece642rtle/timeInt8.h>
@@ -12,22 +9,17 @@
 #include <ece642rtle/aendEcho.h>
 #include <QPointF>
 
-// Enum to define turtle's possible moves
-enum turtleMove { FORWARD, LEFT, RIGHT };
-
-// Function declarations
+// Functions to interface with ROS. Don't change these lines!
+bool bumped(int x1,int y1,int x2,int y2);
+bool atend(int x, int y);
+void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
+
+// Scope-preserving changes to these lines permitted (see p5 writeup)
+enum turtleMove { FORWARD, TURN_LEFT, TURN_RIGHT, STOP };
 turtleMove studentTurtleStep(bool bumped);
 QPointF translatePos(QPointF pos_, turtleMove nextMove);
 int translateOrnt(int orientation, turtleMove nextMove);
 
-// Wall-checking and goal functions (simulated by the maze logic)
-bool bumped(int x1, int y1, int x2, int y2);
-bool atEnd(int x, int y);
-void displayVisits(int visits);
-
-// Getter and setter for the visit count in the local map
-int getVisitCount(int x, int y);
-void setVisitCount(int x, int y, int visits);
-
-#endif // STUDENT_H
+// OK to change below this line
+bool studentMoveTurtle(QPointF& pos_, int& nw_or);
