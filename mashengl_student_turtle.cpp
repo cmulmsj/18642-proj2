@@ -51,6 +51,8 @@ void setVisitCount(int32_t x, int32_t y, int32_t count) {
  * Determines the turtle's next move based on whether it has bumped into a wall.
  */
 turtleMove studentTurtleStep(bool bumped) {
+    ROS_INFO("Orientation: %d, Position: (%d, %d), State: %d, Bumped: %d", orientation, currentX, currentY, state, bumped);
+
     static bool firstCall = true;
     if (firstCall) {
         // Initialize the visit count at the starting position
@@ -117,6 +119,5 @@ turtleMove studentTurtleStep(bool bumped) {
             state = 0;
         }
     }
-
     return nextMove;
 }
