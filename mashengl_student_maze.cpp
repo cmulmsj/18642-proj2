@@ -27,22 +27,15 @@
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     static bool firstMove = true;
-    int x1 = pos_.x(), y1 = pos_.y();
-    int x2 = x1, y2 = y1;
-
+    
     // Calculate the position ahead based on orientation
-    switch (nw_or) {
-        case 0: x2 = x1 + 1; break; // RIGHT
-        case 1: y2 = y1 + 1; break; // DOWN
-        case 2: x2 = x1 - 1; break; // LEFT
-        case 3: y2 = y1 - 1; break; // UP
-    }
+    QPointF nextPos = translatePos(pos_, FORWARD, nw_or);
 
     // Check if there's a wall ahead
-    bool isBumped = bumped(x1, y1, x2, y2);
+    bool isBumped = bumped(pos_.x(), pos_.y(), nextPos.x(), nextPos.y());
 
-    ROS_INFO("Maze - Current Pos: (%d, %d), Orientation: %d, Next Pos: (%d, %d), Bumped: %d, First Move: %d",
-             x1, y1, nw_or, x2, y2, isBumped, firstMove);
+    ROS_INFO("Maze - Current Pos: (%.0f, %.0f), Orientation: %d, Next Pos: (%.0f, %.0f), Bumped: %d, First Move: %d",
+             pos_.x(), pos_.y(), nw_or, nextPos.x(), nextPos.y(), isBumped, firstMove);
 
     // Call the turtle's decision-making function
     turtleMove nextMove = studentTurtleStep(isBumped);
@@ -55,14 +48,9 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         } else {
             // We hit a wall, so we need to try other directions
             for (int i = 1; i < 4; i++) {
-                nw_or = (nw_or + 1) % 4;
-                switch (nw_or) {
-                    case 0: x2 = x1 + 1; y2 = y1; break; // RIGHT
-                    case 1: x2 = x1; y2 = y1 + 1; break; // DOWN
-                    case 2: x2 = x1 - 1; y2 = y1; break; // LEFT
-                    case 3: x2 = x1; y2 = y1 - 1; break; // UP
-                }
-                if (!bumped(x1, y1, x2, y2)) {
+                nw_or = translateOrnt(nw_or, TURN_RIGHT);
+                nextPos = translatePos(pos_, FORWARD, nw_or);
+                if (!bumped(pos_.x(), pos_.y(), nextPos.x(), nextPos.y())) {
                     ROS_INFO("Initial orientation corrected to: %d", nw_or);
                     break;
                 }
@@ -71,36 +59,54 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         firstMove = false;
     } else {
         // Update the orientation
-        if (nextMove == TURN_LEFT) {
-            nw_or = (nw_or + 3) % 4;
-        } else if (nextMove == TURN_RIGHT) {
-            nw_or = (nw_or + 1) % 4;
-        } else if (nextMove == FORWARD && !isBumped) {
-            // Only update position if moving forward and not bumped
-            pos_.setX(x2);
-            pos_.setY(y2);
-            ROS_INFO("Maze - Moved to (%d, %d)", x2, y2);
+        nw_or = translateOrnt(nw_or, nextMove);
+
+        // Update the position if moving forward and not bumped
+        if (nextMove == FORWARD && !isBumped) {
+            pos_ = translatePos(pos_, FORWARD, nw_or);
+            ROS_INFO("Maze - Moved to (%.0f, %.0f)", pos_.x(), pos_.y());
         }
     }
 
     // Check if the turtle has reached the end
     bool atEnd = atend(pos_.x(), pos_.y());
 
-    ROS_INFO("Maze - End of move: Pos: (%d, %d), Orientation: %d, At End: %d",
-             (int)pos_.x(), (int)pos_.y(), nw_or, atEnd);
+    ROS_INFO("Maze - End of move: Pos: (%.0f, %.0f), Orientation: %d, At End: %d",
+             pos_.x(), pos_.y(), nw_or, atEnd);
 
     // Return true to continue, false to stop the turtle
     return !atEnd;
 }
 
 
-int translateOrnt(int orientation, turtleMove nextMove) {
-    if (nextMove == TURN_LEFT) {
-        orientation = (orientation + 3) % 4; // Turn left
-    } else if (nextMove == TURN_RIGHT) {
-        orientation = (orientation + 1) % 4; // Turn right
+QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
+    switch (nextMove) {
+        case FORWARD:
+            switch (orientation) {
+                case 0: return QPointF(pos_.x() + 1, pos_.y()); // RIGHT
+                case 1: return QPointF(pos_.x(), pos_.y() + 1); // DOWN
+                case 2: return QPointF(pos_.x() - 1, pos_.y()); // LEFT
+                case 3: return QPointF(pos_.x(), pos_.y() - 1); // UP
+            }
+            break;
+        case TURN_LEFT:
+        case TURN_RIGHT:
+        case STOP:
+            return pos_; // No position change for turns or stop
     }
-    // No orientation change for FORWARD or STOP
-    return orientation;
+    return pos_; // Default case, should not happen
+}
+
+int translateOrnt(int orientation, turtleMove nextMove) {
+    switch (nextMove) {
+        case TURN_LEFT:
+            return (orientation + 3) % 4;
+        case TURN_RIGHT:
+            return (orientation + 1) % 4;
+        case FORWARD:
+        case STOP:
+            return orientation; // No orientation change for forward or stop
+    }
+    return orientation; // Default case, should not happen
 }
 
