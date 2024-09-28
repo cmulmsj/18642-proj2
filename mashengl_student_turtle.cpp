@@ -32,6 +32,9 @@ static Direction orientation = LEFT; // Turtle starts facing LEFT
 int32_t getVisitCount(int32_t x, int32_t y);
 void setVisitCount(int32_t x, int32_t y, int32_t count);
 
+// Variable to store the last move made
+static turtleMove lastMove = FORWARD;
+
 /**
  * Retrieves the visit count for a specific cell in the local map.
  */
@@ -52,47 +55,50 @@ void setVisitCount(int32_t x, int32_t y, int32_t count) {
  */
 turtleMove studentTurtleStep(bool bumped) {
     static bool firstCall = true;
-    if (firstCall) {
-        // Initialize the visit count at the starting position
-        setVisitCount(currentX, currentY, 1);
-        firstCall = false;
-    }
-
-    // Implementing the right-hand wall-following algorithm approximation
     static int state = 0; // 0: Try to turn right, 1: Move forward, 2: Turn left
 
-    turtleMove nextMove;
-
-    // Debugging statement placed after 'state' declaration
-    ROS_INFO("Orientation: %d, Position: (%d, %d), State: %d, Bumped: %d",
-             orientation, currentX, currentY, state, bumped);
-
-    if (state == 0) {
-        // Try to turn right
-        orientation = static_cast<Direction>((orientation + 1) % 4); // Turn right
-        nextMove = TURN_RIGHT;
-        state = 1;
-    } else if (state == 1) {
-        // After turning right, attempt to move forward
-        if (bumped) {
-            // Can't move forward, need to turn left
-            orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
-            nextMove = TURN_LEFT;
-            state = 2;
-        } else {
-            // Move forward
-            // Update the turtle's internal position
+    // Update internal orientation and position based on the last move
+    if (!firstCall) {
+        if (lastMove == TURN_LEFT) {
+            orientation = static_cast<Direction>((orientation + 3) % 4);
+        } else if (lastMove == TURN_RIGHT) {
+            orientation = static_cast<Direction>((orientation + 1) % 4);
+        } else if (lastMove == FORWARD) {
+            // Update position based on orientation
             switch (orientation) {
                 case LEFT:  currentX--; break;
                 case DOWN:  currentY++; break;
                 case RIGHT: currentX++; break;
                 case UP:    currentY--; break;
             }
-
             // Update visit count
             int32_t visits = getVisitCount(currentX, currentY) + 1;
             setVisitCount(currentX, currentY, visits);
+        }
+    } else {
+        // On first call, initialize the visit count at the starting position
+        setVisitCount(currentX, currentY, 1);
+        firstCall = false;
+    }
 
+    // Debugging statement
+    ROS_INFO("Orientation: %d, Position: (%d, %d), State: %d, Bumped: %d",
+             orientation, currentX, currentY, state, bumped);
+
+    turtleMove nextMove;
+
+    if (state == 0) {
+        // Try to turn right
+        nextMove = TURN_RIGHT;
+        state = 1;
+    } else if (state == 1) {
+        // After turning right, attempt to move forward
+        if (bumped) {
+            // Can't move forward, need to turn left
+            nextMove = TURN_LEFT;
+            state = 2;
+        } else {
+            // Move forward
             nextMove = FORWARD;
             state = 0;
         }
@@ -100,28 +106,17 @@ turtleMove studentTurtleStep(bool bumped) {
         // After turning left, try to move forward
         if (bumped) {
             // Can't move forward, need to turn left again
-            orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
             nextMove = TURN_LEFT;
             // Stay in state 2 to keep turning left until we can move forward
         } else {
             // Move forward
-            // Update the turtle's internal position
-            switch (orientation) {
-                case LEFT:  currentX--; break;
-                case DOWN:  currentY++; break;
-                case RIGHT: currentX++; break;
-                case UP:    currentY--; break;
-            }
-
-            // Update visit count
-            int32_t visits = getVisitCount(currentX, currentY) + 1;
-            setVisitCount(currentX, currentY, visits);
-
             nextMove = FORWARD;
             state = 0;
         }
     }
 
+    // Store the move to update internal state on the next call
+    lastMove = nextMove;
+
     return nextMove;
 }
-
