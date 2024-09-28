@@ -1,6 +1,3 @@
-#ifndef STUDENT_H
-#define STUDENT_H
-
 #include <ros/ros.h>
 #include <boost/bind.hpp>
 #include <ece642rtle/timeInt8.h>
@@ -13,19 +10,18 @@
 #include <QPointF>
 
 // Functions to interface with ROS. Don't change these lines!
-bool bumped(int x1,int y1,int x2,int y2);
+bool bumped(int x1, int y1, int x2, int y2);
 bool atend(int x, int y);
 void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
 
 // Scope-preserving changes to these lines permitted
-enum turtleMove { MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, STOP };
+enum turtleMove { MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, NO_MOVE };
+QPointF translatePos(QPointF pos_, turtleMove nextMove);
+int translateOrnt(int orientation, turtleMove nextMove);
 turtleMove studentTurtleStep(bool bumped);
-void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove);
-void translateOrnt(int& nw_or, turtleMove nextMove);
-int getCurrentVisitCount();
 
 // OK to change below this line
-// No further changes needed
-
-#endif // STUDENT_H
+bool studentMoveTurtle(QPointF& pos_, int& nw_or);
+void incrementVisitCount(int x, int y); // Function to increment visit count
+int getVisitCount(int x, int y);        // Function to get the visit count
