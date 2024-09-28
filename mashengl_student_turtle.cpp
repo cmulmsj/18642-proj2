@@ -56,30 +56,28 @@ void setVisitCount(int32_t x, int32_t y, int32_t count) {
 turtleMove studentTurtleStep(bool bumped) {
     static int orientation = 0; // 0: RIGHT, 1: DOWN, 2: LEFT, 3: UP
     static turtleMove lastMove = FORWARD;
+    static int turnCount = 0;
 
-    // If we bumped into a wall on the last move, undo it
-    if (bumped && lastMove == FORWARD) {
-        switch (orientation) {
-            case 0: currentX--; break;
-            case 1: currentY--; break;
-            case 2: currentX++; break;
-            case 3: currentY++; break;
-        }
-    }
+    ROS_INFO("Turtle Input - Bumped: %d, Last Move: %d, Orientation: %d, Position: (%d, %d)",
+             bumped, lastMove, orientation, currentX, currentY);
 
-    // Right-hand rule: Try to turn right first
     turtleMove nextMove;
+
+    // If we're not bumped, try to move forward
     if (!bumped) {
-        // If we didn't bump, try to turn right
+        nextMove = FORWARD;
+        turnCount = 0;
+    } else {
+        // If we're bumped, turn right
         nextMove = TURN_RIGHT;
         orientation = (orientation + 1) % 4;
-    } else {
-        // If we bumped, try to move forward in the current direction
-        nextMove = FORWARD;
-        // If we're still bumping, turn left
-        if (bumped) {
+        turnCount++;
+
+        // If we've turned right 4 times (made a full rotation), move left once
+        if (turnCount >= 4) {
             nextMove = TURN_LEFT;
             orientation = (orientation + 3) % 4;
+            turnCount = 0;
         }
     }
 
@@ -97,9 +95,8 @@ turtleMove studentTurtleStep(bool bumped) {
     int visits = getVisitCount(currentX, currentY) + 1;
     setVisitCount(currentX, currentY, visits);
 
-    // Log the decision
-    ROS_INFO("Turtle Decision - Orientation: %d, Position: (%d, %d), Bumped: %d, Next Move: %d",
-             orientation, currentX, currentY, bumped, nextMove);
+    ROS_INFO("Turtle Decision - Next Move: %d, New Orientation: %d, New Position: (%d, %d), Turn Count: %d",
+             nextMove, orientation, currentX, currentY, turnCount);
 
     lastMove = nextMove;
     return nextMove;
