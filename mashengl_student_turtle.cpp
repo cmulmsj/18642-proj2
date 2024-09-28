@@ -19,69 +19,61 @@ int32_t currentX = START_POS;
 int32_t currentY = START_POS;
 Direction orientation = LEFT; // Start facing left
 
-turtleMove studentTurtleStep(bool bumped)
-{
+turtleMove studentTurtleStep(bool bumped) {
     static enum TurtleState {
-        STATE_INIT,
         STATE_CHECK_RIGHT,
         STATE_MOVE_FORWARD,
-        STATE_CHECK_FORWARD,
         STATE_TURN_LEFT
-    } state = STATE_INIT;
+    } state = STATE_CHECK_RIGHT;
 
     ROS_INFO("Current state: %d, Bumped: %s", state, bumped ? "true" : "false");
 
     turtleMove move;
     switch (state) {
-        case STATE_INIT:
-            state = STATE_CHECK_RIGHT;
-            move = TURN_RIGHT;
-            break;
-
         case STATE_CHECK_RIGHT:
-            if (bumped) {
+            if (!bumped) {
+                state = STATE_MOVE_FORWARD;
+                move = TURN_RIGHT;
+            } else {
                 state = STATE_TURN_LEFT;
                 move = TURN_LEFT;
-            } else {
-                state = STATE_MOVE_FORWARD;
-                move = MOVE_FORWARD;
-            }
-            break;
-
-        case STATE_TURN_LEFT:
-            state = STATE_CHECK_FORWARD;
-            move = TURN_LEFT;
-            break;
-
-        case STATE_CHECK_FORWARD:
-            if (bumped) {
-                state = STATE_TURN_LEFT;
-                move = TURN_LEFT;
-            } else {
-                state = STATE_MOVE_FORWARD;
-                move = MOVE_FORWARD;
             }
             break;
 
         case STATE_MOVE_FORWARD:
             if (!bumped) {
+                move = MOVE_FORWARD;
+                // Update position in the turtle's local coordinate system
                 switch (orientation) {
-                    case UP:    currentY -= 1; break;
-                    case RIGHT: currentX += 1; break;
-                    case DOWN:  currentY += 1; break;
-                    case LEFT:  currentX -= 1; break;
+                    case UP:    currentY--; break;
+                    case RIGHT: currentX++; break;
+                    case DOWN:  currentY++; break;
+                    case LEFT:  currentX--; break;
                 }
                 setVisitCount(currentX, currentY, getVisitCount(currentX, currentY) + 1);
+            } else {
+                move = TURN_LEFT;
             }
             state = STATE_CHECK_RIGHT;
-            move = MOVE_FORWARD;
+            break;
+
+        case STATE_TURN_LEFT:
+            move = TURN_LEFT;
+            state = STATE_CHECK_RIGHT;
             break;
 
         default:
             ROS_ERROR("Invalid state in studentTurtleStep");
-            state = STATE_INIT;
+            state = STATE_CHECK_RIGHT;
             move = STOP;
             break;
+    }
+
+    // Update orientation based on the move
+    if (move == TURN_RIGHT) {
+        orientation = static_cast<Direction>((static_cast<int>(orientation) + 1) % 4);
+    } else if (move == TURN_LEFT) {
+        orientation = static_cast<Direction>((static_cast<int>(orientation) + 3) % 4);
     }
 
     ROS_INFO("Next move: %d, New state: %d, New orientation: %d", 
@@ -89,8 +81,7 @@ turtleMove studentTurtleStep(bool bumped)
     return move;
 }
 
-int32_t getVisitCount(int32_t x, int32_t y)
-{
+int32_t getVisitCount(int32_t x, int32_t y) {
     if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
         return visitMap[y][x];
     }
@@ -98,8 +89,7 @@ int32_t getVisitCount(int32_t x, int32_t y)
     return 0;
 }
 
-void setVisitCount(int32_t x, int32_t y, int32_t count)
-{
+void setVisitCount(int32_t x, int32_t y, int32_t count) {
     if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
         visitMap[y][x] = count;
         ROS_INFO("Updated visit count at (%d, %d) to %d", x, y, count);
@@ -108,14 +98,12 @@ void setVisitCount(int32_t x, int32_t y, int32_t count)
     }
 }
 
-int getCurrentVisitCount()
-{
+int getCurrentVisitCount() {
     return getVisitCount(currentX, currentY);
 }
 
 // This function is no longer needed, but kept for compatibility
-bool studentMoveTurtle(QPointF& pos_, int& nw_or)
-{
+bool studentMoveTurtle(QPointF& pos_, int& nw_or) {
     ROS_WARN("studentMoveTurtle called, but it's not being used in the current implementation");
     return true;
 }
