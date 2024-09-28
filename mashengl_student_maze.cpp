@@ -2,48 +2,9 @@
 #include "mashengl_turtle_state.h"
 #include <ros/ros.h>
 #include <QPointF>
-#include <boost/bind.hpp>
-#include <ece642rtle/timeInt8.h>
-#include <std_msgs/Empty.h>
-#include <ece642rtle/RTIbump.h>
-#include <ece642rtle/RTIatend.h>
-#include <ece642rtle/PoseOrntBundle.h>
-#include <ece642rtle/bumpEcho.h>
-#include <ece642rtle/aendEcho.h>
-
-/*
- * This file translates the turtle's relative moves into absolute positions
- * and handles interactions with the maze environment.
- * It keeps track of the absolute coordinates and orientation of the turtle.
- */
 
 // Function prototypes
 bool isFacingWall(QPointF pos_, int nw_or);
-
-// Function to check if the turtle is facing a wall
-bool isFacingWall(QPointF pos_, int nw_or) {
-    int x = static_cast<int>(pos_.x());
-    int y = static_cast<int>(pos_.y());
-
-    int x1 = x;
-    int y1 = y;
-
-    // Calculate the position in front of the turtle based on its orientation
-    switch (nw_or) {
-        case 0: y1 -= 1; break; // Up
-        case 1: x1 += 1; break; // Right
-        case 2: y1 += 1; break; // Down
-        case 3: x1 -= 1; break; // Left
-        default:
-            ROS_ERROR("Invalid orientation in isFacingWall");
-            break;
-    }
-
-    // Use the bumped function to check for walls
-    return bumped(x, y, x1, y1);
-}
-
-// In mashengl_student_maze.cpp
 
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
@@ -57,7 +18,8 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
 
     // Check if the turtle is facing a wall
     bool bumpedStatus = isFacingWall(pos_, nw_or);
-    ROS_INFO("Facing wall: %s", bumpedStatus ? "true" : "false");
+    ROS_INFO("Current position: (%.2f, %.2f), Orientation: %d, Facing wall: %s", 
+             pos_.x(), pos_.y(), nw_or, bumpedStatus ? "true" : "false");
 
     // Get the next move from the turtle
     turtleMove nextMove = studentTurtleStep(bumpedStatus);
@@ -95,8 +57,33 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return true; // Continue moving the turtle
 }
 
-void translateOrnt(int& nw_or, turtleMove nextMove) {
-    int oldOrnt = nw_or;
+void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove)
+{
+    if (nextMove == MOVE_FORWARD) {
+        QPointF newPos = pos_;
+        switch (nw_or) {
+            case 0: newPos.setY(newPos.y() - 1); break; // Up
+            case 1: newPos.setX(newPos.x() + 1); break; // Right
+            case 2: newPos.setY(newPos.y() + 1); break; // Down
+            case 3: newPos.setX(newPos.x() - 1); break; // Left
+            default:
+                ROS_ERROR("Invalid orientation in translatePos");
+                return;
+        }
+        
+        // Check if the new position is valid (not hitting a wall)
+        if (!bumped(pos_.x(), pos_.y(), newPos.x(), newPos.y())) {
+            pos_ = newPos;
+            ROS_INFO("Position updated to (%.2f, %.2f)", pos_.x(), pos_.y());
+        } else {
+            ROS_WARN("Move blocked by wall. Position remains (%.2f, %.2f)", pos_.x(), pos_.y());
+        }
+    }
+    // No position change for turns
+}
+
+void translateOrnt(int& nw_or, turtleMove nextMove)
+{
     if (nextMove == TURN_LEFT) {
         nw_or = (nw_or + 3) % 4; // Equivalent to -1 mod 4
     } else if (nextMove == TURN_RIGHT) {
@@ -106,23 +93,24 @@ void translateOrnt(int& nw_or, turtleMove nextMove) {
 
     // Update the turtle's internal orientation
     orientation = static_cast<Direction>(nw_or);
-    ROS_INFO("Orientation changed from %d to %d", oldOrnt, nw_or);
+    ROS_INFO("New orientation: %d", nw_or);
 }
 
-void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
-    if (nextMove == MOVE_FORWARD) {
-        QPointF oldPos = pos_;
-        switch (nw_or) {
-            case 0: pos_.setY(pos_.y() - 1); break; // Up
-            case 1: pos_.setX(pos_.x() + 1); break; // Right
-            case 2: pos_.setY(pos_.y() + 1); break; // Down
-            case 3: pos_.setX(pos_.x() - 1); break; // Left
-            default:
-                ROS_ERROR("Invalid orientation in translatePos");
-                break;
-        }
-        ROS_INFO("Position changed from (%.2f, %.2f) to (%.2f, %.2f)", 
-                 oldPos.x(), oldPos.y(), pos_.x(), pos_.y());
+bool isFacingWall(QPointF pos_, int nw_or)
+{
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    int x1 = x, y1 = y;
+
+    switch (nw_or) {
+        case 0: y1 -= 1; break; // Up
+        case 1: x1 += 1; break; // Right
+        case 2: y1 += 1; break; // Down
+        case 3: x1 -= 1; break; // Left
+        default:
+            ROS_ERROR("Invalid orientation in isFacingWall");
+            return false;
     }
-    // No position change for turns
+
+    return bumped(x, y, x1, y1);
 }
