@@ -22,69 +22,78 @@
  */
 
 #include "student.h"
-#include <ros/ros.h>
 
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
-    // Calculate the position ahead based on current orientation
-    QPointF nextPos = translatePos(pos_, FORWARD, nw_or);
+    static int count_down = 0;
+    static State current_state = INIT;
 
-    // Check if there's a wall ahead
-    bool isBumped = bumped(pos_.x(), pos_.y(), nextPos.x(), nextPos.y());
+    if (count_down == 0) {
+        if (current_state == INIT) {
+            record_visited(pos_);
+            displayVisits(get_visited(pos_));
+        }
 
-    ROS_INFO("Maze - Current Pos: (%.0f, %.0f), Orientation: %d, Next Pos: (%.0f, %.0f), Bumped: %d",
-             pos_.x(), pos_.y(), nw_or, nextPos.x(), nextPos.y(), isBumped);
+        bool has_wall = check_bumped(pos_, static_cast<Orientation>(nw_or));
+        bool at_goal = atend(pos_.x(), pos_.y());
 
-    // Call the turtle's decision-making function
-    turtleMove nextMove = studentTurtleStep(isBumped);
+        turtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_state);
+        nw_or = translateOrnt(nw_or, nextMove);
 
-    // Update the orientation
-    nw_or = translateOrnt(nw_or, nextMove);
+        ROS_INFO("Orientation=%d  State=%d  NextMove=%d", nw_or, current_state, nextMove);
 
-    // Update the position if moving forward and not bumped
-    if (nextMove == FORWARD && !isBumped) {
-        pos_ = nextPos;
-        ROS_INFO("Maze - Moved to (%.0f, %.0f)", pos_.x(), pos_.y());
-    } else if (nextMove == FORWARD && isBumped) {
-        ROS_WARN("Maze - Bumped into wall at (%.0f, %.0f)", nextPos.x(), nextPos.y());
+        if (nextMove == MOVE) {
+            pos_ = translatePos(pos_, static_cast<Orientation>(nw_or));
+            record_visited(pos_);
+            displayVisits(get_visited(pos_));
+        }
+
+        if (current_state == GOAL) {
+            return false;
+        }
+
+        count_down = TIMEOUT;
+        return true;
     }
 
-    ROS_INFO("Maze - End of move: Pos: (%.0f, %.0f), Orientation: %d",
-             pos_.x(), pos_.y(), nw_or);
-
-    // Check if the turtle has reached the end
-    bool atEnd = atend(pos_.x(), pos_.y());
-
-    // Return true to continue, false to stop the turtle
-    return !atEnd;
+    count_down--;
+    return false;
 }
 
-
-QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
-    if (nextMove == FORWARD) {
-        switch (orientation) {
-            case 0: return QPointF(pos_.x() + 1, pos_.y()); // RIGHT
-            case 1: return QPointF(pos_.x(), pos_.y() + 1); // DOWN
-            case 2: return QPointF(pos_.x() - 1, pos_.y()); // LEFT
-            case 3: return QPointF(pos_.x(), pos_.y() - 1); // UP
-        }
+QPointF translatePos(QPointF pos_, Orientation orientation) {
+    switch (orientation) {
+        case LEFT:  pos_.setX(pos_.x() - 1); break;
+        case DOWN:  pos_.setY(pos_.y() - 1); break;
+        case RIGHT: pos_.setX(pos_.x() + 1); break;
+        case UP:    pos_.setY(pos_.y() + 1); break;
+        default:    ROS_ERROR("Invalid Orientation"); break;
     }
-    // For turns and stop, position doesn't change
     return pos_;
 }
 
-
 int translateOrnt(int orientation, turtleMove nextMove) {
     switch (nextMove) {
-        case TURN_LEFT:
-            return (orientation + 3) % 4;
-        case TURN_RIGHT:
-            return (orientation + 1) % 4;
-        case FORWARD:
-        case STOP:
-            return orientation; // No orientation change for forward or stop
+        case TURNRIGHT: return (orientation + 1) % NUM_ORIENTATIONS;
+        case TURNLEFT:  return (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
+        case MOVE:
+        case STOP:      return orientation;
+        default:        ROS_ERROR("Invalid Move"); return orientation;
     }
-    return orientation; // Default case, should not happen
+}
+
+bool check_bumped(QPointF pos_, Orientation orient) {
+    int x1 = pos_.x(), y1 = pos_.y();
+    int x2 = x1, y2 = y1;
+
+    switch (orient) {
+        case LEFT:  y2++; break;
+        case DOWN:  x2++; break;
+        case RIGHT: x2++; y2++; x1++; break;
+        case UP:    x2++; y2++; y1++; break;
+        default:    ROS_ERROR("Invalid Orientation"); return false;
+    }
+
+    return bumped(x1, y1, x2, y2);
 }
 
 
