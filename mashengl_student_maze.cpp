@@ -23,34 +23,64 @@
 
 #include "student.h"
 
-/*
- * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
- * Ground rule -- you are only allowed to call the three helper functions defined in student.h, and NO other turtle methods or maze methods (no peeking at the maze!)
- * This file interfaces with functions in student_turtle.cpp
- */
+// Define the turtleMove enum if not already defined in student.h
+enum class turtleMove {
+    FORWARD,
+    TURN_LEFT,
+    TURN_RIGHT,
+    NO_MOVE
+};
+
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
-  bool bumped = true; // Replace with your own procedure
-  turtleMove nextMove = studentTurtleStep(bumped); // define your own turtleMove enum or structure
-  pos_ = translatePos(pos_, nextMove);
-  nw_or = translateOrnt(nw_or, nextMove);
-
-  // REPLACE THE FOLLOWING LINE IN PROJECT 5
-  return studentMoveTurtle(pos_, nw_or);
+    bool bumped = bumped(pos_.x(), pos_.y(), pos_.x(), pos_.y());
+    turtleMove nextMove = studentTurtleStep(bumped);
+    
+    QPointF newPos = translatePos(pos_, nextMove, nw_or);
+    int newOrnt = translateOrnt(nw_or, nextMove);
+    
+    // Check if the new position is valid (not hitting a wall)
+    if (!bumped(pos_.x(), pos_.y(), newPos.x(), newPos.y())) {
+        pos_ = newPos;
+        nw_or = newOrnt;
+        
+        // Call displayVisits with the number of visits from studentTurtleStep
+        int visits = getVisitsFromTurtle(pos_.x(), pos_.y());
+        displayVisits(visits);
+        
+        return true;
+    }
+    
+    return false;
 }
 
-/*
- * Takes a position and a turtleMove and returns a new position
- * based on the move
- */
-QPointF translatePos(QPointF pos_, turtleMove nextMove) {
-  return pos_;
+QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
+    switch (nextMove) {
+        case turtleMove::FORWARD:
+            switch (orientation) {
+                case 0: return QPointF(pos_.x() - 1, pos_.y()); // Left
+                case 1: return QPointF(pos_.x(), pos_.y() - 1); // Up
+                case 2: return QPointF(pos_.x() + 1, pos_.y()); // Right
+                case 3: return QPointF(pos_.x(), pos_.y() + 1); // Down
+            }
+        default:
+            return pos_; // No change for turns or no move
+    }
 }
 
-/*
- * Takes an orientation and a turtleMove and returns a new orienation
- * based on the move
- */
 int translateOrnt(int orientation, turtleMove nextMove) {
-  return orientation;
+    switch (nextMove) {
+        case turtleMove::TURN_LEFT:
+            return (orientation - 1 + 4) % 4;
+        case turtleMove::TURN_RIGHT:
+            return (orientation + 1) % 4;
+        default:
+            return orientation; // No change for forward or no move
+    }
 }
+
+// This function should be implemented in ANDREWID_student_turtle.cpp
+extern turtleMove studentTurtleStep(bool bumped);
+
+// This function should be implemented in ANDREWID_student_turtle.cpp
+extern int getVisitsFromTurtle(int x, int y);
