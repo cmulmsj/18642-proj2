@@ -18,10 +18,37 @@ bool atend(int x, int y);
 void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
 
-// Scope-preserving changes to these lines permitted (see p5 writeup)
-enum turtleMove { FORWARD, TURN_LEFT, TURN_RIGHT, STOP };
-QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation);
+enum turtleMove : int8_t {
+    MOVE,
+    TURNRIGHT,
+    TURNLEFT,
+    STOP
+};
+
+enum Orientation : int8_t {
+    LEFT,
+    DOWN,
+    RIGHT,
+    UP
+};
+
+enum State : int8_t {
+    INIT,
+    GO,
+    TURN,
+    GOAL
+};
+
+QPointF translatePos(QPointF pos_, Orientation orientation);
 int translateOrnt(int orientation, turtleMove nextMove);
-turtleMove studentTurtleStep(bool bumped);
+turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state);
+
+bool check_bumped(QPointF pos_, Orientation orient);
+void record_visited(QPointF& pos_);
+uint8_t get_visited(QPointF& pos_);
+
+const uint8_t NUM_ORIENTATIONS = 4;
+const uint8_t TIMEOUT = 40;
+const uint8_t MAZE_SIZE = 23;
 
 #endif // STUDENT_H
