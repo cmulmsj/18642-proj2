@@ -29,19 +29,33 @@ bool isFacingWall(QPointF pos_, int nw_or);
 
 // Function to check if the turtle is facing a wall
 bool isFacingWall(QPointF pos_, int nw_or) {
-    int32_t futureX = pos_.x(), futureY = pos_.y();
-    int32_t futureX2 = pos_.x(), futureY2 = pos_.y();
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
 
-    if (nw_or < 2) {  // Facing LEFT or UP
-        if (nw_or == 0) futureY2 += 1;
-        else            futureX2 += 1;
-    } else {  // Facing RIGHT or DOWN
-        futureX2 += 1; futureY2 += 1;
-        if (nw_or == 2) futureX += 1;
-        else            futureY += 1;
+    int x1 = x, y1 = y, x2 = x, y2 = y;
+
+    switch (nw_or) {
+        case 0:  // LEFT
+            x1 -= 1;
+            break;
+        case 1:  // UP
+            y1 -= 1;
+            break;
+        case 2:  // RIGHT
+            x1 += 1;
+            break;
+        case 3:  // DOWN
+            y1 += 1;
+            break;
+        default:
+            ROS_ERROR("Invalid orientation: %d", nw_or);
+            break;
     }
 
-    return bumped(futureX, futureY, futureX2, futureY2);
+    // The bumped function checks if there's a wall between (x, y) and (x1, y1)
+    bool result = bumped(x, y, x1, y1);
+    ROS_INFO("isFacingWall: position (%d, %d) facing %d, wall ahead: %d", x, y, nw_or, result);
+    return result;
 }
 
 bool moveTurtle(QPointF& pos_, int& nw_or) {
@@ -51,8 +65,12 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
     // Call the turtle's step function to get the next move
     turtleMove nextMove = studentTurtleStep(bumpedStatus);
 
-    // Update the absolute position and orientation
+    ROS_INFO("moveTurtle: nextMove = %d", nextMove);
+
+    // Update the absolute orientation
     translateOrnt(nw_or, nextMove);
+
+    // Update the absolute position
     translatePos(pos_, nw_or, nextMove);
 
     // Get the number of visits from the turtle code
@@ -62,9 +80,13 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
     displayVisits(visits);
 
     // Check if at end
-    bool atEnd = atend(pos_.x(), pos_.y());
+    bool atEnd = atend(static_cast<int>(pos_.x()), static_cast<int>(pos_.y()));
+    if (atEnd) {
+        ROS_INFO("Turtle has reached the end at position (%f, %f)", pos_.x(), pos_.y());
+        return false;  // Stop moving
+    }
 
-    return !atEnd;
+    return true;  // Continue moving
 }
 
 // Update the turtle's absolute position based on the move
@@ -79,6 +101,7 @@ void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
                 ROS_ERROR("Invalid orientation: %d", nw_or);
                 break;
         }
+        ROS_INFO("translatePos: Moved to position (%f, %f)", pos_.x(), pos_.y());
     }
     // No position change for turns
 }
@@ -87,8 +110,10 @@ void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
 void translateOrnt(int& nw_or, turtleMove nextMove) {
     if (nextMove == TURN_LEFT) {
         nw_or = (nw_or + 3) % 4;  // Equivalent to -1 mod 4
+        ROS_INFO("translateOrnt: Turned left. New orientation: %d", nw_or);
     } else if (nextMove == TURN_RIGHT) {
         nw_or = (nw_or + 1) % 4;
+        ROS_INFO("translateOrnt: Turned right. New orientation: %d", nw_or);
     }
     // No orientation change for MOVE_FORWARD or STOP
 }
