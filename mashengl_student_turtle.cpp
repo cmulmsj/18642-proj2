@@ -12,52 +12,52 @@
  */
 
 #include "student.h"
-#include <vector>
 
-const int MAZE_SIZE = 23;
-const int START_POS = MAZE_SIZE / 2;
+// Forward declaration of getVisitsFromTurtle
+int getVisitsFromTurtle(int x, int y);
 
-static std::vector<std::vector<int>> visitMap(MAZE_SIZE, std::vector<int>(MAZE_SIZE, 0));
-static int currentX = START_POS;
-static int currentY = START_POS;
-static int currentOrientation = 1; // Start facing up (0: Left, 1: Up, 2: Right, 3: Down)
-
-turtleMove studentTurtleStep(bool bumped)
+bool moveTurtle(QPointF& pos_, int& nw_or)
 {
-    if (bumped) {
-        // Turn right when bumped
-        currentOrientation = (currentOrientation + 1) % 4;
-    } else {
-        // Move forward
-        switch (currentOrientation) {
-            case 0: currentX--; break; // Left
-            case 1: currentY--; break; // Up
-            case 2: currentX++; break; // Right
-            case 3: currentY++; break; // Down
-        }
+    bool is_bumped = bumped(pos_.x(), pos_.y(), pos_.x(), pos_.y());
+    turtleMove nextMove = studentTurtleStep(is_bumped);
+    
+    QPointF newPos = translatePos(pos_, nextMove);
+    int newOrnt = translateOrnt(nw_or, nextMove);
+    
+    // Check if the new position is valid (not hitting a wall)
+    if (!bumped(pos_.x(), pos_.y(), newPos.x(), newPos.y())) {
+        pos_ = newPos;
+        nw_or = newOrnt;
         
-        visitMap[currentY][currentX]++;
+        int visits = getVisitsFromTurtle(pos_.x(), pos_.y());
+        displayVisits(visits);
+        
+        return true;
     }
     
-    return MOVE;
+    return false;
 }
 
-int getVisitsFromTurtle(int x, int y)
+QPointF translatePos(QPointF pos_, turtleMove nextMove)
 {
-    // Convert absolute coordinates to turtle's local coordinates
-    int localX = x - START_POS + currentX;
-    int localY = y - START_POS + currentY;
-    
-    // Check if the coordinates are within the visitMap bounds
-    if (localX >= 0 && localX < MAZE_SIZE && localY >= 0 && localY < MAZE_SIZE) {
-        return visitMap[localY][localX];
+    // We need to get the current orientation
+    // For now, let's assume it's stored in a static variable
+    static int currentOrientation = 1; // Start facing up
+
+    if (nextMove == MOVE) {
+        switch (currentOrientation) {
+            case 0: return QPointF(pos_.x() - 1, pos_.y()); // Left
+            case 1: return QPointF(pos_.x(), pos_.y() - 1); // Up
+            case 2: return QPointF(pos_.x() + 1, pos_.y()); // Right
+            case 3: return QPointF(pos_.x(), pos_.y() + 1); // Down
+        }
     }
-    return 0; // Return 0 for out-of-bounds coordinates
+    return pos_; // No change for other moves (which don't exist in current enum)
 }
 
-// This function is no longer needed, but keeping it here as per the student.h file
-bool studentMoveTurtle(QPointF& pos_, int& nw_or)
+int translateOrnt(int orientation, turtleMove nextMove)
 {
-    // This function is now empty as its functionality has been moved to moveTurtle in mashengl_student_maze.cpp
-    return true;
+    // In the current implementation, MOVE doesn't change orientation
+    // We might need to update this if we add more move types
+    return orientation;
 }
