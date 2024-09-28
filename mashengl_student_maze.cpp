@@ -1,3 +1,23 @@
+#include "student.h"
+#include "mashengl_turtle_state.h"
+#include <ros/ros.h>
+#include <QPointF>
+
+bool isFacingWall(QPointF pos_, int nw_or) {
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    int x1 = x, y1 = y;
+
+    switch (nw_or) {
+        case 0: y1 -= 1; break; // Up
+        case 1: x1 += 1; break; // Right
+        case 2: y1 += 1; break; // Down
+        case 3: x1 -= 1; break; // Left
+    }
+
+    return bumped(x, y, x1, y1);
+}
+
 bool moveTurtle(QPointF& pos_, int& nw_or) {
     static bool firstCall = true;
     if (firstCall) {
