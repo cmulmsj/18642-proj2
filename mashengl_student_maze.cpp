@@ -36,6 +36,13 @@ bool isFacingWall(QPointF pos_, int nw_or) {
 // Main function to move the turtle
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
+    static bool firstCall = true;
+    if (firstCall) {
+        // Ensure nw_or matches the turtle's initial orientation
+        nw_or = 3; // Facing left
+        firstCall = false;
+    }
+
     // Determine if the turtle is facing a wall
     bool bumpedStatus = isFacingWall(pos_, nw_or);
 
