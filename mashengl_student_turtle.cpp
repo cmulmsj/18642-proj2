@@ -6,7 +6,7 @@
 const int32_t MAZE_SIZE = 23;
 const int32_t START_POS = MAZE_SIZE / 2;
 
-// Enum for directions (kept for compatibility)
+// Enum for directions
 enum Direction {
     LEFT = 0,
     UP = 1,
@@ -59,10 +59,10 @@ turtleMove studentTurtleStep(bool bumped) {
         updatePosition();
     }
     
-    return MOVE; // Always return MOVE as it's the only option in the enum
+    return MOVE;
 }
 
-// Function to get the visit count for a given position
+// Function to get and update the visit count for a given position
 int getVisitCount(int x, int y) {
     int relX = x - START_POS + currentX;
     int relY = y - START_POS + currentY;
