@@ -49,28 +49,23 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     static bool firstCall = true;
     if (firstCall) {
-        // Ensure nw_or matches the turtle's initial orientation
         nw_or = 3; // Facing left
         firstCall = false;
     }
 
-    // Get the next move from the turtle with a dummy 'false' for bumped
-    turtleMove nextMove = studentTurtleStep(false);
-
-    // Update orientation based on the turtle's move
-    translateOrnt(nw_or, nextMove);
-
-    // Now determine if the turtle is facing a wall after updating orientation
+    // Check if the turtle is facing a wall
     bool bumpedStatus = isFacingWall(pos_, nw_or);
 
-    // Provide the actual 'bumped' status to the turtle
-    nextMove = studentTurtleStep(bumpedStatus);
+    // Get the next move from the turtle
+    turtleMove nextMove = studentTurtleStep(bumpedStatus);
 
-    // Update orientation again if the turtle decided to turn
+    // Update orientation
     translateOrnt(nw_or, nextMove);
 
-    // Update position
-    translatePos(pos_, nw_or, nextMove);
+    // Update position only if the move is MOVE_FORWARD and not bumped
+    if (nextMove == MOVE_FORWARD && !bumpedStatus) {
+        translatePos(pos_, nw_or, nextMove);
+    }
 
     // Get the number of visits from the turtle code
     int visits = getCurrentVisitCount();
@@ -87,7 +82,6 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
 
     return true; // Continue moving the turtle
 }
-
 // Update the turtle's absolute position based on the move
 void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
     if (nextMove == MOVE_FORWARD) {
