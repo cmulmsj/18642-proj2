@@ -1,3 +1,6 @@
+#ifndef STUDENT_H
+#define STUDENT_H
+
 #include <ros/ros.h>
 #include <boost/bind.hpp>
 #include <ece642rtle/timeInt8.h>
@@ -15,13 +18,14 @@ bool atend(int x, int y);
 void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
 
-// Scope-preserving changes to these lines permitted
-enum turtleMove { MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, NO_MOVE };
-QPointF translatePos(QPointF pos_, turtleMove nextMove, int nw_or);  // Added nw_or
-int translateOrnt(int orientation, turtleMove nextMove);
+// Scope-preserving changes to these lines permitted (see p5 writeup)
+enum turtleMove { MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, STOP };
 turtleMove studentTurtleStep(bool bumped);
+void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove);
+void translateOrnt(int& nw_or, turtleMove nextMove);
+int getCurrentVisitCount();
 
 // OK to change below this line
-bool studentMoveTurtle(QPointF& pos_, int& nw_or);
-void incrementVisitCount(int x, int y); // Function to increment visit count
-int getVisitCount(int x, int y);        // Function to get the visit count
+// No further changes needed
+
+#endif // STUDENT_H
