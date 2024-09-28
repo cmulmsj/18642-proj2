@@ -56,35 +56,30 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     // Update the orientation
     nw_or = translateOrnt(nw_or, nextMove);
 
-    bool moveSuccessful = false;
-
-    // Update the position if the turtle wants to move forward and there's no wall
+    // Update the position if the turtle wants to move forward
     if (nextMove == FORWARD) {
         // Calculate the new position based on the updated orientation
-        int newX = x1, newY = y1;
+        int newX = pos_.x(), newY = pos_.y();
         switch (nw_or) {
-            case 0: newX = x1 - 1; break; // LEFT
-            case 1: newY = y1 - 1; break; // UP
-            case 2: newX = x1 + 1; break; // RIGHT
-            case 3: newY = y1 + 1; break; // DOWN
+            case 0: newX = pos_.x() - 1; break; // LEFT
+            case 1: newY = pos_.y() - 1; break; // UP
+            case 2: newX = pos_.x() + 1; break; // RIGHT
+            case 3: newY = pos_.y() + 1; break; // DOWN
         }
 
         // Check if moving to the new position would result in a collision
-        bool wouldBump = bumped(x1, y1, newX, newY);
+        bool wouldBump = bumped(pos_.x(), pos_.y(), newX, newY);
 
         if (!wouldBump) {
             // Update position
             pos_.setX(newX);
             pos_.setY(newY);
-            moveSuccessful = true;
         } else {
             // Cannot move forward due to a wall
             ROS_INFO("Cannot move forward; wall detected ahead.");
         }
     }
-
-    // Inform the turtle whether the move was successful
-    updateAfterMove(moveSuccessful);
+    // For turns, position remains the same
 
     // Check if the turtle has reached the end
     bool atEnd = atend(pos_.x(), pos_.y());
