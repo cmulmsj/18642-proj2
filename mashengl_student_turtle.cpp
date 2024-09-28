@@ -30,9 +30,11 @@ turtleMove studentTurtleStep(bool bumped, int& newOrientation) {
         currentOrientation = (currentOrientation - 1 + 4) % 4;
         ROS_INFO("Bumped, turned left, new orientation: %d", currentOrientation);
     } else {
-        // If not bumped, try to move forward
-        updatePosition();
-        ROS_INFO("Moved forward, new position: (%d, %d)", currentX, currentY);
+        // If not bumped, first try to turn right
+        int rightOrientation = (currentOrientation + 1) % 4;
+        currentOrientation = rightOrientation;
+        ROS_INFO("Not bumped, turned right, new orientation: %d", currentOrientation);
+        // The actual movement will be handled by the maze file
     }
 
     newOrientation = currentOrientation;
