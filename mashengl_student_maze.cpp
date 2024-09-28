@@ -21,19 +21,14 @@ QPointF translatePos(QPointF currentPos, int orientation, turtleMove move) {
 }
 
 bool checkBump(QPointF pos, int orientation) {
-    int futureX = pos.x(), futureY = pos.y();
-    int futureX2 = pos.x(), futureY2 = pos.y();
-
-    if (orientation < 2) {  
-        if (orientation == 0) futureY2 += 1;
-        else                  futureX2 += 1;
-    } else {  
-        futureX2 += 1; futureY2 += 1;
-        if (orientation == 2) futureX += 1;
-        else                  futureY += 1;
+    QPointF newPos = pos;
+    switch (orientation) {
+        case 0: newPos.setX(newPos.x() - 1); break; // Left
+        case 1: newPos.setY(newPos.y() - 1); break; // Up
+        case 2: newPos.setX(newPos.x() + 1); break; // Right
+        case 3: newPos.setY(newPos.y() + 1); break; // Down
     }
-
-    return bumped(futureX, futureY, futureX2, futureY2);
+    return bumped(pos.x(), pos.y(), newPos.x(), newPos.y());
 }
 
 bool moveTurtle(QPointF& pos_, int& nw_or) {
@@ -48,18 +43,18 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
         QPointF oldPos = pos_;
         int oldOrientation = nw_or;
         
-        pos_ = translatePos(pos_, newOrientation, nextMove);
-        nw_or = newOrientation;
+        QPointF newPos = translatePos(pos_, newOrientation, nextMove);
         
-        if (!checkBump(pos_, nw_or)) {
+        if (!checkBump(oldPos, newOrientation)) {
+            pos_ = newPos;
+            nw_or = newOrientation;
+            
             int visits = getVisitCount(pos_.x(), pos_.y());
             displayVisits(visits);
 
             ROS_INFO("Turtle moved from (%f, %f) to (%f, %f), orientation: %d -> %d",
                      oldPos.x(), oldPos.y(), pos_.x(), pos_.y(), oldOrientation, nw_or);
         } else {
-            pos_ = oldPos;
-            nw_or = oldOrientation;
             ROS_INFO("Turtle bumped at (%f, %f), orientation: %d", pos_.x(), pos_.y(), nw_or);
         }
         
