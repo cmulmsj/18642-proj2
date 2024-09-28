@@ -117,4 +117,3 @@ void translateOrnt(int& nw_or, turtleMove nextMove) {
     }
     // No orientation change for MOVE_FORWARD or STOP
 }
-
