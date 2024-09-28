@@ -1,63 +1,86 @@
 #include "student.h"
-#include <vector>
+#include <stdint.h>
+#include <ros/ros.h>
 
-const int MAZE_SIZE = 23;
-const int START_POS = MAZE_SIZE / 2;
+// Constants
+const int32_t MAZE_SIZE = 23;
+const int32_t START_POS = MAZE_SIZE / 2;
 
-enum TurtleMove {
+// Enum for directions (kept for compatibility)
+enum Direction {
+    LEFT = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3
+};
+
+// Enum for turtle moves
+enum turtleMove {
     MOVE_FORWARD,
     TURN_LEFT,
     TURN_RIGHT,
     NO_MOVE
 };
 
-// Local map to store visit counts
-static std::vector<std::vector<int>> visitMap(MAZE_SIZE, std::vector<int>(MAZE_SIZE, 0));
+// States
+const int32_t STATE_MOVING = 2;
+const int32_t STATE_TURNED = 1;
+const int32_t STATE_BUMPED = 0;
 
-// Turtle's relative position and orientation
-static int relativeX = 0;
-static int relativeY = 0;
-static int relativeOrientation = 0; // 0: Left, 1: Up, 2: Right, 3: Down
+// Global variables
+static int32_t currentState = STATE_MOVING;
+static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
+static int32_t currentX = 0;
+static int32_t currentY = 0;
+static int32_t currentOrientation = LEFT;
 
-TurtleMove studentTurtleStep(bool bumped) {
-    if (bumped) {
-        // If bumped, turn left
-        relativeOrientation = (relativeOrientation - 1 + 4) % 4;
-        return TURN_LEFT;
-    } else {
-        // Move forward
-        switch (relativeOrientation) {
-            case 0: relativeX--; break;
-            case 1: relativeY--; break;
-            case 2: relativeX++; break;
-            case 3: relativeY++; break;
-        }
-        
-        // Update visit count
-        int actualX = START_POS + relativeX;
-        int actualY = START_POS + relativeY;
-        if (actualX >= 0 && actualX < MAZE_SIZE && actualY >= 0 && actualY < MAZE_SIZE) {
-            visitMap[actualY][actualX]++;
-        }
-        
+// Function to update the turtle's orientation
+void updateOrientation(bool isBumped) {
+    if (currentState == STATE_MOVING) {
+        currentOrientation = (currentOrientation + 1) % 4;
+        currentState = STATE_TURNED;
+    }
+    else if (isBumped) {
+        currentOrientation = (currentOrientation + 2) % 4;
+        currentState = STATE_BUMPED;
+    }
+    else {
+        currentState = STATE_MOVING;
+    }
+}
+
+// Function to update the turtle's position
+void updatePosition() {
+    switch (currentOrientation) {
+        case LEFT:  currentX--; break;
+        case UP:    currentY--; break;
+        case RIGHT: currentX++; break;
+        case DOWN:  currentY++; break;
+    }
+}
+
+// Main function to determine the turtle's next move
+turtleMove studentTurtleStep(bool bumped) {
+    updateOrientation(bumped);
+    
+    if (currentState == STATE_MOVING) {
+        updatePosition();
         return MOVE_FORWARD;
     }
-}
-
-// Function to get visit count for a relative position
-int getVisitCount(int relX, int relY) {
-    int actualX = START_POS + relX;
-    int actualY = START_POS + relY;
-    if (actualX >= 0 && actualX < MAZE_SIZE && actualY >= 0 && actualY < MAZE_SIZE) {
-        return visitMap[actualY][actualX];
+    else if (currentState == STATE_TURNED) {
+        return TURN_RIGHT;
     }
-    return 0;
+    else { // STATE_BUMPED
+        return TURN_LEFT;
+    }
 }
 
-// This function should be called from mashengl_student_maze.cpp
-int updateVisitCount(int absoluteX, int absoluteY) {
-    if (absoluteX >= 0 && absoluteX < MAZE_SIZE && absoluteY >= 0 && absoluteY < MAZE_SIZE) {
-        return ++visitMap[absoluteY][absoluteX];
+// Function to update and return the visit count for a given position
+int updateVisitCount(int x, int y) {
+    int relX = x - START_POS + currentX;
+    int relY = y - START_POS + currentY;
+    if (relX >= 0 && relX < MAZE_SIZE && relY >= 0 && relY < MAZE_SIZE) {
+        return ++visitMap[relY][relX];
     }
     return 0;
 }
