@@ -29,7 +29,6 @@ int translateOrnt(int currentOrientation, turtleMove move) {
     return newOrientation;
 }
 
-// Function to check if the turtle would bump into a wall
 bool checkBump(QPointF pos, int orientation) {
     int futureX = pos.x(), futureY = pos.y();
     int futureX2 = pos.x(), futureY2 = pos.y();
@@ -49,13 +48,6 @@ bool checkBump(QPointF pos, int orientation) {
 bool moveTurtle(QPointF& pos_, int& nw_or) {
     static int timeoutCounter = 0;
     const int TIMEOUT = 40;
-    static bool firstMove = true;
-
-    // Always move on the first call
-    if (firstMove) {
-        timeoutCounter = 0;
-        firstMove = false;
-    }
 
     if (timeoutCounter == 0) {
         bool isBumped = checkBump(pos_, nw_or);
@@ -64,22 +56,18 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
         QPointF oldPos = pos_;
         int oldOrientation = nw_or;
         
-        QPointF newPos = translatePos(pos_, nw_or, nextMove);
-        int newOrientation = translateOrnt(nw_or, nextMove);
+        pos_ = translatePos(pos_, nw_or, nextMove);
+        nw_or = translateOrnt(nw_or, nextMove);
         
-        if (!checkBump(newPos, newOrientation)) {
-            pos_ = newPos;
-            nw_or = newOrientation;
-            
+        if (!checkBump(pos_, nw_or)) {
             int visits = getVisitCount(pos_.x(), pos_.y());
             displayVisits(visits);
 
             ROS_INFO("Turtle moved from (%f, %f) to (%f, %f), orientation: %d -> %d",
                      oldPos.x(), oldPos.y(), pos_.x(), pos_.y(), oldOrientation, nw_or);
-            
-            // Force immediate display update
-            ros::spinOnce();
         } else {
+            pos_ = oldPos;
+            nw_or = oldOrientation;
             ROS_INFO("Turtle bumped at (%f, %f), orientation: %d", pos_.x(), pos_.y(), nw_or);
         }
         
