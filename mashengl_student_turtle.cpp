@@ -3,7 +3,7 @@
  * ANDREW ID: mashengl
  * LAST UPDATE: [Your Last Update Date]
  *
- * This file contains the turtle's movement logic using a modified right-hand rule.
+ * This file contains the turtle's movement logic using the right-hand rule.
  * The turtle operates based on its local perception without knowledge of
  * absolute positions or orientations.
  */
@@ -45,46 +45,36 @@ int getCurrentVisitCount() {
     return getVisitCount(currentX, currentY);
 }
 
-// The turtle's movement logic implementing a modified right-hand rule
+// The turtle's movement logic implementing the right-hand rule
 turtleMove studentTurtleStep(bool bumped) {
-    // Prefix the enumerators in the State enum to avoid conflicts
-    static enum State {
-        STATE_INITIAL_TURN_RIGHT,
+    // State machine to manage the turtle's actions
+    enum TurtleState {
+        STATE_INIT,
+        STATE_TURN_RIGHT,
         STATE_CHECK_RIGHT,
         STATE_MOVE_FORWARD,
-        STATE_TURN_LEFT,
-        STATE_TURN_RIGHT,
-        STATE_CHECK_FORWARD
-    } state = STATE_INITIAL_TURN_RIGHT;
+        STATE_CHECK_FORWARD,
+        STATE_TURN_LEFT
+    };
+    static TurtleState state = STATE_INIT;
 
     switch (state) {
-        case STATE_INITIAL_TURN_RIGHT:
-            // Turn right to start following the right-hand rule
+        case STATE_INIT:
+            // Start by attempting to turn right
+            orientation = static_cast<Direction>((orientation + 1) % 4); // Turn right
             state = STATE_CHECK_RIGHT;
             return TURN_RIGHT;
 
         case STATE_CHECK_RIGHT:
-            if (bumped) {
-                // Wall to the right, turn back to original orientation
-                orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
-                state = STATE_CHECK_FORWARD;
-                return TURN_LEFT;
-            } else {
-                // No wall to the right, proceed forward
+            if (!bumped) {
+                // No wall to the right, move forward
                 state = STATE_MOVE_FORWARD;
                 return MOVE_FORWARD;
-            }
-
-        case STATE_CHECK_FORWARD:
-            if (bumped) {
-                // Wall ahead, turn left to find a new path
+            } else {
+                // Wall to the right, turn left to original orientation
                 orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
                 state = STATE_TURN_LEFT;
                 return TURN_LEFT;
-            } else {
-                // No wall ahead, move forward
-                state = STATE_MOVE_FORWARD;
-                return MOVE_FORWARD;
             }
 
         case STATE_MOVE_FORWARD:
@@ -100,7 +90,7 @@ turtleMove studentTurtleStep(bool bumped) {
                 int visits = getVisitCount(currentX, currentY) + 1;
                 setVisitCount(currentX, currentY, visits);
             }
-            // After moving forward, try to turn right again
+            // After moving forward, attempt to turn right again
             state = STATE_TURN_RIGHT;
             return MOVE_FORWARD;
 
@@ -108,6 +98,18 @@ turtleMove studentTurtleStep(bool bumped) {
             // After turning left, check forward
             state = STATE_CHECK_FORWARD;
             return TURN_LEFT;
+
+        case STATE_CHECK_FORWARD:
+            if (!bumped) {
+                // No wall ahead, move forward
+                state = STATE_MOVE_FORWARD;
+                return MOVE_FORWARD;
+            } else {
+                // Wall ahead, turn left
+                orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
+                state = STATE_TURN_LEFT;
+                return TURN_LEFT;
+            }
 
         case STATE_TURN_RIGHT:
             // Turn right to check for a wall on the right
@@ -117,7 +119,7 @@ turtleMove studentTurtleStep(bool bumped) {
 
         default:
             ROS_ERROR("Invalid state in studentTurtleStep");
-            state = STATE_INITIAL_TURN_RIGHT;
+            state = STATE_INIT;
             return STOP;
     }
 }
