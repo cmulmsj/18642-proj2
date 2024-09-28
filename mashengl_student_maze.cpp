@@ -65,6 +65,9 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
         return false; // Stop the turtle
     }
 
+    // Add a delay to slow down the turtle's movement
+    ros::Duration(0.5).sleep();
+
     return true; // Continue moving the turtle
 }
 
