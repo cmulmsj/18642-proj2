@@ -63,7 +63,6 @@ turtleMove studentTurtleStep(bool bumped) {
     turtleMove nextMove;
 
     if (firstMove) {
-        // On the first move, we want to move forward to check our initial orientation
         nextMove = FORWARD;
         firstMove = false;
     } else {
@@ -97,8 +96,28 @@ turtleMove studentTurtleStep(bool bumped) {
         }
     }
 
-    ROS_INFO("Turtle Decision - Next Move: %d, New State: %d",
-             nextMove, state);
+    // Update local position based on move (only if actually moving)
+    if (nextMove == FORWARD && !bumped) {
+        switch (orientation) {
+            case LEFT: currentX--; break;
+            case RIGHT: currentX++; break;
+            case UP: currentY--; break;
+            case DOWN: currentY++; break;
+        }
+    }
+
+    // Update orientation based on turn
+    if (nextMove == TURN_LEFT) {
+        orientation = static_cast<Direction>((orientation + 3) % 4);
+    } else if (nextMove == TURN_RIGHT) {
+        orientation = static_cast<Direction>((orientation + 1) % 4);
+    }
+
+    // Update visit count
+    int visits = getVisitCount(currentX, currentY) + 1;
+    setVisitCount(currentX, currentY, visits);
+
+    ROS_INFO("Turtle Decision - Next Move: %d, New State: %d, Local Pos: (%d, %d), Orientation: %d",
+             nextMove, state, currentX, currentY, orientation);
 
     return nextMove;
-}
