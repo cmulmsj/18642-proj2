@@ -24,6 +24,7 @@
 // mashengl_student_maze.cpp
 
 #include "student.h"
+#include <ros/ros.h>
 
 /*
  * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
@@ -59,16 +60,19 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     // Update the position if the turtle wants to move forward
     if (nextMove == FORWARD) {
         // Calculate the new position based on the updated orientation
-        int newX = pos_.x(), newY = pos_.y();
+        int newX = x1, newY = y1;
         switch (nw_or) {
-            case 0: newX = pos_.x() - 1; break; // LEFT
-            case 1: newY = pos_.y() - 1; break; // UP
-            case 2: newX = pos_.x() + 1; break; // RIGHT
-            case 3: newY = pos_.y() + 1; break; // DOWN
+            case 0: newX = x1 - 1; break; // LEFT
+            case 1: newY = y1 - 1; break; // UP
+            case 2: newX = x1 + 1; break; // RIGHT
+            case 3: newY = y1 + 1; break; // DOWN
+            default:
+                ROS_ERROR("Invalid orientation: %d", nw_or);
+                return false;
         }
 
         // Check if moving to the new position would result in a collision
-        bool wouldBump = bumped(pos_.x(), pos_.y(), newX, newY);
+        bool wouldBump = bumped(x1, y1, newX, newY);
 
         if (!wouldBump) {
             // Update position
@@ -88,23 +92,20 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return !atEnd;
 }
 
-
+/*
+ * Takes a position, orientation, and a turtleMove and returns a new position
+ * based on the move
+ */
 QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
-    if (nextMove == FORWARD) {
-        switch (orientation) {
-            case 0: pos_.setX(pos_.x() - 1); break; // LEFT
-            case 1: pos_.setY(pos_.y() - 1); break; // UP
-            case 2: pos_.setX(pos_.x() + 1); break; // RIGHT
-            case 3: pos_.setY(pos_.y() + 1); break; // DOWN
-            default:
-                ROS_ERROR("Invalid orientation: %d", orientation);
-                break;
-        }
-    }
-    // No position change for turns or stop
+    // Position updates are handled in moveTurtle()
+    // This function can return the position unchanged
     return pos_;
 }
 
+/*
+ * Takes an orientation and a turtleMove and returns a new orientation
+ * based on the move
+ */
 int translateOrnt(int orientation, turtleMove nextMove) {
     if (nextMove == TURN_LEFT) {
         orientation = (orientation + 3) % 4; // Turn left
