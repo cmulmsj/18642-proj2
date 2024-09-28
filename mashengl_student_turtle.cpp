@@ -35,6 +35,9 @@ void setVisitCount(int32_t x, int32_t y, int32_t count);
 // Variable to store the last move made
 static turtleMove lastMove = FORWARD;
 
+// Variable to indicate if we need to update internal state
+static bool pendingStateUpdate = false;
+
 /**
  * Retrieves the visit count for a specific cell in the local map.
  */
@@ -58,32 +61,38 @@ turtleMove studentTurtleStep(bool bumped) {
     static int state = 0; // 0: Try to turn right, 1: Move forward, 2: Turn left
 
     // Update internal orientation and position based on the last move
-    if (!firstCall) {
+    if (!firstCall && pendingStateUpdate) {
         if (lastMove == TURN_LEFT) {
             orientation = static_cast<Direction>((orientation + 3) % 4);
         } else if (lastMove == TURN_RIGHT) {
             orientation = static_cast<Direction>((orientation + 1) % 4);
         } else if (lastMove == FORWARD) {
-            // Update position based on orientation
-            switch (orientation) {
-                case LEFT:  currentX--; break;
-                case DOWN:  currentY++; break;
-                case RIGHT: currentX++; break;
-                case UP:    currentY--; break;
+            if (!bumped) {
+                // Only update position if the move was not blocked
+                switch (orientation) {
+                    case LEFT:  currentX--; break;
+                    case DOWN:  currentY++; break;
+                    case RIGHT: currentX++; break;
+                    case UP:    currentY--; break;
+                }
+                // Update visit count
+                int32_t visits = getVisitCount(currentX, currentY) + 1;
+                setVisitCount(currentX, currentY, visits);
+            } else {
+                // Move was blocked; do not update position
+                ROS_WARN("Move blocked; position not updated.");
             }
-            // Update visit count
-            int32_t visits = getVisitCount(currentX, currentY) + 1;
-            setVisitCount(currentX, currentY, visits);
         }
-    } else {
+        pendingStateUpdate = false;
+    } else if (firstCall) {
         // On first call, initialize the visit count at the starting position
         setVisitCount(currentX, currentY, 1);
         firstCall = false;
     }
 
     // Debugging statement
-    ROS_INFO("Orientation: %d, Position: (%d, %d), State: %d, Bumped: %d",
-             orientation, currentX, currentY, state, bumped);
+    ROS_INFO("Orientation: %d, Position: (%d, %d), State: %d, Bumped: %d, LastMove: %d",
+             orientation, currentX, currentY, state, bumped, lastMove);
 
     turtleMove nextMove;
 
@@ -117,6 +126,7 @@ turtleMove studentTurtleStep(bool bumped) {
 
     // Store the move to update internal state on the next call
     lastMove = nextMove;
+    pendingStateUpdate = true;
 
     return nextMove;
 }
