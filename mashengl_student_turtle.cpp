@@ -56,28 +56,38 @@ void setVisitCount(int32_t x, int32_t y, int32_t count) {
 turtleMove studentTurtleStep(bool bumped) {
     static int orientation = 0; // 0: RIGHT, 1: DOWN, 2: LEFT, 3: UP
     static turtleMove lastMove = FORWARD;
-    static int turnCount = 0;
+    static int state = 0; // 0: Try right, 1: Try forward, 2: Try left
 
-    ROS_INFO("Turtle Input - Bumped: %d, Last Move: %d, Orientation: %d, Position: (%d, %d)",
-             bumped, lastMove, orientation, currentX, currentY);
+    ROS_INFO("Turtle Input - Bumped: %d, Last Move: %d, Orientation: %d, Position: (%d, %d), State: %d",
+             bumped, lastMove, orientation, currentX, currentY, state);
 
     turtleMove nextMove;
 
-    // If we're not bumped, try to move forward
-    if (!bumped) {
-        nextMove = FORWARD;
-        turnCount = 0;
-    } else {
-        // If we're bumped, turn right
+    if (state == 0) {
+        // Try to turn right
         nextMove = TURN_RIGHT;
         orientation = (orientation + 1) % 4;
-        turnCount++;
-
-        // If we've turned right 4 times (made a full rotation), move left once
-        if (turnCount >= 4) {
+        state = 1;
+    } else if (state == 1) {
+        // Try to move forward
+        if (!bumped) {
+            nextMove = FORWARD;
+            state = 0; // Reset to try right again
+        } else {
+            // If bumped, move to next state
             nextMove = TURN_LEFT;
             orientation = (orientation + 3) % 4;
-            turnCount = 0;
+            state = 2;
+        }
+    } else if (state == 2) {
+        // Try to turn left
+        if (!bumped) {
+            nextMove = FORWARD;
+            state = 0; // Reset to try right again
+        } else {
+            nextMove = TURN_LEFT;
+            orientation = (orientation + 3) % 4;
+            // Stay in state 2
         }
     }
 
@@ -95,8 +105,8 @@ turtleMove studentTurtleStep(bool bumped) {
     int visits = getVisitCount(currentX, currentY) + 1;
     setVisitCount(currentX, currentY, visits);
 
-    ROS_INFO("Turtle Decision - Next Move: %d, New Orientation: %d, New Position: (%d, %d), Turn Count: %d",
-             nextMove, orientation, currentX, currentY, turnCount);
+    ROS_INFO("Turtle Decision - Next Move: %d, New Orientation: %d, New Position: (%d, %d), New State: %d",
+             nextMove, orientation, currentX, currentY, state);
 
     lastMove = nextMove;
     return nextMove;
