@@ -43,7 +43,8 @@ bool isFacingWall(QPointF pos_, int nw_or) {
     return bumped(x, y, x1, y1);
 }
 
-// Main function to move the turtle
+// In mashengl_student_maze.cpp
+
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     static bool firstCall = true;
@@ -53,13 +54,19 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         firstCall = false;
     }
 
-    // Determine if the turtle is facing a wall
+    // Get the next move from the turtle with a dummy 'false' for bumped
+    turtleMove nextMove = studentTurtleStep(false);
+
+    // Update orientation based on the turtle's move
+    translateOrnt(nw_or, nextMove);
+
+    // Now determine if the turtle is facing a wall after updating orientation
     bool bumpedStatus = isFacingWall(pos_, nw_or);
 
-    // Get the next move from the turtle
-    turtleMove nextMove = studentTurtleStep(bumpedStatus);
+    // Provide the actual 'bumped' status to the turtle
+    nextMove = studentTurtleStep(bumpedStatus);
 
-    // Update orientation
+    // Update orientation again if the turtle decided to turn
     translateOrnt(nw_or, nextMove);
 
     // Update position
@@ -75,10 +82,10 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     bool atEnd = atend(static_cast<int>(pos_.x()), static_cast<int>(pos_.y()));
     if (atEnd) {
         ROS_INFO("Turtle has reached the end of the maze.");
-        return false;
+        return false; // Stop the turtle
     }
 
-    return true;
+    return true; // Continue moving the turtle
 }
 
 // Update the turtle's absolute position based on the move
@@ -97,7 +104,8 @@ void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
     // No position change for turns
 }
 
-// Update the turtle's absolute orientation based on the move
+// In mashengl_student_maze.cpp
+
 void translateOrnt(int& nw_or, turtleMove nextMove) {
     if (nextMove == TURN_LEFT) {
         nw_or = (nw_or + 3) % 4; // Equivalent to -1 mod 4
@@ -105,4 +113,8 @@ void translateOrnt(int& nw_or, turtleMove nextMove) {
         nw_or = (nw_or + 1) % 4;
     }
     // No orientation change for MOVE_FORWARD or STOP
+
+    // Update the turtle's internal orientation
+    orientation = static_cast<Direction>(nw_or);
 }
+
