@@ -53,6 +53,12 @@ turtleMove studentTurtleStep(bool bumped) {
             move = MOVE_FORWARD;
             state = MOVE_FORWARD;
             break;
+
+        default:
+            ROS_ERROR("Invalid state in studentTurtleStep");
+            move = STOP;
+            state = CHECK_RIGHT;
+            break;
     }
 
     // Update orientation based on the move
