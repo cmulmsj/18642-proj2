@@ -31,7 +31,7 @@ enum Direction {
 static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
 static int32_t currentX = START_POS;
 static int32_t currentY = START_POS;
-static Direction orientation = WEST; // Start facing up
+static Direction orientation = EAST; // Start facing right
 
 // Function to get visit count
 int32_t getVisitCount(int32_t x, int32_t y) {
