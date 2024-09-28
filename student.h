@@ -27,6 +27,6 @@ int getCurrentVisitCount();
 
 // OK to change below this line
 // Removed obsolete function declaration
-// bool studentMoveTurtle(QPointF& pos_, int& nw_or);
+bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or);
 
 #endif  // STUDENT_H
