@@ -23,78 +23,63 @@
 
 #include "student.h"
 
-// Define orientation constants if they aren't already defined elsewhere
-#define NORTH 0
-#define EAST 1
-#define SOUTH 2
-#define WEST 3
+/*
+ * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
+ */
+bool moveTurtle(QPointF& pos_, int& nw_or)
+{
+    // Determine if the turtle is facing a wall
+    int x1 = pos_.x(), y1 = pos_.y();
+    int x2 = x1, y2 = y1;
 
-// Function to move the turtle and update its position in the maze
-bool moveTurtle(QPointF& pos_, int& nw_or) {
-    // Use the bumped function to check if the turtle is facing a wall
-    int futureX = static_cast<int>(pos_.x());
-    int futureY = static_cast<int>(pos_.y());
-    int futureX2 = futureX, futureY2 = futureY; // second set of coordinates for boundary check
-    
-    // Adjust future positions based on the turtle's orientation
-    if (nw_or == NORTH) futureY -= 1;
-    else if (nw_or == SOUTH) futureY += 1;
-    else if (nw_or == EAST)  futureX += 1;
-    else if (nw_or == WEST)  futureX -= 1;
-    
-    // Call the bumped function with the new potential future position
-    bool bumped = ::bumped(futureX, futureY, futureX2, futureY2); 
+    // Calculate the next position based on orientation
+    switch (nw_or) {
+        case 0: x2 = x1 - 1; break; // LEFT
+        case 1: y2 = y1 - 1; break; // UP
+        case 2: x2 = x1 + 1; break; // RIGHT
+        case 3: y2 = y1 + 1; break; // DOWN
+    }
 
-    // Get the next move from the turtle logic
+    bool bumped = bumped(x1, y1, x2, y2);
+
+    // Call the turtle's decision-making function
     turtleMove nextMove = studentTurtleStep(bumped);
 
-    // Translate the relative move to absolute coordinates
+    // Update the position and orientation based on the move
     pos_ = translatePos(pos_, nextMove, nw_or);
     nw_or = translateOrnt(nw_or, nextMove);
 
-    // Update display based on the number of visits in the current cell
-    int x = static_cast<int>(pos_.x());
-    int y = static_cast<int>(pos_.y());
-    int visits = getVisitCount(x, y);
-    displayVisits(visits); // Display the number of visits in the maze
-
-    // If turtle reaches the end, return false to stop moving
-    if (atEnd(x, y)) {
-        return false;
-    }
-
-    return true; // Continue moving if the end is not reached
+    // Check if the turtle has reached the end
+    return !atend(pos_.x(), pos_.y());
 }
 
-// Translate relative turtle moves into absolute position based on the current orientation
-QPointF translatePos(QPointF pos_, turtleMove nextMove, int nw_or) {
-    // Update position based on the current orientation and the next move
-    switch (nextMove) {
-        case FORWARD:
-            if (nw_or == NORTH) pos_.setY(pos_.y() - 1);
-            if (nw_or == SOUTH) pos_.setY(pos_.y() + 1);
-            if (nw_or == EAST)  pos_.setX(pos_.x() + 1);
-            if (nw_or == WEST)  pos_.setX(pos_.x() - 1);
-            break;
-        default:
-            break;
+/*
+ * Takes a position, orientation, and a turtleMove and returns a new position
+ * based on the move
+ */
+QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
+    if (nextMove == FORWARD) {
+        switch (orientation) {
+            case 0: pos_.setX(pos_.x() - 1); break; // LEFT
+            case 1: pos_.setY(pos_.y() - 1); break; // UP
+            case 2: pos_.setX(pos_.x() + 1); break; // RIGHT
+            case 3: pos_.setY(pos_.y() + 1); break; // DOWN
+        }
     }
+    // No position change for turns
     return pos_;
 }
 
-// Translate relative moves into absolute orientation changes
+/*
+ * Takes an orientation and a turtleMove and returns a new orientation
+ * based on the move
+ */
 int translateOrnt(int orientation, turtleMove nextMove) {
-    switch (nextMove) {
-        case LEFT:
-            // Turning left
-            orientation = (orientation + 3) % 4; 
-            break;
-        case RIGHT:
-            // Turning right
-            orientation = (orientation + 1) % 4; 
-            break;
-        default:
-            break;
+    if (nextMove == TURN_LEFT) {
+        orientation = (orientation + 3) % 4;
+    } else if (nextMove == TURN_RIGHT) {
+        orientation = (orientation + 1) % 4;
     }
+    // No orientation change for FORWARD
     return orientation;
 }
