@@ -12,15 +12,6 @@
 #include "mashengl_turtle_state.h"
 #include <ros/ros.h>
 #include <stdint.h>
-#include <QPointF>
-#include <boost/bind.hpp>
-#include <ece642rtle/timeInt8.h>
-#include <std_msgs/Empty.h>
-#include <ece642rtle/RTIbump.h>
-#include <ece642rtle/RTIatend.h>
-#include <ece642rtle/PoseOrntBundle.h>
-#include <ece642rtle/bumpEcho.h>
-#include <ece642rtle/aendEcho.h>
 
 // Define global variables
 int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
@@ -28,24 +19,8 @@ int32_t currentX = START_POS;
 int32_t currentY = START_POS;
 Direction orientation = LEFT; // Start facing left
 
-// Function to get visit count
-int32_t getVisitCount(int32_t x, int32_t y) {
-    return visitMap[y][x];
-}
-
-// Function to set visit count
-void setVisitCount(int32_t x, int32_t y, int32_t count) {
-    visitMap[y][x] = count;
-}
-
-// Function to get the current number of visits for the display
-int getCurrentVisitCount() {
-    return getVisitCount(currentX, currentY);
-}
-
-// In mashengl_student_turtle.cpp
-
-turtleMove studentTurtleStep(bool bumped) {
+turtleMove studentTurtleStep(bool bumped)
+{
     static enum TurtleState {
         STATE_INIT,
         STATE_CHECK_RIGHT,
@@ -60,14 +35,12 @@ turtleMove studentTurtleStep(bool bumped) {
     switch (state) {
         case STATE_INIT:
             state = STATE_CHECK_RIGHT;
-            orientation = static_cast<Direction>((static_cast<int>(orientation) + 1) % 4);
             move = TURN_RIGHT;
             break;
 
         case STATE_CHECK_RIGHT:
             if (bumped) {
                 state = STATE_TURN_LEFT;
-                orientation = static_cast<Direction>((static_cast<int>(orientation) + 3) % 4);
                 move = TURN_LEFT;
             } else {
                 state = STATE_MOVE_FORWARD;
@@ -77,14 +50,12 @@ turtleMove studentTurtleStep(bool bumped) {
 
         case STATE_TURN_LEFT:
             state = STATE_CHECK_FORWARD;
-            orientation = static_cast<Direction>((static_cast<int>(orientation) + 3) % 4);
             move = TURN_LEFT;
             break;
 
         case STATE_CHECK_FORWARD:
             if (bumped) {
                 state = STATE_TURN_LEFT;
-                orientation = static_cast<Direction>((static_cast<int>(orientation) + 3) % 4);
                 move = TURN_LEFT;
             } else {
                 state = STATE_MOVE_FORWARD;
@@ -116,4 +87,35 @@ turtleMove studentTurtleStep(bool bumped) {
     ROS_INFO("Next move: %d, New state: %d, New orientation: %d", 
              static_cast<int>(move), state, static_cast<int>(orientation));
     return move;
+}
+
+int32_t getVisitCount(int32_t x, int32_t y)
+{
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        return visitMap[y][x];
+    }
+    ROS_WARN("Attempted to get visit count for invalid position (%d, %d)", x, y);
+    return 0;
+}
+
+void setVisitCount(int32_t x, int32_t y, int32_t count)
+{
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        visitMap[y][x] = count;
+        ROS_INFO("Updated visit count at (%d, %d) to %d", x, y, count);
+    } else {
+        ROS_WARN("Attempted to set visit count for invalid position (%d, %d)", x, y);
+    }
+}
+
+int getCurrentVisitCount()
+{
+    return getVisitCount(currentX, currentY);
+}
+
+// This function is no longer needed, but kept for compatibility
+bool studentMoveTurtle(QPointF& pos_, int& nw_or)
+{
+    ROS_WARN("studentMoveTurtle called, but it's not being used in the current implementation");
+    return true;
 }
