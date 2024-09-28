@@ -88,10 +88,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return !atEnd;
 }
 
-/*
- * Takes a position, orientation, and a turtleMove and returns a new position
- * based on the move
- */
+
 QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
     if (nextMove == FORWARD) {
         switch (orientation) {
@@ -108,10 +105,6 @@ QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
     return pos_;
 }
 
-/*
- * Takes an orientation and a turtleMove and returns a new orientation
- * based on the move
- */
 int translateOrnt(int orientation, turtleMove nextMove) {
     if (nextMove == TURN_LEFT) {
         orientation = (orientation + 3) % 4; // Turn left
