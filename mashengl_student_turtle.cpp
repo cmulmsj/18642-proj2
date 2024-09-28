@@ -1,13 +1,3 @@
-/*
- * STUDENT NAME: Mashengjun Li
- * ANDREW ID: mashengl
- * LAST UPDATE: [Your Last Update Date]
- *
- * This file contains the turtle's movement logic using the right-hand rule.
- * The turtle operates based on its local perception without knowledge of
- * absolute positions or orientations.
- */
-
 #include "student.h"
 #include "mashengl_turtle_state.h"
 #include <ros/ros.h>
@@ -51,10 +41,11 @@ turtleMove studentTurtleStep(bool bumped) {
                     case LEFT:  currentX--; break;
                 }
                 setVisitCount(currentX, currentY, getVisitCount(currentX, currentY) + 1);
+                state = STATE_CHECK_RIGHT;
             } else {
+                state = STATE_TURN_LEFT;
                 move = TURN_LEFT;
             }
-            state = STATE_CHECK_RIGHT;
             break;
 
         case STATE_TURN_LEFT:
