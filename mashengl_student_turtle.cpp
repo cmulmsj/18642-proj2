@@ -25,10 +25,10 @@ bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or) {
 
     // Handle turtle movement or stopping based on bump sensor
     if (timeoutCounter == 0) {
-        bool bumped = bumped(pos_.x(), pos_.y(), currentX, currentY);
+        bool isBumped = bumped(pos_.x(), pos_.y(), currentX, currentY);  // Renamed variable
 
         // Get the next move based on bump sensor and internal turtle logic
-        turtleMove nextMove = studentTurtleStep(bumped);
+        turtleMove nextMove = studentTurtleStep(isBumped);
 
         if (nextMove == MOVE_FORWARD) {
             // Move in the direction the turtle is facing
@@ -55,9 +55,9 @@ bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or) {
     return !atend(currentX, currentY);
 }
 
-turtleMove studentTurtleStep(bool bumped) {
+turtleMove studentTurtleStep(bool isBumped) {  // Updated variable name
     // Basic logic to avoid obstacles (can be expanded)
-    if (bumped) {
+    if (isBumped) {
         return TURN_LEFT; // Turn left if bumped
     } else {
         return MOVE_FORWARD; // Move forward otherwise
@@ -73,4 +73,5 @@ void incrementVisitCount(int x, int y) {
 int getVisitCount(int x, int y) {
     return visitMap[x][y];
 }
+
 
