@@ -43,18 +43,16 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         firstCall = false;
     }
 
-    // Update orientation before checking for walls
-    translateOrnt(nw_or, TURN_RIGHT); // Simulate the turtle's initial turn
-    // Determine if the turtle is facing a wall after updating orientation
+    // Determine if the turtle is facing a wall
     bool bumpedStatus = isFacingWall(pos_, nw_or);
 
-    // Inform the turtle of the wall status and get the next move
+    // Get the next move from the turtle
     turtleMove nextMove = studentTurtleStep(bumpedStatus);
 
-    // Update orientation based on the turtle's move
+    // Update orientation
     translateOrnt(nw_or, nextMove);
 
-    // Update position if the turtle moves forward
+    // Update position
     translatePos(pos_, nw_or, nextMove);
 
     // Get the number of visits from the turtle code
