@@ -64,22 +64,18 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
 
 
 QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
-    switch (nextMove) {
-        case FORWARD:
-            switch (orientation) {
-                case 0: return QPointF(pos_.x() + 1, pos_.y()); // RIGHT
-                case 1: return QPointF(pos_.x(), pos_.y() + 1); // DOWN
-                case 2: return QPointF(pos_.x() - 1, pos_.y()); // LEFT
-                case 3: return QPointF(pos_.x(), pos_.y() - 1); // UP
-            }
-            break;
-        case TURN_LEFT:
-        case TURN_RIGHT:
-        case STOP:
-            return pos_; // No position change for turns or stop
+    if (nextMove == FORWARD) {
+        switch (orientation) {
+            case 0: return QPointF(pos_.x() + 1, pos_.y()); // RIGHT
+            case 1: return QPointF(pos_.x(), pos_.y() + 1); // DOWN
+            case 2: return QPointF(pos_.x() - 1, pos_.y()); // LEFT
+            case 3: return QPointF(pos_.x(), pos_.y() - 1); // UP
+        }
     }
-    return pos_; // Default case, should not happen
+    // For turns and stop, position doesn't change
+    return pos_;
 }
+
 
 int translateOrnt(int orientation, turtleMove nextMove) {
     switch (nextMove) {
@@ -93,4 +89,5 @@ int translateOrnt(int orientation, turtleMove nextMove) {
     }
     return orientation; // Default case, should not happen
 }
+
 
