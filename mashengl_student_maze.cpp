@@ -2,9 +2,9 @@
  * Originally by Philip Koopman (koopman@cmu.edu)
  * and Milda Zizyte (milda@cmu.edu)
  *
- * STUDENT NAME: Mashengjun Li
- * ANDREW ID: mashengl
- * LAST UPDATE: 09/28/2024
+ * STUDENT NAME:
+ * ANDREW ID:
+ * LAST UPDATE:
  *
  * This file keeps track of where the turtle is in the maze
  * and updates the location when the turtle is moved. It shall not
@@ -22,45 +22,35 @@
  */
 
 #include "student.h"
-#include <ros/ros.h>
 
+/*
+ * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
+ * Ground rule -- you are only allowed to call the three helper functions defined in student.h, and NO other turtle methods or maze methods (no peeking at the maze!)
+ * This file interfaces with functions in student_turtle.cpp
+ */
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
-    int32_t futureX = pos_.x(), futureY = pos_.y();
-    int32_t futureX2 = pos_.x(), futureY2 = pos_.y();
+  bool bumped = true; // Replace with your own procedure
+  turtleMove nextMove = studentTurtleStep(bumped); // define your own turtleMove enum or structure
+  pos_ = translatePos(pos_, nextMove);
+  nw_or = translateOrnt(nw_or, nextMove);
 
-    if (nw_or < 2) {  // LEFT or UP
-        if (nw_or == 0) futureY2 += 1;
-        else            futureX2 += 1;
-    } else {  // RIGHT or DOWN
-        futureX2 += 1; futureY2 += 1;
-        if (nw_or == 2) futureX += 1;
-        else            futureY += 1;
-    }
-
-    bool isBumped = bumped(futureX, futureY, futureX2, futureY2);
-    turtleMove nextMove = studentTurtleStep(isBumped);
-    
-    QPointF newPos = translatePos(pos_, nextMove);
-    int newOrientation = translateOrnt(nw_or, nextMove);
-    
-    if (!bumped(newPos.x(), newPos.y(), newPos.x(), newPos.y())) {
-        pos_ = newPos;
-        nw_or = newOrientation;
-        return true;
-    }
-    
-    return false;
+  // REPLACE THE FOLLOWING LINE IN PROJECT 5
+  return studentMoveTurtle(pos_, nw_or);
 }
 
+/*
+ * Takes a position and a turtleMove and returns a new position
+ * based on the move
+ */
 QPointF translatePos(QPointF pos_, turtleMove nextMove) {
-    // Since we only have MOVE, we'll use the current position
-    // The actual movement logic should be in studentMoveTurtle
-    return pos_;
+  return pos_;
 }
 
+/*
+ * Takes an orientation and a turtleMove and returns a new orienation
+ * based on the move
+ */
 int translateOrnt(int orientation, turtleMove nextMove) {
-    // Since we only have MOVE, we'll return the current orientation
-    // The actual orientation change logic should be in studentMoveTurtle
-    return orientation;
+  return orientation;
 }
