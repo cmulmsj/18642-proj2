@@ -16,7 +16,7 @@
 #include <ros/ros.h>
 
 // Constants
-const int32_t MAZE_SIZE = 50;  // Increased size to handle negative coordinates
+const int32_t MAZE_SIZE = 50;  // Adjusted size to accommodate the turtle's local map
 const int32_t START_POS = MAZE_SIZE / 2;
 
 // Enum for directions (matching maze orientations)
@@ -51,26 +51,45 @@ turtleMove studentTurtleStep(bool bumped) {
         firstCall = false;
     }
 
-    // Left-hand rule logic
+    static int turnCount = 0;  // Count how many times we've turned in place
+
+    ROS_INFO("studentTurtleStep called with bumped = %d", bumped);
+
     if (bumped) {
-        // If bumped, turn right
+        // Turn right
         orientation = static_cast<Direction>((orientation + 1) % 4);
+        turnCount++;
+        if (turnCount >= 4) {
+            // We've turned all the way around and can't move forward
+            // Implement logic to handle this, e.g., stop or backtrack
+            turnCount = 0;
+            ROS_WARN("Surrounded by walls, stopping.");
+            return STOP;  // Or another appropriate action
+        }
+        ROS_INFO("Bumped into wall, turning right. New orientation: %d", orientation);
         return TURN_RIGHT;
     } else {
+        // Reset turn count when we can move forward
+        turnCount = 0;
+
         // Move forward
-        // Update position
         switch (orientation) {
             case LEFT: currentX -= 1; break;
             case UP:   currentY -= 1; break;
             case RIGHT: currentX += 1; break;
             case DOWN: currentY += 1; break;
+            default:
+                ROS_ERROR("Invalid orientation: %d", orientation);
+                break;
         }
-        // Increment visit count
         int32_t visits = getVisitCount(currentX, currentY) + 1;
         setVisitCount(currentX, currentY, visits);
 
-        // Then turn left to keep the wall on the left
+        ROS_INFO("Moved forward to position (%d, %d). Visits: %d", currentX, currentY, visits);
+
+        // Then turn left to keep wall on the left
         orientation = static_cast<Direction>((orientation + 3) % 4);  // Equivalent to -1 mod 4
+        ROS_INFO("Turning left to keep wall on the left. New orientation: %d", orientation);
         return TURN_LEFT;
     }
 }
@@ -79,4 +98,5 @@ turtleMove studentTurtleStep(bool bumped) {
 int getCurrentVisitCount() {
     return getVisitCount(currentX, currentY);
 }
+
 
