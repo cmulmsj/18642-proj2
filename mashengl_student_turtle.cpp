@@ -22,7 +22,7 @@ void updatePosition() {
     ROS_INFO("Relative position updated to (%d, %d)", currentX, currentY);
 }
 
-turtleMove studentTurtleStep(bool bumped) {
+turtleMove studentTurtleStep(bool bumped, int& newOrientation) {
     ROS_INFO("studentTurtleStep called with bumped: %s", bumped ? "true" : "false");
 
     if (!bumped) {
@@ -36,6 +36,7 @@ turtleMove studentTurtleStep(bool bumped) {
     }
 
     updatePosition();
+    newOrientation = currentOrientation;
     return MOVE;
 }
 
