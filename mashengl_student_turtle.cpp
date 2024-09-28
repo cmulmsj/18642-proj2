@@ -9,114 +9,68 @@
  */
 
 #include "student.h"
-#include <stdint.h>
-#include <ros/ros.h>
 
-// Constants
-const int32_t MAZE_SIZE = 100; // Adjusted size to accommodate the turtle's local map
-const int32_t START_POS = MAZE_SIZE / 2;
+// Local variables to keep track of the turtle's state
+static int visitMap[100][100]; // Turtle's relative visit map (can adjust size)
+static int currentX = 50, currentY = 50; // Starting position in the relative grid
+static int timeoutCounter = 0;
+static const int TIMEOUT = 10;
 
-// Enum for directions (relative to turtle's starting orientation)
-enum Direction {
-    UP = 0,    // Facing up
-    RIGHT = 1, // Facing right
-    DOWN = 2,  // Facing down
-    LEFT = 3   // Facing left
-};
+bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or) {
+    static bool firstCall = true;
+    if (firstCall) {
+        incrementVisitCount(currentX, currentY);
+        firstCall = false;
+    }
 
-// Global variables
-static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
-static int32_t currentX = START_POS;
-static int32_t currentY = START_POS;
-static Direction orientation = LEFT; // Start facing left
+    // Handle turtle movement or stopping based on bump sensor
+    if (timeoutCounter == 0) {
+        bool bumped = bumped(pos_.x(), pos_.y(), currentX, currentY);
 
-// Function to get visit count
-int32_t getVisitCount(int32_t x, int32_t y) {
-    return visitMap[y][x];
-}
+        // Get the next move based on bump sensor and internal turtle logic
+        turtleMove nextMove = studentTurtleStep(bumped);
 
-// Function to set visit count
-void setVisitCount(int32_t x, int32_t y, int32_t count) {
-    visitMap[y][x] = count;
-}
-
-// Function to get the current number of visits for the display
-int getCurrentVisitCount() {
-    return getVisitCount(currentX, currentY);
-}
-
-// The turtle's movement logic implementing the right-hand rule
-turtleMove studentTurtleStep(bool bumped) {
-    static enum TurtleState {
-        STATE_START,
-        STATE_CHECK_RIGHT,
-        STATE_MOVE_FORWARD,
-        STATE_CHECK_FORWARD,
-        STATE_TURN_LEFT
-    } state = STATE_START;
-
-    static bool justTurned = false;
-
-    if (justTurned) {
-        // After a turn, we need to check for a wall ahead
-        if (bumped) {
-            // There's a wall ahead, need to turn left
-            state = STATE_TURN_LEFT;
-            justTurned = false;
-            return TURN_LEFT;
-        } else {
-            // No wall ahead, move forward
-            state = STATE_CHECK_RIGHT;
-            justTurned = false;
-            return MOVE_FORWARD;
+        if (nextMove == MOVE_FORWARD) {
+            // Move in the direction the turtle is facing
+            switch (nw_or) {
+                case 0: currentY--; break; // North
+                case 90: currentX++; break; // East
+                case 180: currentY++; break; // South
+                case 270: currentX--; break; // West
+            }
+            incrementVisitCount(currentX, currentY);
+        } else if (nextMove == TURN_LEFT || nextMove == TURN_RIGHT) {
+            // Only adjust orientation for turns
+            nw_or = translateOrnt(nw_or, nextMove);
         }
+
+        // Reset the timeout counter for the next tick
+        timeoutCounter = TIMEOUT;
+    } else {
+        // Decrement timeout counter
+        timeoutCounter--;
     }
 
-    switch (state) {
-        case STATE_START:
-        case STATE_CHECK_RIGHT:
-            // Try to turn right
-            orientation = static_cast<Direction>((orientation + 1) % 4); // Turn right
-            state = STATE_MOVE_FORWARD;
-            justTurned = true;
-            return TURN_RIGHT;
+    // Return true if the turtle should continue, false if it has reached the end
+    return !atend(currentX, currentY);
+}
 
-        case STATE_MOVE_FORWARD:
-            // Move forward in the current orientation
-            switch (orientation) {
-                case UP:    currentY -= 1; break;
-                case RIGHT: currentX += 1; break;
-                case DOWN:  currentY += 1; break;
-                case LEFT:  currentX -= 1; break;
-            }
-            // Increment visit count
-            setVisitCount(currentX, currentY, getVisitCount(currentX, currentY) + 1);
-            // After moving forward, check right again
-            state = STATE_CHECK_RIGHT;
-            return MOVE_FORWARD;
-
-        case STATE_TURN_LEFT:
-            // Turn left to find a new path
-            orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
-            state = STATE_CHECK_FORWARD;
-            justTurned = true;
-            return TURN_LEFT;
-
-        case STATE_CHECK_FORWARD:
-            // After turning left, check if we can move forward
-            if (bumped) {
-                // Wall ahead, turn left again
-                state = STATE_TURN_LEFT;
-                return TURN_LEFT;
-            } else {
-                // No wall ahead, move forward
-                state = STATE_MOVE_FORWARD;
-                return MOVE_FORWARD;
-            }
-
-        default:
-            ROS_ERROR("Invalid state in studentTurtleStep");
-            state = STATE_START;
-            return STOP;
+turtleMove studentTurtleStep(bool bumped) {
+    // Basic logic to avoid obstacles (can be expanded)
+    if (bumped) {
+        return TURN_LEFT; // Turn left if bumped
+    } else {
+        return MOVE_FORWARD; // Move forward otherwise
     }
 }
+
+// Increments the visit count for the turtle's current position
+void incrementVisitCount(int x, int y) {
+    visitMap[x][y]++;
+}
+
+// Returns the visit count for a given position
+int getVisitCount(int x, int y) {
+    return visitMap[x][y];
+}
+
