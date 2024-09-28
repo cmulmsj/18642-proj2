@@ -21,10 +21,10 @@ QPointF translatePos(QPointF currentPos, int currentOrientation, turtleMove move
 
 // Function to translate orientation based on the move
 int translateOrnt(int currentOrientation, turtleMove move) {
-    switch (move) {
-        case MOVE: return (currentOrientation + 1) % 4; // Assuming MOVE also means turn right
-        default:   return currentOrientation;
+    if (move == MOVE) {
+        return (currentOrientation + 1) % 4; // Assuming MOVE also means turn right
     }
+    return currentOrientation;
 }
 
 // Function to check if the turtle would bump into a wall
@@ -45,21 +45,28 @@ bool checkBump(QPointF pos, int orientation) {
 }
 
 bool moveTurtle(QPointF& pos_, int& nw_or) {
-    bool isBumped = checkBump(pos_, nw_or);
-    turtleMove nextMove = studentTurtleStep(isBumped);
-    
-    QPointF newPos = translatePos(pos_, nw_or, nextMove);
-    int newOrientation = translateOrnt(nw_or, nextMove);
-    
-    if (!checkBump(newPos, newOrientation)) {
-        pos_ = newPos;
-        nw_or = newOrientation;
+    static int timeoutCounter = 0;
+    const int TIMEOUT = 40;
+
+    if (timeoutCounter == 0) {
+        bool isBumped = checkBump(pos_, nw_or);
+        turtleMove nextMove = studentTurtleStep(isBumped);
         
-        int visits = getVisitCount(pos_.x(), pos_.y());
-        displayVisits(visits);
+        QPointF newPos = translatePos(pos_, nw_or, nextMove);
+        int newOrientation = translateOrnt(nw_or, nextMove);
         
-        return !atend(pos_.x(), pos_.y());
+        if (!checkBump(newPos, newOrientation)) {
+            pos_ = newPos;
+            nw_or = newOrientation;
+            
+            int visits = getVisitCount(pos_.x(), pos_.y());
+            displayVisits(visits);
+        }
+        
+        timeoutCounter = TIMEOUT;
+    } else {
+        timeoutCounter--;
     }
     
-    return true;
+    return !atend(pos_.x(), pos_.y());
 }
