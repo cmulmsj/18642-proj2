@@ -1,109 +1,56 @@
+/* 
+ * Originally by Philip Koopman (koopman@cmu.edu)
+ * and Milda Zizyte (milda@cmu.edu)
+ *
+ * STUDENT NAME:
+ * ANDREW ID:
+ * LAST UPDATE:
+ *
+ * This file keeps track of where the turtle is in the maze
+ * and updates the location when the turtle is moved. It shall not
+ * contain the maze solving logic/algorithm.
+ *
+ * This file is used along with student_turtle.cpp. student_turtle.cpp shall
+ * contain the maze solving logic/algorithm and shall not make use of the
+ * absolute coordinates or orientation of the turtle.
+ *
+ * This file shall call studentTurtleStep(..) in student_turtle.cpp to determine
+ * the next move the turtle will make, and shall use translatePos(..) and
+ * translateOrnt(..) to translate this move into absolute coordinates
+ * to display the turtle.
+ *
+ */
+
 #include "student.h"
-#include "mashengl_turtle_state.h"
-#include <ros/ros.h>
-#include <QPointF>
 
-bool isFacingWall(QPointF pos_, int nw_or) {
-    int x = static_cast<int>(pos_.x());
-    int y = static_cast<int>(pos_.y());
-    int x1 = x, y1 = y;
+/*
+ * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
+ * Ground rule -- you are only allowed to call the three helper functions defined in student.h, and NO other turtle methods or maze methods (no peeking at the maze!)
+ * This file interfaces with functions in student_turtle.cpp
+ */
+bool moveTurtle(QPointF& pos_, int& nw_or)
+{
+  bool bumped = true; // Replace with your own procedure
+  turtleMove nextMove = studentTurtleStep(bumped); // define your own turtleMove enum or structure
+  pos_ = translatePos(pos_, nextMove);
+  nw_or = translateOrnt(nw_or, nextMove);
 
-    switch (nw_or) {
-        case 0: y1 -= 1; break; // Up
-        case 1: x1 += 1; break; // Right
-        case 2: y1 += 1; break; // Down
-        case 3: x1 -= 1; break; // Left
-    }
-
-    return bumped(x, y, x1, y1);
+  // REPLACE THE FOLLOWING LINE IN PROJECT 5
+  return studentMoveTurtle(pos_, nw_or);
 }
 
-bool moveTurtle(QPointF& pos_, int& nw_or) {
-    static bool firstCall = true;
-    if (firstCall) {
-        nw_or = 3; // Facing left
-        orientation = LEFT;
-        firstCall = false;
-        ROS_INFO("Initial orientation: %d", nw_or);
-    }
-
-    // Check if the turtle is facing a wall
-    bool bumpedStatus = isFacingWall(pos_, nw_or);
-    ROS_INFO("Current position: (%.2f, %.2f), Orientation: %d, Facing wall: %s", 
-             pos_.x(), pos_.y(), nw_or, bumpedStatus ? "true" : "false");
-
-    // Get the next move from the turtle
-    turtleMove nextMove = studentTurtleStep(bumpedStatus);
-    ROS_INFO("Next move: %d", static_cast<int>(nextMove));
-
-    // Update orientation
-    int oldOrnt = nw_or;
-    translateOrnt(nw_or, nextMove);
-    ROS_INFO("Orientation changed from %d to %d", oldOrnt, nw_or);
-
-    // Update position if the move is MOVE_FORWARD
-    if (nextMove == MOVE_FORWARD) {
-        QPointF oldPos = pos_;
-        translatePos(pos_, nw_or, nextMove);
-        if (oldPos != pos_) {
-            ROS_INFO("Position changed from (%.2f, %.2f) to (%.2f, %.2f)", 
-                     oldPos.x(), oldPos.y(), pos_.x(), pos_.y());
-        } else {
-            ROS_WARN("Attempted to move but position did not change.");
-        }
-    } else {
-        ROS_INFO("Turn performed, position unchanged.");
-    }
-
-    // Get the number of visits from the turtle code
-    int visits = getCurrentVisitCount();
-    ROS_INFO("Current visit count: %d", visits);
-
-    // Update the display
-    displayVisits(visits);
-
-    // Check if at end
-    bool atEnd = atend(static_cast<int>(pos_.x()), static_cast<int>(pos_.y()));
-    if (atEnd) {
-        ROS_INFO("Turtle has reached the end of the maze.");
-        return false; // Stop the turtle
-    }
-
-    // Add a delay to slow down the turtle's movement
-    ros::Duration(0.5).sleep();
-
-    return true; // Continue moving the turtle
+/*
+ * Takes a position and a turtleMove and returns a new position
+ * based on the move
+ */
+QPointF translatePos(QPointF pos_, turtleMove nextMove) {
+  return pos_;
 }
 
-void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
-    if (nextMove == MOVE_FORWARD) {
-        QPointF newPos = pos_;
-        switch (nw_or) {
-            case 0: newPos.setY(newPos.y() - 1); break; // Up
-            case 1: newPos.setX(newPos.x() + 1); break; // Right
-            case 2: newPos.setY(newPos.y() + 1); break; // Down
-            case 3: newPos.setX(newPos.x() - 1); break; // Left
-        }
-        
-        // Check if the new position is valid (not hitting a wall)
-        if (!bumped(pos_.x(), pos_.y(), newPos.x(), newPos.y())) {
-            pos_ = newPos;
-            ROS_INFO("Position updated to (%.2f, %.2f)", pos_.x(), pos_.y());
-        } else {
-            ROS_WARN("Move blocked by wall. Position remains (%.2f, %.2f)", pos_.x(), pos_.y());
-        }
-    }
-}
-
-void translateOrnt(int& nw_or, turtleMove nextMove) {
-    if (nextMove == TURN_LEFT) {
-        nw_or = (nw_or + 3) % 4; // Equivalent to -1 mod 4
-    } else if (nextMove == TURN_RIGHT) {
-        nw_or = (nw_or + 1) % 4;
-    }
-    // No orientation change for MOVE_FORWARD or STOP
-
-    // Update the turtle's internal orientation
-    orientation = static_cast<Direction>(nw_or);
-    ROS_INFO("New orientation: %d", nw_or);
+/*
+ * Takes an orientation and a turtleMove and returns a new orienation
+ * based on the move
+ */
+int translateOrnt(int orientation, turtleMove nextMove) {
+  return orientation;
 }
