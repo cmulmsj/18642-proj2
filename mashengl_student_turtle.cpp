@@ -11,6 +11,8 @@
  *
  */
 
+// mashengl_student_turtle.cpp
+
 #include "student.h"
 #include <stdint.h>
 #include <ros/ros.h>
@@ -24,12 +26,14 @@ static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0}; // Initialize visit map
 static int32_t currentX = START_POS; // Turtle's current X position in local map
 static int32_t currentY = START_POS; // Turtle's current Y position in local map
 
-// Turtle's orientation
+// Turtle's orientation (relative)
 enum Direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
-static Direction orientation = LEFT;
+static Direction orientation = UP; // Assuming the turtle starts facing UP
 
-// Possible moves the turtle can make
-enum turtleMove { FORWARD, TURN_LEFT, TURN_RIGHT, STOP };
+// Function prototypes
+int32_t getVisitCount(int32_t x, int32_t y);
+void setVisitCount(int32_t x, int32_t y, int32_t count);
+
 /**
  * Retrieves the visit count for a specific cell in the local map.
  */
@@ -50,24 +54,29 @@ void setVisitCount(int32_t x, int32_t y, int32_t count) {
  */
 turtleMove studentTurtleStep(bool bumped) {
     static bool firstCall = true;
+    static int state = 0; // 0: Try to turn right, 1: Move forward, 2: Turn left
+    static int turnCount = 0; // To prevent infinite turning
+
     if (firstCall) {
         // Initialize the visit count at the starting position
         setVisitCount(currentX, currentY, 1);
         firstCall = false;
     }
 
-    // Implement the right-hand wall-following logic
-    // The turtle tries to keep a wall on its right
-
-    // Variables to hold the next move and orientation
-    turtleMove nextMove;
-
     if (bumped) {
-        // If there's a wall ahead, turn left
+        // Can't move forward, need to turn left
         orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
-        nextMove = TURN_LEFT;
+        turnCount++;
+        if (turnCount > 4) {
+            // We've turned all directions and are stuck
+            return STOP;
+        }
+        return TURN_LEFT;
     } else {
-        // If no wall ahead, try to turn right to follow the wall
+        // Reset turn count since we're able to move
+        turnCount = 0;
+
+        // Move forward
         // Update the turtle's position based on its orientation
         switch (orientation) {
             case UP:    currentY--; break;
@@ -76,12 +85,10 @@ turtleMove studentTurtleStep(bool bumped) {
             case LEFT:  currentX--; break;
         }
 
-        // Update the visit count for the new cell
+        // Update visit count
         int32_t visits = getVisitCount(currentX, currentY) + 1;
         setVisitCount(currentX, currentY, visits);
 
-        nextMove = FORWARD;
+        return FORWARD;
     }
-
-    return nextMove;
 }
