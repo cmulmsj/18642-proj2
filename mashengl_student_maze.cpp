@@ -2,13 +2,13 @@
 #include <ros/ros.h>
 
 // Forward declarations
-turtleMove studentTurtleStep(bool bumped);
+turtleMove studentTurtleStep(bool bumped, int& newOrientation);
 int getVisitCount(int x, int y);
 
-QPointF translatePos(QPointF currentPos, int currentOrientation, turtleMove move) {
+QPointF translatePos(QPointF currentPos, int orientation, turtleMove move) {
     QPointF newPos = currentPos;
     if (move == MOVE) {
-        switch (currentOrientation) {
+        switch (orientation) {
             case 0: newPos.setX(newPos.x() - 1); break; // Left
             case 1: newPos.setY(newPos.y() - 1); break; // Up
             case 2: newPos.setX(newPos.x() + 1); break; // Right
@@ -16,17 +16,8 @@ QPointF translatePos(QPointF currentPos, int currentOrientation, turtleMove move
         }
     }
     ROS_INFO("translatePos: from (%f, %f) to (%f, %f), orientation: %d, move: %d",
-             currentPos.x(), currentPos.y(), newPos.x(), newPos.y(), currentOrientation, move);
+             currentPos.x(), currentPos.y(), newPos.x(), newPos.y(), orientation, move);
     return newPos;
-}
-
-int translateOrnt(int currentOrientation, turtleMove move) {
-    int newOrientation = currentOrientation;
-    if (move == MOVE) {
-        newOrientation = (currentOrientation + 1) % 4; // Assuming MOVE also means turn right
-    }
-    ROS_INFO("translateOrnt: from %d to %d, move: %d", currentOrientation, newOrientation, move);
-    return newOrientation;
 }
 
 bool checkBump(QPointF pos, int orientation) {
@@ -51,13 +42,14 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
 
     if (timeoutCounter == 0) {
         bool isBumped = checkBump(pos_, nw_or);
-        turtleMove nextMove = studentTurtleStep(isBumped);
+        int newOrientation = nw_or;
+        turtleMove nextMove = studentTurtleStep(isBumped, newOrientation);
         
         QPointF oldPos = pos_;
         int oldOrientation = nw_or;
         
-        pos_ = translatePos(pos_, nw_or, nextMove);
-        nw_or = translateOrnt(nw_or, nextMove);
+        pos_ = translatePos(pos_, newOrientation, nextMove);
+        nw_or = newOrientation;
         
         if (!checkBump(pos_, nw_or)) {
             int visits = getVisitCount(pos_.x(), pos_.y());
