@@ -3,11 +3,22 @@
 #include <ros/ros.h>
 #include <QPointF>
 
-// Function prototypes
-bool isFacingWall(QPointF pos_, int nw_or);
+bool isFacingWall(QPointF pos_, int nw_or) {
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    int x1 = x, y1 = y;
 
-bool moveTurtle(QPointF& pos_, int& nw_or)
-{
+    switch (nw_or) {
+        case 0: y1 -= 1; break; // Up
+        case 1: x1 += 1; break; // Right
+        case 2: y1 += 1; break; // Down
+        case 3: x1 -= 1; break; // Left
+    }
+
+    return bumped(x, y, x1, y1);
+}
+
+bool moveTurtle(QPointF& pos_, int& nw_or) {
     static bool firstCall = true;
     if (firstCall) {
         nw_or = 3; // Facing left
@@ -57,8 +68,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return true; // Continue moving the turtle
 }
 
-void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove)
-{
+void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
     if (nextMove == MOVE_FORWARD) {
         QPointF newPos = pos_;
         switch (nw_or) {
@@ -66,9 +76,6 @@ void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove)
             case 1: newPos.setX(newPos.x() + 1); break; // Right
             case 2: newPos.setY(newPos.y() + 1); break; // Down
             case 3: newPos.setX(newPos.x() - 1); break; // Left
-            default:
-                ROS_ERROR("Invalid orientation in translatePos");
-                return;
         }
         
         // Check if the new position is valid (not hitting a wall)
@@ -79,11 +86,9 @@ void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove)
             ROS_WARN("Move blocked by wall. Position remains (%.2f, %.2f)", pos_.x(), pos_.y());
         }
     }
-    // No position change for turns
 }
 
-void translateOrnt(int& nw_or, turtleMove nextMove)
-{
+void translateOrnt(int& nw_or, turtleMove nextMove) {
     if (nextMove == TURN_LEFT) {
         nw_or = (nw_or + 3) % 4; // Equivalent to -1 mod 4
     } else if (nextMove == TURN_RIGHT) {
@@ -94,23 +99,4 @@ void translateOrnt(int& nw_or, turtleMove nextMove)
     // Update the turtle's internal orientation
     orientation = static_cast<Direction>(nw_or);
     ROS_INFO("New orientation: %d", nw_or);
-}
-
-bool isFacingWall(QPointF pos_, int nw_or)
-{
-    int x = static_cast<int>(pos_.x());
-    int y = static_cast<int>(pos_.y());
-    int x1 = x, y1 = y;
-
-    switch (nw_or) {
-        case 0: y1 -= 1; break; // Up
-        case 1: x1 += 1; break; // Right
-        case 2: y1 += 1; break; // Down
-        case 3: x1 -= 1; break; // Left
-        default:
-            ROS_ERROR("Invalid orientation in isFacingWall");
-            return false;
-    }
-
-    return bumped(x, y, x1, y1);
 }
