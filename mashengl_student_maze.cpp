@@ -1,6 +1,10 @@
 #include "student.h"
 #include <ros/ros.h>
 
+// Forward declarations
+turtleMove studentTurtleStep(bool bumped);
+int getVisitCount(int x, int y);
+
 // Function to translate relative position to absolute position
 QPointF translatePos(QPointF currentPos, int currentOrientation, turtleMove move) {
     QPointF newPos = currentPos;
@@ -59,7 +63,3 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
     
     return true;
 }
-
-// Declare functions that will be implemented in mashengl_student_turtle.cpp
-turtleMove studentTurtleStep(bool bumped);
-int getVisitCount(int x, int y);
