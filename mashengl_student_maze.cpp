@@ -23,20 +23,12 @@
 
 #include "student.h"
 
-// Define the turtleMove enum if not already defined in student.h
-enum class turtleMove {
-    FORWARD,
-    TURN_LEFT,
-    TURN_RIGHT,
-    NO_MOVE
-};
-
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
-    bool bumped = bumped(pos_.x(), pos_.y(), pos_.x(), pos_.y());
-    turtleMove nextMove = studentTurtleStep(bumped);
+    bool is_bumped = bumped(pos_.x(), pos_.y(), pos_.x(), pos_.y());
+    turtleMove nextMove = studentTurtleStep(is_bumped);
     
-    QPointF newPos = translatePos(pos_, nextMove, nw_or);
+    QPointF newPos = translatePos(pos_, nextMove);
     int newOrnt = translateOrnt(nw_or, nextMove);
     
     // Check if the new position is valid (not hitting a wall)
@@ -44,7 +36,9 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         pos_ = newPos;
         nw_or = newOrnt;
         
-        // Call displayVisits with the number of visits from studentTurtleStep
+        // We need to implement a way to get the number of visits
+        // This could be done by keeping a static 2D array in this file
+        // or by implementing a function in mashengl_student_turtle.cpp
         int visits = getVisitsFromTurtle(pos_.x(), pos_.y());
         displayVisits(visits);
         
@@ -54,33 +48,29 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return false;
 }
 
-QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
-    switch (nextMove) {
-        case turtleMove::FORWARD:
-            switch (orientation) {
-                case 0: return QPointF(pos_.x() - 1, pos_.y()); // Left
-                case 1: return QPointF(pos_.x(), pos_.y() - 1); // Up
-                case 2: return QPointF(pos_.x() + 1, pos_.y()); // Right
-                case 3: return QPointF(pos_.x(), pos_.y() + 1); // Down
-            }
-        default:
-            return pos_; // No change for turns or no move
+QPointF translatePos(QPointF pos_, turtleMove nextMove)
+{
+    // We need to get the current orientation
+    // For now, let's assume it's stored in a static variable
+    static int currentOrientation = 1; // Start facing up
+
+    if (nextMove == MOVE) {
+        switch (currentOrientation) {
+            case 0: return QPointF(pos_.x() - 1, pos_.y()); // Left
+            case 1: return QPointF(pos_.x(), pos_.y() - 1); // Up
+            case 2: return QPointF(pos_.x() + 1, pos_.y()); // Right
+            case 3: return QPointF(pos_.x(), pos_.y() + 1); // Down
+        }
     }
+    return pos_; // No change for other moves (which don't exist in current enum)
 }
 
-int translateOrnt(int orientation, turtleMove nextMove) {
-    switch (nextMove) {
-        case turtleMove::TURN_LEFT:
-            return (orientation - 1 + 4) % 4;
-        case turtleMove::TURN_RIGHT:
-            return (orientation + 1) % 4;
-        default:
-            return orientation; // No change for forward or no move
-    }
+int translateOrnt(int orientation, turtleMove nextMove)
+{
+    // In the current implementation, MOVE doesn't change orientation
+    // We might need to update this if we add more move types
+    return orientation;
 }
 
-// This function should be implemented in ANDREWID_student_turtle.cpp
-extern turtleMove studentTurtleStep(bool bumped);
-
-// This function should be implemented in ANDREWID_student_turtle.cpp
+// This function should be implemented in mashengl_student_turtle.cpp
 extern int getVisitsFromTurtle(int x, int y);
