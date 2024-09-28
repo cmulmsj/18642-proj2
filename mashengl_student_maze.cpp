@@ -5,7 +5,6 @@
 turtleMove studentTurtleStep(bool bumped);
 int getVisitCount(int x, int y);
 
-// Function to translate relative position to absolute position
 QPointF translatePos(QPointF currentPos, int currentOrientation, turtleMove move) {
     QPointF newPos = currentPos;
     if (move == MOVE) {
@@ -16,15 +15,18 @@ QPointF translatePos(QPointF currentPos, int currentOrientation, turtleMove move
             case 3: newPos.setY(newPos.y() + 1); break; // Down
         }
     }
+    ROS_INFO("translatePos: from (%f, %f) to (%f, %f), orientation: %d, move: %d",
+             currentPos.x(), currentPos.y(), newPos.x(), newPos.y(), currentOrientation, move);
     return newPos;
 }
 
-// Function to translate orientation based on the move
 int translateOrnt(int currentOrientation, turtleMove move) {
+    int newOrientation = currentOrientation;
     if (move == MOVE) {
-        return (currentOrientation + 1) % 4; // Assuming MOVE also means turn right
+        newOrientation = (currentOrientation + 1) % 4; // Assuming MOVE also means turn right
     }
-    return currentOrientation;
+    ROS_INFO("translateOrnt: from %d to %d, move: %d", currentOrientation, newOrientation, move);
+    return newOrientation;
 }
 
 // Function to check if the turtle would bump into a wall
@@ -59,6 +61,9 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
         bool isBumped = checkBump(pos_, nw_or);
         turtleMove nextMove = studentTurtleStep(isBumped);
         
+        QPointF oldPos = pos_;
+        int oldOrientation = nw_or;
+        
         QPointF newPos = translatePos(pos_, nw_or, nextMove);
         int newOrientation = translateOrnt(nw_or, nextMove);
         
@@ -69,7 +74,11 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
             int visits = getVisitCount(pos_.x(), pos_.y());
             displayVisits(visits);
 
-            ROS_INFO("Turtle moved to (%f, %f), orientation: %d", pos_.x(), pos_.y(), nw_or);
+            ROS_INFO("Turtle moved from (%f, %f) to (%f, %f), orientation: %d -> %d",
+                     oldPos.x(), oldPos.y(), pos_.x(), pos_.y(), oldOrientation, nw_or);
+            
+            // Force immediate display update
+            ros::spinOnce();
         } else {
             ROS_INFO("Turtle bumped at (%f, %f), orientation: %d", pos_.x(), pos_.y(), nw_or);
         }
