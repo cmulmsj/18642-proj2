@@ -20,17 +20,17 @@ bool isFacingWall(QPointF pos_, int nw_or) {
 
     // Calculate the position in front of the turtle based on its orientation
     switch (nw_or) {
-        case 0: // North
+        case 0: // Left
+            x1 -= 1;
+            break;
+        case 1: // Up
             y1 -= 1;
             break;
-        case 1: // East
+        case 2: // Right
             x1 += 1;
             break;
-        case 2: // South
+        case 3: // Down
             y1 += 1;
-            break;
-        case 3: // West
-            x1 -= 1;
             break;
         default:
             ROS_ERROR("Invalid orientation in isFacingWall");
@@ -76,10 +76,10 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
 void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
     if (nextMove == MOVE_FORWARD) {
         switch (nw_or) {
-            case 0: pos_.setY(pos_.y() - 1); break; // North
-            case 1: pos_.setX(pos_.x() + 1); break; // East
-            case 2: pos_.setY(pos_.y() + 1); break; // South
-            case 3: pos_.setX(pos_.x() - 1); break; // West
+            case 0: pos_.setX(pos_.x() - 1); break; // Left
+            case 1: pos_.setY(pos_.y() - 1); break; // Up
+            case 2: pos_.setX(pos_.x() + 1); break; // Right
+            case 3: pos_.setY(pos_.y() + 1); break; // Down
             default:
                 ROS_ERROR("Invalid orientation in translatePos");
                 break;
