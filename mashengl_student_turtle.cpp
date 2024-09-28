@@ -1,65 +1,73 @@
 #include "student.h"
+#include <stdint.h>
 #include <ros/ros.h>
 
-// Forward declarations
-turtleMove studentTurtleStep(bool bumped);
-int getVisitCount(int x, int y);
+// Constants
+const int32_t MAZE_SIZE = 23;
+const int32_t START_POS = MAZE_SIZE / 2;
 
-// Function to translate relative position to absolute position
-QPointF translatePos(QPointF currentPos, int currentOrientation, turtleMove move) {
-    QPointF newPos = currentPos;
-    if (move == MOVE) {
-        switch (currentOrientation) {
-            case 0: newPos.setX(newPos.x() - 1); break; // Left
-            case 1: newPos.setY(newPos.y() - 1); break; // Up
-            case 2: newPos.setX(newPos.x() + 1); break; // Right
-            case 3: newPos.setY(newPos.y() + 1); break; // Down
-        }
+// Enum for directions (kept for compatibility)
+enum Direction {
+    LEFT = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3
+};
+
+// States
+const int32_t STATE_MOVING = 2;
+const int32_t STATE_TURNED = 1;
+const int32_t STATE_BUMPED = 0;
+
+// Global variables
+static int32_t currentState = STATE_MOVING;
+static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
+static int32_t currentX = 0;
+static int32_t currentY = 0;
+static int32_t currentOrientation = LEFT;
+
+// Function to update the turtle's orientation
+void updateOrientation(bool isBumped) {
+    if (currentState == STATE_MOVING) {
+        currentOrientation = (currentOrientation + 1) % 4;
+        currentState = STATE_TURNED;
     }
-    return newPos;
+    else if (isBumped) {
+        currentOrientation = (currentOrientation + 2) % 4;
+        currentState = STATE_BUMPED;
+    }
+    else {
+        currentState = STATE_MOVING;
+    }
 }
 
-// Function to translate orientation based on the move
-int translateOrnt(int currentOrientation, turtleMove move) {
-    switch (move) {
-        case MOVE: return (currentOrientation + 1) % 4; // Assuming MOVE also means turn right
-        default:   return currentOrientation;
+// Function to update the turtle's position
+void updatePosition() {
+    switch (currentOrientation) {
+        case LEFT:  currentX--; break;
+        case UP:    currentY--; break;
+        case RIGHT: currentX++; break;
+        case DOWN:  currentY++; break;
     }
 }
 
-// Function to check if the turtle would bump into a wall
-bool checkBump(QPointF pos, int orientation) {
-    int futureX = pos.x(), futureY = pos.y();
-    int futureX2 = pos.x(), futureY2 = pos.y();
-
-    if (orientation < 2) {  
-        if (orientation == 0) futureY2 += 1;
-        else                  futureX2 += 1;
-    } else {  
-        futureX2 += 1; futureY2 += 1;
-        if (orientation == 2) futureX += 1;
-        else                  futureY += 1;
+// Main function to determine the turtle's next move
+turtleMove studentTurtleStep(bool bumped) {
+    updateOrientation(bumped);
+    
+    if (currentState == STATE_MOVING) {
+        updatePosition();
     }
-
-    return bumped(futureX, futureY, futureX2, futureY2);
+    
+    return MOVE; // Always return MOVE as it's the only option in the enum
 }
 
-bool moveTurtle(QPointF& pos_, int& nw_or) {
-    bool isBumped = checkBump(pos_, nw_or);
-    turtleMove nextMove = studentTurtleStep(isBumped);
-    
-    QPointF newPos = translatePos(pos_, nw_or, nextMove);
-    int newOrientation = translateOrnt(nw_or, nextMove);
-    
-    if (!checkBump(newPos, newOrientation)) {
-        pos_ = newPos;
-        nw_or = newOrientation;
-        
-        int visits = getVisitCount(pos_.x(), pos_.y());
-        displayVisits(visits);
-        
-        return !atend(pos_.x(), pos_.y());
+// Function to get the visit count for a given position
+int getVisitCount(int x, int y) {
+    int relX = x - START_POS + currentX;
+    int relY = y - START_POS + currentY;
+    if (relX >= 0 && relX < MAZE_SIZE && relY >= 0 && relY < MAZE_SIZE) {
+        return ++visitMap[relY][relX];
     }
-    
-    return true;
+    return 0;
 }
