@@ -17,7 +17,8 @@
 
 // Constants
 const int32_t MAZE_SIZE = 50;  // Adjusted size to accommodate the turtle's local map
-const int32_t START_POS = MAZE_SIZE / 2;
+const int32_t START_POS_X = 0;  // Start at internal position (0, 0)
+const int32_t START_POS_Y = 0;
 
 // Enum for directions (matching maze orientations)
 enum Direction {
@@ -29,18 +30,18 @@ enum Direction {
 
 // Global variables
 static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
-static int32_t currentX = START_POS;
-static int32_t currentY = START_POS;
+static int32_t currentX = START_POS_X;
+static int32_t currentY = START_POS_Y;
 static Direction orientation = UP;  // Start facing UP
 
 // Function to get visit count
 int32_t getVisitCount(int32_t x, int32_t y) {
-    return visitMap[y][x];
+    return visitMap[y + MAZE_SIZE / 2][x + MAZE_SIZE / 2];
 }
 
 // Function to set visit count
 void setVisitCount(int32_t x, int32_t y, int32_t count) {
-    visitMap[y][x] = count;
+    visitMap[y + MAZE_SIZE / 2][x + MAZE_SIZE / 2] = count;
 }
 
 // The turtle's movement logic
@@ -104,4 +105,3 @@ turtleMove studentTurtleStep(bool bumped) {
 int getCurrentVisitCount() {
     return getVisitCount(currentX, currentY);
 }
-
