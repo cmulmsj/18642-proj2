@@ -95,6 +95,7 @@ turtleMove studentTurtleStep(bool bumped) {
                 break;
         }
     }
+}
 
     // Update local position based on move (only if actually moving)
     if (nextMove == FORWARD && !bumped) {
