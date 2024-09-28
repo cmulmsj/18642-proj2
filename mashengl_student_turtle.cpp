@@ -14,14 +14,6 @@ enum Direction {
     DOWN = 3
 };
 
-// Enum for turtle moves
-enum turtleMove {
-    MOVE_FORWARD,
-    TURN_LEFT,
-    TURN_RIGHT,
-    NO_MOVE
-};
-
 // States
 const int32_t STATE_MOVING = 2;
 const int32_t STATE_TURNED = 1;
@@ -65,18 +57,13 @@ turtleMove studentTurtleStep(bool bumped) {
     
     if (currentState == STATE_MOVING) {
         updatePosition();
-        return MOVE_FORWARD;
     }
-    else if (currentState == STATE_TURNED) {
-        return TURN_RIGHT;
-    }
-    else { // STATE_BUMPED
-        return TURN_LEFT;
-    }
+    
+    return MOVE; // Always return MOVE as it's the only option in the enum
 }
 
-// Function to update and return the visit count for a given position
-int updateVisitCount(int x, int y) {
+// Function to get the visit count for a given position
+int getVisitCount(int x, int y) {
     int relX = x - START_POS + currentX;
     int relY = y - START_POS + currentY;
     if (relX >= 0 && relX < MAZE_SIZE && relY >= 0 && relY < MAZE_SIZE) {
