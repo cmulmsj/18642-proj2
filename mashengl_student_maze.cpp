@@ -1,18 +1,10 @@
 #include "student.h"
 #include <ros/ros.h>
 
-// Enum for turtle moves
-enum turtleMove {
-    MOVE_FORWARD,
-    TURN_LEFT,
-    TURN_RIGHT,
-    NO_MOVE
-};
-
 // Function to translate relative position to absolute position
 QPointF translatePos(QPointF currentPos, int currentOrientation, turtleMove move) {
     QPointF newPos = currentPos;
-    if (move == MOVE_FORWARD) {
+    if (move == MOVE) {
         switch (currentOrientation) {
             case 0: newPos.setX(newPos.x() - 1); break; // Left
             case 1: newPos.setY(newPos.y() - 1); break; // Up
@@ -26,9 +18,8 @@ QPointF translatePos(QPointF currentPos, int currentOrientation, turtleMove move
 // Function to translate orientation based on the move
 int translateOrnt(int currentOrientation, turtleMove move) {
     switch (move) {
-        case TURN_LEFT:  return (currentOrientation - 1 + 4) % 4;
-        case TURN_RIGHT: return (currentOrientation + 1) % 4;
-        default:         return currentOrientation;
+        case MOVE: return (currentOrientation + 1) % 4; // Assuming MOVE also means turn right
+        default:   return currentOrientation;
     }
 }
 
@@ -60,7 +51,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
         pos_ = newPos;
         nw_or = newOrientation;
         
-        int visits = updateVisitCount(pos_.x(), pos_.y());
+        int visits = getVisitCount(pos_.x(), pos_.y());
         displayVisits(visits);
         
         return !atend(pos_.x(), pos_.y());
@@ -71,4 +62,4 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
 
 // Declare functions that will be implemented in mashengl_student_turtle.cpp
 turtleMove studentTurtleStep(bool bumped);
-int updateVisitCount(int x, int y);
+int getVisitCount(int x, int y);
