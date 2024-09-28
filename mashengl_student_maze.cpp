@@ -32,19 +32,15 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
 
     // Calculate the position ahead based on orientation
     switch (nw_or) {
-        case 0: x2 = x1 - 1; break; // LEFT
+        case 0: x2 = x1 + 1; break; // RIGHT
         case 1: y2 = y1 + 1; break; // DOWN
-        case 2: x2 = x1 + 1; break; // RIGHT
+        case 2: x2 = x1 - 1; break; // LEFT
         case 3: y2 = y1 - 1; break; // UP
-        default:
-            ROS_ERROR("Invalid orientation: %d", nw_or);
-            return false;
     }
 
     // Check if there's a wall ahead
     bool isBumped = bumped(x1, y1, x2, y2);
 
-    // Log the maze's perspective
     ROS_INFO("Maze - Current Pos: (%d, %d), Orientation: %d, Next Pos: (%d, %d), Bumped: %d",
              x1, y1, nw_or, x2, y2, isBumped);
 
@@ -52,40 +48,40 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     turtleMove nextMove = studentTurtleStep(isBumped);
 
     // Update the orientation
-    nw_or = translateOrnt(nw_or, nextMove);
+    if (nextMove == TURN_LEFT) {
+        nw_or = (nw_or + 3) % 4;
+    } else if (nextMove == TURN_RIGHT) {
+        nw_or = (nw_or + 1) % 4;
+    }
 
     // Update the position if the turtle wants to move forward
     if (nextMove == FORWARD) {
-        // Calculate the new position based on the updated orientation
-        int newX = x1, newY = y1;
+        // Recalculate the new position based on the updated orientation
         switch (nw_or) {
-            case 0: newX = x1 - 1; break; // LEFT
-            case 1: newY = y1 + 1; break; // DOWN
-            case 2: newX = x1 + 1; break; // RIGHT
-            case 3: newY = y1 - 1; break; // UP
-            default:
-                ROS_ERROR("Invalid orientation: %d", nw_or);
-                return false;
+            case 0: x2 = x1 + 1; break; // RIGHT
+            case 1: y2 = y1 + 1; break; // DOWN
+            case 2: x2 = x1 - 1; break; // LEFT
+            case 3: y2 = y1 - 1; break; // UP
         }
 
         // Check if moving to the new position would result in a collision
-        bool wouldBump = bumped(x1, y1, newX, newY);
-
-        ROS_INFO("Maze - Attempting to move to (%d, %d), Would Bump: %d", newX, newY, wouldBump);
+        bool wouldBump = bumped(x1, y1, x2, y2);
 
         if (!wouldBump) {
             // Update position
-            pos_.setX(newX);
-            pos_.setY(newY);
+            pos_.setX(x2);
+            pos_.setY(y2);
+            ROS_INFO("Maze - Moved to (%d, %d)", x2, y2);
         } else {
-            // Cannot move forward due to a wall
-            ROS_WARN("Cannot move forward; wall detected ahead.");
+            ROS_WARN("Maze - Cannot move forward; wall detected ahead.");
         }
     }
-    // For turns, position remains the same
 
     // Check if the turtle has reached the end
     bool atEnd = atend(pos_.x(), pos_.y());
+
+    ROS_INFO("Maze - End of move: Pos: (%d, %d), Orientation: %d, At End: %d",
+             (int)pos_.x(), (int)pos_.y(), nw_or, atEnd);
 
     // Return true to continue, false to stop the turtle
     return !atEnd;
