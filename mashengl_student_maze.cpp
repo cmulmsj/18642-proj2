@@ -36,7 +36,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     int x1 = pos_.x(), y1 = pos_.y();
     int x2 = x1, y2 = y1;
 
-    // Calculate the next position based on orientation
+    // Calculate the position ahead based on orientation
     switch (nw_or) {
         case 0: x2 = x1 - 1; break; // LEFT
         case 1: y2 = y1 - 1; break; // UP
@@ -47,20 +47,49 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
             return false;
     }
 
-    // Use a different variable name to avoid conflict with the function 'bumped'
+    // Check if there's a wall ahead
     bool isBumped = bumped(x1, y1, x2, y2);
 
     // Call the turtle's decision-making function
     turtleMove nextMove = studentTurtleStep(isBumped);
 
-    // Update the position and orientation based on the move
-    pos_ = translatePos(pos_, nextMove, nw_or);
+    // Update the orientation
     nw_or = translateOrnt(nw_or, nextMove);
+
+    bool moveSuccessful = false;
+
+    // Update the position if the turtle wants to move forward and there's no wall
+    if (nextMove == FORWARD) {
+        // Calculate the new position based on the updated orientation
+        int newX = x1, newY = y1;
+        switch (nw_or) {
+            case 0: newX = x1 - 1; break; // LEFT
+            case 1: newY = y1 - 1; break; // UP
+            case 2: newX = x1 + 1; break; // RIGHT
+            case 3: newY = y1 + 1; break; // DOWN
+        }
+
+        // Check if moving to the new position would result in a collision
+        bool wouldBump = bumped(x1, y1, newX, newY);
+
+        if (!wouldBump) {
+            // Update position
+            pos_.setX(newX);
+            pos_.setY(newY);
+            moveSuccessful = true;
+        } else {
+            // Cannot move forward due to a wall
+            ROS_INFO("Cannot move forward; wall detected ahead.");
+        }
+    }
+
+    // Inform the turtle whether the move was successful
+    updateAfterMove(moveSuccessful);
 
     // Check if the turtle has reached the end
     bool atEnd = atend(pos_.x(), pos_.y());
 
-    // Return true to accept changes, or false to stop the turtle if it has reached the end
+    // Return true to continue, false to stop the turtle
     return !atEnd;
 }
 
