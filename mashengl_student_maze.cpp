@@ -50,25 +50,37 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     static bool firstCall = true;
     if (firstCall) {
         nw_or = 3; // Facing left
+        orientation = LEFT;
         firstCall = false;
+        ROS_INFO("Initial orientation: %d", nw_or);
     }
 
     // Check if the turtle is facing a wall
     bool bumpedStatus = isFacingWall(pos_, nw_or);
+    ROS_INFO("Facing wall: %s", bumpedStatus ? "true" : "false");
 
     // Get the next move from the turtle
     turtleMove nextMove = studentTurtleStep(bumpedStatus);
+    ROS_INFO("Next move: %d", static_cast<int>(nextMove));
 
     // Update orientation
+    int oldOrnt = nw_or;
     translateOrnt(nw_or, nextMove);
+    ROS_INFO("Orientation changed from %d to %d", oldOrnt, nw_or);
 
     // Update position only if the move is MOVE_FORWARD and not bumped
     if (nextMove == MOVE_FORWARD && !bumpedStatus) {
+        QPointF oldPos = pos_;
         translatePos(pos_, nw_or, nextMove);
+        ROS_INFO("Position changed from (%.2f, %.2f) to (%.2f, %.2f)", 
+                 oldPos.x(), oldPos.y(), pos_.x(), pos_.y());
+    } else if (nextMove == MOVE_FORWARD && bumpedStatus) {
+        ROS_WARN("Attempted to move into a wall. Move ignored.");
     }
 
     // Get the number of visits from the turtle code
     int visits = getCurrentVisitCount();
+    ROS_INFO("Current visit count: %d", visits);
 
     // Update the display
     displayVisits(visits);
@@ -82,25 +94,9 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
 
     return true; // Continue moving the turtle
 }
-// Update the turtle's absolute position based on the move
-void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
-    if (nextMove == MOVE_FORWARD) {
-        switch (nw_or) {
-            case 0: pos_.setY(pos_.y() - 1); break; // Up
-            case 1: pos_.setX(pos_.x() + 1); break; // Right
-            case 2: pos_.setY(pos_.y() + 1); break; // Down
-            case 3: pos_.setX(pos_.x() - 1); break; // Left
-            default:
-                ROS_ERROR("Invalid orientation in translatePos");
-                break;
-        }
-    }
-    // No position change for turns
-}
-
-// In mashengl_student_maze.cpp
 
 void translateOrnt(int& nw_or, turtleMove nextMove) {
+    int oldOrnt = nw_or;
     if (nextMove == TURN_LEFT) {
         nw_or = (nw_or + 3) % 4; // Equivalent to -1 mod 4
     } else if (nextMove == TURN_RIGHT) {
@@ -110,5 +106,23 @@ void translateOrnt(int& nw_or, turtleMove nextMove) {
 
     // Update the turtle's internal orientation
     orientation = static_cast<Direction>(nw_or);
+    ROS_INFO("Orientation changed from %d to %d", oldOrnt, nw_or);
 }
 
+void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
+    if (nextMove == MOVE_FORWARD) {
+        QPointF oldPos = pos_;
+        switch (nw_or) {
+            case 0: pos_.setY(pos_.y() - 1); break; // Up
+            case 1: pos_.setX(pos_.x() + 1); break; // Right
+            case 2: pos_.setY(pos_.y() + 1); break; // Down
+            case 3: pos_.setX(pos_.x() - 1); break; // Left
+            default:
+                ROS_ERROR("Invalid orientation in translatePos");
+                break;
+        }
+        ROS_INFO("Position changed from (%.2f, %.2f) to (%.2f, %.2f)", 
+                 oldPos.x(), oldPos.y(), pos_.x(), pos_.y());
+    }
+    // No position change for turns
+}
