@@ -18,7 +18,7 @@ bool atend(int x, int y);
 void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
 
-// Scope-preserving changes to these lines permitted
+// Scope-preserving changes to these lines permitted (see project writeup)
 enum turtleMove { MOVE_FORWARD, TURN_LEFT, TURN_RIGHT, STOP };
 turtleMove studentTurtleStep(bool bumped);
 void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove);
@@ -26,7 +26,7 @@ void translateOrnt(int& nw_or, turtleMove nextMove);
 int getCurrentVisitCount();
 
 // OK to change below this line
-// Removed obsolete function
+// Removed obsolete function declaration
 // bool studentMoveTurtle(QPointF& pos_, int& nw_or);
 
 #endif  // STUDENT_H
