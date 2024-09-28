@@ -1,68 +1,87 @@
+/* 
+ * Originally by Philip Koopman (koopman@cmu.edu)
+ * and Milda Zizyte (milda@cmu.edu)
+ *
+ * STUDENT NAME: Mashengjun Li
+ * ANDREW ID: mashengl
+ * LAST UPDATE: 09/28/2024
+ *
+ * This file keeps track of where the turtle is in the maze
+ * and updates the location when the turtle is moved. It shall not
+ * contain the maze solving logic/algorithm.
+ *
+ * This file is used along with student_turtle.cpp. student_turtle.cpp shall
+ * contain the maze solving logic/algorithm and shall not make use of the
+ * absolute coordinates or orientation of the turtle.
+ *
+ * This file shall call studentTurtleStep(..) in student_turtle.cpp to determine
+ * the next move the turtle will make, and shall use translatePos(..) and
+ * translateOrnt(..) to translate this move into absolute coordinates
+ * to display the turtle.
+ *
+ */
+
 #include "student.h"
 #include <ros/ros.h>
-#include <cmath>
 
-// Forward declarations
-turtleMove studentTurtleStep(bool bumped, int& newOrientation);
-int getVisitCount(int x, int y);
+/*
+ * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
+ * Ground rule -- you are only allowed to call the three helper functions defined in student.h, and NO other turtle methods or maze methods (no peeking at the maze!)
+ * This file interfaces with functions in student_turtle.cpp
+ */
+bool moveTurtle(QPointF& pos_, int& nw_or)
+{
+    int32_t futureX = pos_.x(), futureY = pos_.y();
+    int32_t futureX2 = pos_.x(), futureY2 = pos_.y();
 
-QPointF translatePos(QPointF currentPos, int orientation, turtleMove move) {
-    QPointF newPos = currentPos;
-    if (move == MOVE) {
-        switch (orientation) {
-            case 0: newPos.setX(newPos.x() - 1); break; // Left
-            case 1: newPos.setY(newPos.y() - 1); break; // Up
-            case 2: newPos.setX(newPos.x() + 1); break; // Right
-            case 3: newPos.setY(newPos.y() + 1); break; // Down
-        }
+    if (nw_or < 2) {  // LEFT or UP
+        if (nw_or == 0) futureY2 += 1;
+        else            futureX2 += 1;
+    } else {  // RIGHT or DOWN
+        futureX2 += 1; futureY2 += 1;
+        if (nw_or == 2) futureX += 1;
+        else            futureY += 1;
     }
-    ROS_INFO("translatePos: from (%f, %f) to (%f, %f), orientation: %d, move: %d",
-             currentPos.x(), currentPos.y(), newPos.x(), newPos.y(), orientation, move);
-    return newPos;
-}
 
-bool checkBump(QPointF pos, int orientation) {
-    QPointF newPos = pos;
-    switch (orientation) {
-        case 0: newPos.setX(newPos.x() - 1); break; // Left
-        case 1: newPos.setY(newPos.y() - 1); break; // Up
-        case 2: newPos.setX(newPos.x() + 1); break; // Right
-        case 3: newPos.setY(newPos.y() + 1); break; // Down
-    }
-    return bumped(pos.x(), pos.y(), newPos.x(), newPos.y());
-}
-
-bool moveTurtle(QPointF& pos_, int& nw_or) {
-    static int timeoutCounter = 0;
-    const int TIMEOUT = 40;
-
-    if (timeoutCounter == 0) {
-        bool isBumped = checkBump(pos_, nw_or);
-        int newOrientation = nw_or;
-        turtleMove nextMove = studentTurtleStep(isBumped, newOrientation);
-        
-        QPointF oldPos = pos_;
-        int oldOrientation = nw_or;
-        
-        QPointF newPos = translatePos(pos_, newOrientation, nextMove);
-        
-        if (!isBumped) {
-            pos_ = newPos;
-            nw_or = newOrientation;
-            
-            int visits = getVisitCount(std::round(pos_.x()), std::round(pos_.y()));
-            displayVisits(visits);
-
-            ROS_INFO("Turtle moved from (%f, %f) to (%f, %f), orientation: %d -> %d, visits: %d",
-                     oldPos.x(), oldPos.y(), pos_.x(), pos_.y(), oldOrientation, nw_or, visits);
-        } else {
-            ROS_INFO("Turtle bumped at (%f, %f), orientation: %d", pos_.x(), pos_.y(), nw_or);
-        }
-        
-        timeoutCounter = TIMEOUT;
-    } else {
-        timeoutCounter--;
+    bool isBumped = bumped(futureX, futureY, futureX2, futureY2);
+    turtleMove nextMove = studentTurtleStep(isBumped);
+    
+    QPointF newPos = translatePos(pos_, nextMove);
+    int newOrientation = translateOrnt(nw_or, nextMove);
+    
+    if (!bumped(newPos.x(), newPos.y(), newPos.x(), newPos.y())) {
+        pos_ = newPos;
+        nw_or = newOrientation;
+        return true;
     }
     
-    return !atend(pos_.x(), pos_.y());
+    return false;
+}
+
+/*
+ * Takes a position and a turtleMove and returns a new position
+ * based on the move
+ */
+QPointF translatePos(QPointF pos_, turtleMove nextMove) {
+    switch (nextMove) {
+        case MOVE_LEFT:   return QPointF(pos_.x() - 1, pos_.y());
+        case MOVE_UP:     return QPointF(pos_.x(), pos_.y() - 1);
+        case MOVE_RIGHT:  return QPointF(pos_.x() + 1, pos_.y());
+        case MOVE_DOWN:   return QPointF(pos_.x(), pos_.y() + 1);
+        default:          return pos_;
+    }
+}
+
+/*
+ * Takes an orientation and a turtleMove and returns a new orientation
+ * based on the move
+ */
+int translateOrnt(int orientation, turtleMove nextMove) {
+    switch (nextMove) {
+        case MOVE_LEFT:   return 0;
+        case MOVE_UP:     return 1;
+        case MOVE_RIGHT:  return 2;
+        case MOVE_DOWN:   return 3;
+        default:          return orientation;
+    }
 }
