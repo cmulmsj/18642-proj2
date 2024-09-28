@@ -44,6 +44,10 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     // Check if there's a wall ahead
     bool isBumped = bumped(x1, y1, x2, y2);
 
+    // Log the maze's perspective
+    ROS_INFO("Maze - Current Pos: (%d, %d), Orientation: %d, Next Pos: (%d, %d), Bumped: %d",
+             x1, y1, nw_or, x2, y2, isBumped);
+
     // Call the turtle's decision-making function
     turtleMove nextMove = studentTurtleStep(isBumped);
 
@@ -67,13 +71,15 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         // Check if moving to the new position would result in a collision
         bool wouldBump = bumped(x1, y1, newX, newY);
 
+        ROS_INFO("Maze - Attempting to move to (%d, %d), Would Bump: %d", newX, newY, wouldBump);
+
         if (!wouldBump) {
             // Update position
             pos_.setX(newX);
             pos_.setY(newY);
         } else {
             // Cannot move forward due to a wall
-            ROS_INFO("Cannot move forward; wall detected ahead.");
+            ROS_WARN("Cannot move forward; wall detected ahead.");
         }
     }
     // For turns, position remains the same
