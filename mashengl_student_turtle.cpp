@@ -11,8 +11,6 @@
  *
  */
 
-// mashengl_student_turtle.cpp
-
 #include "student.h"
 #include <stdint.h>
 #include <ros/ros.h>
@@ -30,13 +28,10 @@ static int32_t currentY = START_POS; // Turtle's current Y position in local map
 enum Direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
 static Direction orientation = UP; // Assuming the turtle starts facing UP
 
-// Wall map to keep track of detected walls
-static bool wallMap[MAZE_SIZE][MAZE_SIZE][4] = {false}; // [x][y][direction]
-
 // Function prototypes
 int32_t getVisitCount(int32_t x, int32_t y);
 void setVisitCount(int32_t x, int32_t y, int32_t count);
-void updateAfterMove(bool moveSuccessful);
+
 /**
  * Retrieves the visit count for a specific cell in the local map.
  */
@@ -58,50 +53,70 @@ void setVisitCount(int32_t x, int32_t y, int32_t count) {
 turtleMove studentTurtleStep(bool bumped) {
     static bool firstCall = true;
     if (firstCall) {
+        // Initialize the visit count at the starting position
         setVisitCount(currentX, currentY, 1);
         firstCall = false;
     }
 
-    // Update wall map if bumped
-    if (bumped) {
-        wallMap[currentX][currentY][orientation] = true;
-    }
+    // Implementing the right-hand wall-following algorithm approximation
+    static int state = 0; // 0: Try to turn right, 1: Move forward, 2: Turn left
 
-    // Right-hand wall-following logic
-    // Try to turn right
-    Direction rightDir = static_cast<Direction>((orientation + 1) % 4);
-    bool wallOnRight = wallMap[currentX][currentY][rightDir];
+    turtleMove nextMove;
 
-    if (!wallOnRight) {
-        // Turn right and move forward
-        orientation = rightDir;
-        return TURN_RIGHT;
-    } else if (!bumped) {
-        // Move forward
-        return FORWARD;
-    } else {
-        // Turn left
-        orientation = static_cast<Direction>((orientation + 3) % 4);
-        return TURN_LEFT;
-    }
-}
+    if (state == 0) {
+        // Try to turn right
+        orientation = static_cast<Direction>((orientation + 1) % 4); // Turn right
+        nextMove = TURN_RIGHT;
+        state = 1;
+    } else if (state == 1) {
+        // After turning right, attempt to move forward
+        if (bumped) {
+            // Can't move forward, need to turn left
+            orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
+            nextMove = TURN_LEFT;
+            state = 2;
+        } else {
+            // Move forward
+            // Update the turtle's internal position
+            switch (orientation) {
+                case UP:    currentY--; break;
+                case RIGHT: currentX++; break;
+                case DOWN:  currentY++; break;
+                case LEFT:  currentX--; break;
+            }
 
-void updateAfterMove(bool moveSuccessful) {
-    if (moveSuccessful) {
-        // Update the turtle's internal position
-        switch (orientation) {
-            case UP:    currentY--; break;
-            case RIGHT: currentX++; break;
-            case DOWN:  currentY++; break;
-            case LEFT:  currentX--; break;
+            // Update visit count
+            int32_t visits = getVisitCount(currentX, currentY) + 1;
+            setVisitCount(currentX, currentY, visits);
+
+            nextMove = FORWARD;
+            state = 0;
         }
+    } else if (state == 2) {
+        // After turning left, try to move forward
+        if (bumped) {
+            // Can't move forward, need to turn left again
+            orientation = static_cast<Direction>((orientation + 3) % 4); // Turn left
+            nextMove = TURN_LEFT;
+            // Stay in state 2 to keep turning left until we can move forward
+        } else {
+            // Move forward
+            // Update the turtle's internal position
+            switch (orientation) {
+                case UP:    currentY--; break;
+                case RIGHT: currentX++; break;
+                case DOWN:  currentY++; break;
+                case LEFT:  currentX--; break;
+            }
 
-        // Update visit count
-        int32_t visits = getVisitCount(currentX, currentY) + 1;
-        setVisitCount(currentX, currentY, visits);
-    } else {
-        // Since move failed, mark wall ahead
-        wallMap[currentX][currentY][orientation] = true;
+            // Update visit count
+            int32_t visits = getVisitCount(currentX, currentY) + 1;
+            setVisitCount(currentX, currentY, visits);
+
+            nextMove = FORWARD;
+            state = 0;
+        }
     }
-}
+
+    return nextMove;
 }
