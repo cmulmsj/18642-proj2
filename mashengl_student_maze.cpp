@@ -1,12 +1,12 @@
 #include "student.h"
 
 bool moveTurtle(QPointF& pos_, int& nw_or) {
-    // Call studentTurtleStep to get next movement decision
+    // Call studentTurtleStep to get the next movement decision
     bool bumped = false; // will be set by maze code based on wall detection
     turtleMove nextMove = studentTurtleStep(bumped);
 
     // Translate relative move into absolute coordinates
-    pos_ = translatePos(pos_, nextMove);
+    pos_ = translatePos(pos_, nextMove, nw_or);  // Pass nw_or here
     nw_or = translateOrnt(nw_or, nextMove);
 
     // Update the map with the new visit count
@@ -17,12 +17,12 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
     return !atend(pos_.x(), pos_.y());
 }
 
-QPointF translatePos(QPointF pos_, turtleMove nextMove) {
+QPointF translatePos(QPointF pos_, turtleMove nextMove, int nw_or) {  // Added nw_or as a parameter
     // Translate turtle move into absolute coordinates based on move type
     switch (nextMove) {
         case MOVE_FORWARD:
             // Move forward in the current direction
-            if (nw_or == 0) pos_.setY(pos_.y() - 1); // north
+            if (nw_or == 0) pos_.setY(pos_.y() - 1);  // north
             if (nw_or == 90) pos_.setX(pos_.x() + 1); // east
             if (nw_or == 180) pos_.setY(pos_.y() + 1); // south
             if (nw_or == 270) pos_.setX(pos_.x() - 1); // west
