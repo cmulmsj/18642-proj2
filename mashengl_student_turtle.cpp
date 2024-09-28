@@ -52,37 +52,15 @@ turtleMove studentTurtleStep(bool bumped) {
     return MOVE;
 }
 
-/**
- * Retrieves the visit count for a specific cell in the maze.
- *
- * @param x The x-coordinate of the cell.
- * @param y The y-coordinate of the cell.
- * @return The number of times the cell has been visited.
- */
 int32_t getVisitCount(int32_t x, int32_t y) {
     return visitMap[y][x];
 }
 
-/**
- * Updates the visit count for a specific cell in the maze and displays it.
- *
- * @param x The x-coordinate of the cell.
- * @param y The y-coordinate of the cell.
- * @param count The new visit count for the cell.
- */
 void setVisitCount(int32_t x, int32_t y, int32_t count) {
     visitMap[y][x] = count;
     displayVisits(count);
 }
 
-/**
- * Updates the turtle's orientation based on its current state and whether it has bumped into a wall.
- *
- * @param orientation The current orientation of the turtle.
- * @param isBumped Whether the turtle has bumped into a wall.
- * @param currentState Reference to the current state of the turtle.
- * @return The new orientation of the turtle.
- */
 int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentState) {
     if (orientation == LEFT) {
         if (currentState == STATE_MOVING) { orientation = UP; currentState = STATE_TURNED; }
@@ -104,15 +82,7 @@ int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentSt
     return orientation;
 }
 
-/**
- * Main function to move the turtle through the maze.
- * Implements the right-hand rule for maze navigation and tracks cell visits.
- *
- * @param pos_ Reference to the current position of the turtle.
- * @param nw_or Reference to the current orientation of the turtle.
- * @return true if the turtle should continue moving, false if it has reached the end.
- */
-bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or) 
+bool studentMoveTurtle(QPointF& pos_, int& nw_or) 
 {
     static bool firstCall = true;
     if (firstCall) {
