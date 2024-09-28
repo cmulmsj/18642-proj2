@@ -35,8 +35,13 @@ turtleMove studentTurtleStep(bool bumped, int& newOrientation) {
         ROS_INFO("Bumped, turned left, new orientation: %d", currentOrientation);
     }
 
-    updatePosition();
     newOrientation = currentOrientation;
+    
+    // Only update position if not bumped
+    if (!bumped) {
+        updatePosition();
+    }
+    
     return MOVE;
 }
 
