@@ -26,7 +26,7 @@ static int32_t currentY = START_POS; // Turtle's current Y position in local map
 
 // Turtle's orientation (relative)
 enum Direction { LEFT = 0, DOWN = 1, RIGHT = 2, UP = 3 };
-static Direction orientation = LEFT; // Turtle starts facing LEFT
+static Direction orientation = LEFT; 
 
 // Function prototypes
 int32_t getVisitCount(int32_t x, int32_t y);
