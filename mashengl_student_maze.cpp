@@ -1,56 +1,72 @@
-/* 
- * Originally by Philip Koopman (koopman@cmu.edu)
- * and Milda Zizyte (milda@cmu.edu)
- *
- * STUDENT NAME:
- * ANDREW ID:
- * LAST UPDATE:
- *
- * This file keeps track of where the turtle is in the maze
- * and updates the location when the turtle is moved. It shall not
- * contain the maze solving logic/algorithm.
- *
- * This file is used along with student_turtle.cpp. student_turtle.cpp shall
- * contain the maze solving logic/algorithm and shall not make use of the
- * absolute coordinates or orientation of the turtle.
- *
- * This file shall call studentTurtleStep(..) in student_turtle.cpp to determine
- * the next move the turtle will make, and shall use translatePos(..) and
- * translateOrnt(..) to translate this move into absolute coordinates
- * to display the turtle.
- *
- */
-
 #include "student.h"
 
-/*
- * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
- * Ground rule -- you are only allowed to call the three helper functions defined in student.h, and NO other turtle methods or maze methods (no peeking at the maze!)
- * This file interfaces with functions in student_turtle.cpp
- */
-bool moveTurtle(QPointF& pos_, int& nw_or)
-{
-  bool bumped = true; // Replace with your own procedure
-  turtleMove nextMove = studentTurtleStep(bumped); // define your own turtleMove enum or structure
-  pos_ = translatePos(pos_, nextMove);
-  nw_or = translateOrnt(nw_or, nextMove);
+// Define the TurtleMove enum if not already defined
+enum TurtleMove {
+    MOVE_FORWARD,
+    TURN_LEFT,
+    TURN_RIGHT,
+    NO_MOVE
+};
 
-  // REPLACE THE FOLLOWING LINE IN PROJECT 5
-  return studentMoveTurtle(pos_, nw_or);
+// Function to translate relative position to absolute position
+QPointF translatePos(QPointF currentPos, int currentOrientation, TurtleMove move) {
+    QPointF newPos = currentPos;
+    switch (move) {
+        case MOVE_FORWARD:
+            switch (currentOrientation) {
+                case 0: newPos.setX(newPos.x() - 1); break; // Left
+                case 1: newPos.setY(newPos.y() - 1); break; // Up
+                case 2: newPos.setX(newPos.x() + 1); break; // Right
+                case 3: newPos.setY(newPos.y() + 1); break; // Down
+            }
+            break;
+        default:
+            break; // No position change for turns or no move
+    }
+    return newPos;
 }
 
-/*
- * Takes a position and a turtleMove and returns a new position
- * based on the move
- */
-QPointF translatePos(QPointF pos_, turtleMove nextMove) {
-  return pos_;
+// Function to translate orientation based on the move
+int translateOrnt(int currentOrientation, TurtleMove move) {
+    switch (move) {
+        case TURN_LEFT:
+            return (currentOrientation - 1 + 4) % 4;
+        case TURN_RIGHT:
+            return (currentOrientation + 1) % 4;
+        default:
+            return currentOrientation;
+    }
 }
 
-/*
- * Takes an orientation and a turtleMove and returns a new orienation
- * based on the move
- */
-int translateOrnt(int orientation, turtleMove nextMove) {
-  return orientation;
+bool moveTurtle(QPointF& pos_, int& nw_or) {
+    bool bumped = isBumped(pos_, nw_or); // You need to implement this function
+    TurtleMove nextMove = studentTurtleStep(bumped);
+    
+    QPointF newPos = translatePos(pos_, nw_or, nextMove);
+    int newOrientation = translateOrnt(nw_or, nextMove);
+    
+    // Check if the new position is valid (not bumping into a wall)
+    if (!isBumped(newPos, newOrientation)) {
+        pos_ = newPos;
+        nw_or = newOrientation;
+        
+        // Update visit count and display
+        int visits = updateVisitCount(pos_); // You need to implement this function
+        displayVisits(visits);
+        
+        return true;
+    }
+    
+    return false;
+}
+
+// You need to implement these helper functions
+bool isBumped(QPointF pos, int orientation) {
+    // Check if the turtle would bump into a wall at the given position and orientation
+    // Return true if it would bump, false otherwise
+}
+
+int updateVisitCount(QPointF pos) {
+    // Update and return the visit count for the given position
+    // This should interact with the turtle's local map in mashengl_student_turtle.cpp
 }
