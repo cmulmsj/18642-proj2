@@ -1,3 +1,6 @@
+#ifndef STUDENT_H
+#define STUDENT_H
+
 #include <ros/ros.h>
 #include <boost/bind.hpp>
 #include <ece642rtle/timeInt8.h>
