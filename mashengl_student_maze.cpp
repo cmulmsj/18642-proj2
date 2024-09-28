@@ -22,52 +22,74 @@
  */
 
 #include "student.h"
+#include <ros/ros.h>
 
-// Forward declaration of getVisitsFromTurtle
-int getVisitsFromTurtle(int x, int y);
+// Function prototypes
+bool isFacingWall(QPointF pos_, int nw_or);
 
-bool moveTurtle(QPointF& pos_, int& nw_or)
-{
-    bool is_bumped = bumped(pos_.x(), pos_.y(), pos_.x(), pos_.y());
-    turtleMove nextMove = studentTurtleStep(is_bumped);
-    
-    QPointF newPos = translatePos(pos_, nextMove);
-    int newOrnt = translateOrnt(nw_or, nextMove);
-    
-    // Check if the new position is valid (not hitting a wall)
-    if (!bumped(pos_.x(), pos_.y(), newPos.x(), newPos.y())) {
-        pos_ = newPos;
-        nw_or = newOrnt;
-        
-        int visits = getVisitsFromTurtle(pos_.x(), pos_.y());
-        displayVisits(visits);
-        
-        return true;
+// Function to check if the turtle is facing a wall
+bool isFacingWall(QPointF pos_, int nw_or) {
+    int32_t futureX = pos_.x(), futureY = pos_.y();
+    int32_t futureX2 = pos_.x(), futureY2 = pos_.y();
+
+    if (nw_or < 2) {  // Facing LEFT or UP
+        if (nw_or == 0) futureY2 += 1;
+        else            futureX2 += 1;
+    } else {  // Facing RIGHT or DOWN
+        futureX2 += 1; futureY2 += 1;
+        if (nw_or == 2) futureX += 1;
+        else            futureY += 1;
     }
-    
-    return false;
+
+    return bumped(futureX, futureY, futureX2, futureY2);
 }
 
-QPointF translatePos(QPointF pos_, turtleMove nextMove)
-{
-    // We need to get the current orientation
-    // For now, let's assume it's stored in a static variable
-    static int currentOrientation = 1; // Start facing up
+bool moveTurtle(QPointF& pos_, int& nw_or) {
+    // Compute if the turtle is facing a wall
+    bool bumpedStatus = isFacingWall(pos_, nw_or);
 
-    if (nextMove == MOVE) {
-        switch (currentOrientation) {
-            case 0: return QPointF(pos_.x() - 1, pos_.y()); // Left
-            case 1: return QPointF(pos_.x(), pos_.y() - 1); // Up
-            case 2: return QPointF(pos_.x() + 1, pos_.y()); // Right
-            case 3: return QPointF(pos_.x(), pos_.y() + 1); // Down
+    // Call the turtle's step function to get the next move
+    turtleMove nextMove = studentTurtleStep(bumpedStatus);
+
+    // Update the absolute position and orientation
+    translateOrnt(nw_or, nextMove);
+    translatePos(pos_, nw_or, nextMove);
+
+    // Get the number of visits from the turtle code
+    int visits = getCurrentVisitCount();
+
+    // Update the display
+    displayVisits(visits);
+
+    // Check if at end
+    bool atEnd = atend(pos_.x(), pos_.y());
+
+    return !atEnd;
+}
+
+// Update the turtle's absolute position based on the move
+void translatePos(QPointF& pos_, int nw_or, turtleMove nextMove) {
+    if (nextMove == MOVE_FORWARD) {
+        switch (nw_or) {
+            case 0: pos_.setX(pos_.x() - 1); break;  // LEFT
+            case 1: pos_.setY(pos_.y() - 1); break;  // UP
+            case 2: pos_.setX(pos_.x() + 1); break;  // RIGHT
+            case 3: pos_.setY(pos_.y() + 1); break;  // DOWN
+            default:
+                ROS_ERROR("Invalid orientation: %d", nw_or);
+                break;
         }
     }
-    return pos_; // No change for other moves (which don't exist in current enum)
+    // No position change for turns
 }
 
-int translateOrnt(int orientation, turtleMove nextMove)
-{
-    // In the current implementation, MOVE doesn't change orientation
-    // We might need to update this if we add more move types
-    return orientation;
+// Update the turtle's absolute orientation based on the move
+void translateOrnt(int& nw_or, turtleMove nextMove) {
+    if (nextMove == TURN_LEFT) {
+        nw_or = (nw_or + 3) % 4;  // Equivalent to -1 mod 4
+    } else if (nextMove == TURN_RIGHT) {
+        nw_or = (nw_or + 1) % 4;
+    }
+    // No orientation change for MOVE_FORWARD or STOP
 }
+
