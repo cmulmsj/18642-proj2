@@ -11,23 +11,18 @@ Direction orientation = LEFT; // Start facing left
 
 turtleMove studentTurtleStep(bool bumped) {
     static enum TurtleState {
-        STATE_CHECK_RIGHT,
+        STATE_TURN_RIGHT,
         STATE_MOVE_FORWARD,
         STATE_TURN_LEFT
-    } state = STATE_CHECK_RIGHT;
+    } state = STATE_TURN_RIGHT;
 
     ROS_INFO("Current state: %d, Bumped: %s", state, bumped ? "true" : "false");
 
     turtleMove move;
     switch (state) {
-        case STATE_CHECK_RIGHT:
-            if (!bumped) {
-                state = STATE_MOVE_FORWARD;
-                move = TURN_RIGHT;
-            } else {
-                state = STATE_TURN_LEFT;
-                move = TURN_LEFT;
-            }
+        case STATE_TURN_RIGHT:
+            move = TURN_RIGHT;
+            state = STATE_MOVE_FORWARD;
             break;
 
         case STATE_MOVE_FORWARD:
@@ -41,7 +36,7 @@ turtleMove studentTurtleStep(bool bumped) {
                     case LEFT:  currentX--; break;
                 }
                 setVisitCount(currentX, currentY, getVisitCount(currentX, currentY) + 1);
-                state = STATE_CHECK_RIGHT;
+                state = STATE_TURN_RIGHT;
             } else {
                 state = STATE_TURN_LEFT;
                 move = TURN_LEFT;
@@ -50,13 +45,7 @@ turtleMove studentTurtleStep(bool bumped) {
 
         case STATE_TURN_LEFT:
             move = TURN_LEFT;
-            state = STATE_CHECK_RIGHT;
-            break;
-
-        default:
-            ROS_ERROR("Invalid state in studentTurtleStep");
-            state = STATE_CHECK_RIGHT;
-            move = STOP;
+            state = STATE_MOVE_FORWARD;
             break;
     }
 
