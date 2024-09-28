@@ -56,49 +56,43 @@ turtleMove studentTurtleStep(bool bumped) {
 
     switch (state) {
         case STATE_INIT:
-            // Start by attempting to turn right
             state = STATE_CHECK_RIGHT;
+            orientation = static_cast<Direction>((static_cast<int>(orientation) + 1) % 4);
             return TURN_RIGHT;
 
         case STATE_CHECK_RIGHT:
             if (bumped) {
-                // Wall to the right, turn left to original orientation
                 state = STATE_TURN_LEFT;
+                orientation = static_cast<Direction>((static_cast<int>(orientation) + 3) % 4);
                 return TURN_LEFT;
             } else {
-                // No wall to the right, move forward
                 state = STATE_MOVE_FORWARD;
                 return MOVE_FORWARD;
             }
 
         case STATE_TURN_LEFT:
-            // After turning left, check forward
             state = STATE_CHECK_FORWARD;
+            orientation = static_cast<Direction>((static_cast<int>(orientation) + 3) % 4);
             return TURN_LEFT;
 
         case STATE_CHECK_FORWARD:
             if (bumped) {
-                // Wall ahead, turn left again
                 state = STATE_TURN_LEFT;
+                orientation = static_cast<Direction>((static_cast<int>(orientation) + 3) % 4);
                 return TURN_LEFT;
             } else {
-                // No wall ahead, move forward
                 state = STATE_MOVE_FORWARD;
                 return MOVE_FORWARD;
             }
 
         case STATE_MOVE_FORWARD:
-            // Move forward in the current orientation
-            // Update internal position
             switch (orientation) {
                 case UP:    currentY -= 1; break;
                 case RIGHT: currentX += 1; break;
                 case DOWN:  currentY += 1; break;
                 case LEFT:  currentX -= 1; break;
             }
-            // Increment visit count
             setVisitCount(currentX, currentY, getVisitCount(currentX, currentY) + 1);
-            // After moving forward, attempt to turn right again
             state = STATE_CHECK_RIGHT;
             return MOVE_FORWARD;
 
@@ -108,4 +102,3 @@ turtleMove studentTurtleStep(bool bumped) {
             return STOP;
     }
 }
-
