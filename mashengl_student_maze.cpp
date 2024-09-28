@@ -47,6 +47,13 @@ bool checkBump(QPointF pos, int orientation) {
 bool moveTurtle(QPointF& pos_, int& nw_or) {
     static int timeoutCounter = 0;
     const int TIMEOUT = 40;
+    static bool firstMove = true;
+
+    // Always move on the first call
+    if (firstMove) {
+        timeoutCounter = 0;
+        firstMove = false;
+    }
 
     if (timeoutCounter == 0) {
         bool isBumped = checkBump(pos_, nw_or);
@@ -61,6 +68,10 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
             
             int visits = getVisitCount(pos_.x(), pos_.y());
             displayVisits(visits);
+
+            ROS_INFO("Turtle moved to (%f, %f), orientation: %d", pos_.x(), pos_.y(), nw_or);
+        } else {
+            ROS_INFO("Turtle bumped at (%f, %f), orientation: %d", pos_.x(), pos_.y(), nw_or);
         }
         
         timeoutCounter = TIMEOUT;
