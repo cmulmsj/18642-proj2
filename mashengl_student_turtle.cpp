@@ -54,70 +54,54 @@ void setVisitCount(int32_t x, int32_t y, int32_t count) {
  * Determines the turtle's next move based on whether it has bumped into a wall.
  */
 turtleMove studentTurtleStep(bool bumped) {
-    static bool firstCall = true;
-    static int state = 0; // 0: Try to turn right, 1: Move forward, 2: Turn left
+    static int orientation = 0; // 0: RIGHT, 1: DOWN, 2: LEFT, 3: UP
+    static turtleMove lastMove = FORWARD;
 
-    // Update internal orientation and position based on the last move
-    if (!firstCall) {
-        if (lastMove == TURN_LEFT) {
-            orientation = static_cast<Direction>((orientation + 3) % 4);
-        } else if (lastMove == TURN_RIGHT) {
-            orientation = static_cast<Direction>((orientation + 1) % 4);
-        } else if (lastMove == FORWARD) {
-            // Update position based on orientation
-            switch (orientation) {
-                case LEFT:  currentX--; break;
-                case DOWN:  currentY++; break;
-                case RIGHT: currentX++; break;
-                case UP:    currentY--; break;
-            }
-            // Update visit count
-            int32_t visits = getVisitCount(currentX, currentY) + 1;
-            setVisitCount(currentX, currentY, visits);
+    // If we bumped into a wall on the last move, undo it
+    if (bumped && lastMove == FORWARD) {
+        switch (orientation) {
+            case 0: currentX--; break;
+            case 1: currentY--; break;
+            case 2: currentX++; break;
+            case 3: currentY++; break;
         }
-    } else {
-        // On first call, initialize the visit count at the starting position
-        setVisitCount(currentX, currentY, 1);
-        firstCall = false;
     }
 
-    // Debugging statement
-    ROS_INFO("Orientation: %d, Position: (%d, %d), State: %d, Bumped: %d",
-             orientation, currentX, currentY, state, bumped);
-
+    // Right-hand rule: Try to turn right first
     turtleMove nextMove;
-
-    if (state == 0) {
-        // Try to turn right
+    if (!bumped) {
+        // If we didn't bump, try to turn right
         nextMove = TURN_RIGHT;
-        state = 1;
-    } else if (state == 1) {
-        // After turning right, attempt to move forward
+        orientation = (orientation + 1) % 4;
+    } else {
+        // If we bumped, try to move forward in the current direction
+        nextMove = FORWARD;
+        // If we're still bumping, turn left
         if (bumped) {
-            // Can't move forward, need to turn left
             nextMove = TURN_LEFT;
-            state = 2;
-        } else {
-            // Move forward
-            nextMove = FORWARD;
-            state = 0;
-        }
-    } else if (state == 2) {
-        // After turning left, try to move forward
-        if (bumped) {
-            // Can't move forward, need to turn left again
-            nextMove = TURN_LEFT;
-            // Stay in state 2 to keep turning left until we can move forward
-        } else {
-            // Move forward
-            nextMove = FORWARD;
-            state = 0;
+            orientation = (orientation + 3) % 4;
         }
     }
 
-    // Store the move to update internal state on the next call
-    lastMove = nextMove;
+    // Update position if moving forward
+    if (nextMove == FORWARD) {
+        switch (orientation) {
+            case 0: currentX++; break;
+            case 1: currentY++; break;
+            case 2: currentX--; break;
+            case 3: currentY--; break;
+        }
+    }
 
+    // Update visit count
+    int visits = getVisitCount(currentX, currentY) + 1;
+    setVisitCount(currentX, currentY, visits);
+
+    // Log the decision
+    ROS_INFO("Turtle Decision - Orientation: %d, Position: (%d, %d), Bumped: %d, Next Move: %d",
+             orientation, currentX, currentY, bumped, nextMove);
+
+    lastMove = nextMove;
     return nextMove;
 }
 
