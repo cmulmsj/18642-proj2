@@ -49,11 +49,11 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
             pos_ = newPos;
             nw_or = newOrientation;
             
-            int visits = getVisitCount(pos_.x(), pos_.y());
+            int visits = getVisitCount(round(pos_.x()), round(pos_.y()));
             displayVisits(visits);
 
-            ROS_INFO("Turtle moved from (%f, %f) to (%f, %f), orientation: %d -> %d",
-                     oldPos.x(), oldPos.y(), pos_.x(), pos_.y(), oldOrientation, nw_or);
+            ROS_INFO("Turtle moved from (%f, %f) to (%f, %f), orientation: %d -> %d, visits: %d",
+                     oldPos.x(), oldPos.y(), pos_.x(), pos_.y(), oldOrientation, nw_or, visits);
         } else {
             ROS_INFO("Turtle bumped at (%f, %f), orientation: %d", pos_.x(), pos_.y(), nw_or);
         }
