@@ -55,8 +55,8 @@ bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or) {
     return !atend(currentX, currentY);
 }
 
-turtleMove studentTurtleStep(bool isBumped) {  // Updated variable name
-    // Basic logic to avoid obstacles (can be expanded)
+turtleMove studentTurtleStep(bool isBumped) {  
+    // Improved logic to avoid obstacles
     if (isBumped) {
         return TURN_LEFT; // Turn left if bumped
     } else {
@@ -73,5 +73,3 @@ void incrementVisitCount(int x, int y) {
 int getVisitCount(int x, int y) {
     return visitMap[x][y];
 }
-
-
