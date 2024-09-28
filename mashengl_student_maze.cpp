@@ -1,23 +1,3 @@
-#include "student.h"
-#include "mashengl_turtle_state.h"
-#include <ros/ros.h>
-#include <QPointF>
-
-bool isFacingWall(QPointF pos_, int nw_or) {
-    int x = static_cast<int>(pos_.x());
-    int y = static_cast<int>(pos_.y());
-    int x1 = x, y1 = y;
-
-    switch (nw_or) {
-        case 0: y1 -= 1; break; // Up
-        case 1: x1 += 1; break; // Right
-        case 2: y1 += 1; break; // Down
-        case 3: x1 -= 1; break; // Left
-    }
-
-    return bumped(x, y, x1, y1);
-}
-
 bool moveTurtle(QPointF& pos_, int& nw_or) {
     static bool firstCall = true;
     if (firstCall) {
@@ -41,14 +21,18 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
     translateOrnt(nw_or, nextMove);
     ROS_INFO("Orientation changed from %d to %d", oldOrnt, nw_or);
 
-    // Update position only if the move is MOVE_FORWARD and not bumped
-    if (nextMove == MOVE_FORWARD && !bumpedStatus) {
+    // Update position if the move is MOVE_FORWARD
+    if (nextMove == MOVE_FORWARD) {
         QPointF oldPos = pos_;
         translatePos(pos_, nw_or, nextMove);
-        ROS_INFO("Position changed from (%.2f, %.2f) to (%.2f, %.2f)", 
-                 oldPos.x(), oldPos.y(), pos_.x(), pos_.y());
-    } else if (nextMove == MOVE_FORWARD && bumpedStatus) {
-        ROS_WARN("Attempted to move into a wall. Move ignored.");
+        if (oldPos != pos_) {
+            ROS_INFO("Position changed from (%.2f, %.2f) to (%.2f, %.2f)", 
+                     oldPos.x(), oldPos.y(), pos_.x(), pos_.y());
+        } else {
+            ROS_WARN("Attempted to move but position did not change.");
+        }
+    } else {
+        ROS_INFO("Turn performed, position unchanged.");
     }
 
     // Get the number of visits from the turtle code
