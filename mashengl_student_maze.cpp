@@ -23,6 +23,9 @@
 
 #include "student.h"
 
+// Forward declaration of getVisitsFromTurtle
+int getVisitsFromTurtle(int x, int y);
+
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     bool is_bumped = bumped(pos_.x(), pos_.y(), pos_.x(), pos_.y());
@@ -36,9 +39,6 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         pos_ = newPos;
         nw_or = newOrnt;
         
-        // We need to implement a way to get the number of visits
-        // This could be done by keeping a static 2D array in this file
-        // or by implementing a function in mashengl_student_turtle.cpp
         int visits = getVisitsFromTurtle(pos_.x(), pos_.y());
         displayVisits(visits);
         
@@ -71,6 +71,3 @@ int translateOrnt(int orientation, turtleMove nextMove)
     // We might need to update this if we add more move types
     return orientation;
 }
-
-// This function should be implemented in mashengl_student_turtle.cpp
-extern int getVisitsFromTurtle(int x, int y);
