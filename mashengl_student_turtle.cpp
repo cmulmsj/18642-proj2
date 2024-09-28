@@ -54,7 +54,7 @@ void setVisitCount(int32_t x, int32_t y, int32_t count) {
  * Determines the turtle's next move based on whether it has bumped into a wall.
  */
 turtleMove studentTurtleStep(bool bumped) {
-    static int state = 0; // 0: Move forward, 1: Turn right, 2: Turn left
+    static int state = 0; // 0: Initial move, 1: Move forward, 2: Turn right, 3: Turn left
     static bool firstMove = true;
 
     ROS_INFO("Turtle Input - Bumped: %d, State: %d, First Move: %d, Orientation: %d",
@@ -63,27 +63,32 @@ turtleMove studentTurtleStep(bool bumped) {
     turtleMove nextMove;
 
     if (firstMove) {
-        nextMove = FORWARD;
+        nextMove = FORWARD; // Initially move forward (which is left in the maze)
         firstMove = false;
-        state = 1; // Next, we'll try to turn right
+        state = 1; // Next, we'll follow the right-hand rule
     } else {
         switch (state) {
-            case 0: // Moving forward
+            case 1: // Moving forward
                 if (bumped) {
                     nextMove = TURN_RIGHT;
-                    state = 1;
+                    state = 2;
                 } else {
                     nextMove = FORWARD;
-                    state = 1; // Always try to turn right after moving forward
+                    state = 2; // Always try to turn right after moving forward
                 }
                 break;
-            case 1: // Turning right
-                nextMove = TURN_RIGHT;
-                state = 0; // After turning right, try to move forward
+            case 2: // Turning right
+                if (bumped) {
+                    nextMove = TURN_LEFT;
+                    state = 3;
+                } else {
+                    nextMove = FORWARD;
+                    state = 1;
+                }
                 break;
-            case 2: // Turning left
-                nextMove = TURN_LEFT;
-                state = 0; // After turning left, try to move forward
+            case 3: // Turning left
+                nextMove = FORWARD;
+                state = 1; // After turning left, try to move forward
                 break;
         }
     }
