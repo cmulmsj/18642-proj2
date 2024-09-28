@@ -7,7 +7,7 @@
 int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
 int32_t currentX = START_POS;
 int32_t currentY = START_POS;
-Direction orientation = LEFT; // Start facing left
+Direction orientation = RIGHT; // Start facing left
 
 turtleMove studentTurtleStep(bool bumped) {
     static enum TurtleState {
