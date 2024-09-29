@@ -107,36 +107,39 @@ int translateOrnt(int orientation, TurtleMove nextMove) {
     }
 }
 
-// Modified detectObstacle function to ensure accurate wall detection
-bool detectObstacle(QPointF pos_, TurtleDirection orient) {
+bool detectObstacle(QPointF pos_, Orientation orient) {
     int x1 = pos_.x(), y1 = pos_.y();
     int x2 = x1, y2 = y1;
 
     switch (orient) {
-        case WEST:
-            x2 = x1 - 1;
-            y2 = y1;
+        case LEFT:
+            y2 = y1 + 1;
             break;
-        case SOUTH:
-            x2 = x1;
-            y2 = y1 - 1; // Moving south decreases y
-            break;
-        case EAST:
+        case DOWN:
             x2 = x1 + 1;
-            y2 = y1;
             break;
-        case NORTH:
-            x2 = x1;
-            y2 = y1 + 1; // Moving north increases y
+        case RIGHT:
+            x2 = x1 + 1;
+            y2 = y1 + 1;
+            x1 = x1 + 1;
+            break;
+        case UP:
+            x2 = x1 + 1;
+            y2 = y1 + 1;
+            y1 = y1 + 1;
             break;
         default:
-            ROS_ERROR("Invalid Orientation in detectObstacle");
+            ROS_ERROR("detectObstacle: Invalid Orientation %d", orient);
             return false;
     }
 
-    // Debugging information
-    ROS_INFO("Checking obstacle at (%d, %d) for orientation %d", x2, y2, orient);
+    // Log the coordinates being checked for a wall
+    ROS_INFO("detectObstacle: Checking wall between (%d, %d) and (%d, %d)", x1, y1, x2, y2);
 
-    return bumped(x1, y1, x2, y2);
+    bool wall_detected = bumped(x1, y1, x2, y2);
+
+    ROS_INFO("detectObstacle: Wall detected: %d", wall_detected);
+    return wall_detected;
 }
+
 
