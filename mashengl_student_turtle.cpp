@@ -13,56 +13,59 @@
 
 #include "student.h"
 
-static int8_t visit_record[GRID_SIZE][GRID_SIZE] = {0};
+static int8_t visit_map[MAZE_SIZE][MAZE_SIZE] = {0};
 
+// Renamed to addVisit as per your convention
 void addVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
-        visit_record[x][y]++;
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        visit_map[x][y]++;
     }
 }
 
+// Renamed to getVisit as per your convention
 uint8_t getVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
-        return visit_record[x][y];
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        return visit_map[x][y];
     }
     return 0;
 }
 
-TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state) {
-    TurtleCommand nextMove;
+// Slightly modified logic for state transitions and movement
+TurtleMove studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state) {
+    TurtleMove nextMove;
 
     switch (*cur_state) {
-        case NavigationMode::INITIAL:
-        case NavigationMode::FORWARD:
+        case INITIAL:
+        case PROCEED:
             if (goal) {
-                *cur_state = NavigationMode::COMPLETE;
-                nextMove = TurtleCommand::HALT;
+                *cur_state = COMPLETE;
+                nextMove = HALT;
             } else {
-                *cur_state = NavigationMode::ADJUST;
-                nextMove = TurtleCommand::ROTATE_CW;
+                *cur_state = ADJUST;
+                nextMove = ROTATE_CW; // Start by rotating clockwise to explore
             }
             break;
 
-        case NavigationMode::ADJUST:
+        case ADJUST:
             if (bumped) {
-                nextMove = TurtleCommand::ROTATE_CCW;
+                nextMove = ROTATE_CCW; // Rotate counterclockwise if a wall is hit
             } else {
-                *cur_state = NavigationMode::FORWARD;
-                nextMove = TurtleCommand::ADVANCE;
+                *cur_state = PROCEED;
+                nextMove = ADVANCE; // Move forward if the path is clear
             }
             break;
 
-        case NavigationMode::COMPLETE:
-            nextMove = TurtleCommand::HALT;
+        case COMPLETE:
+            nextMove = HALT;
             break;
 
         default:
             ROS_ERROR("Invalid Navigation Mode");
-            nextMove = TurtleCommand::HALT;
+            nextMove = HALT;
             break;
     }
 
