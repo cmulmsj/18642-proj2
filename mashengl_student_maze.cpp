@@ -88,8 +88,15 @@ int translateOrnt(int orientation, TurtleAction next_action) {
 }
 
 bool detectObstacle(QPointF pos_, int facing) {
-    QPointF next_pos = translatePos(pos_, facing);
-    return bumped(pos_.x(), pos_.y(), next_pos.x(), next_pos.y());
+    int x1 = pos_.x(), y1 = pos_.y();
+    int x2 = x1, y2 = y1;
+
+    switch (static_cast<MazeDirection>(facing)) {
+        case MazeDirection::WEST:  x2--; break;
+        case MazeDirection::SOUTH: y2++; break;
+        case MazeDirection::EAST:  x2++; break;
+        case MazeDirection::NORTH: y2--; break;
+    }
+
+    return bumped(x1, y1, x2, y2);
 }
-
-
