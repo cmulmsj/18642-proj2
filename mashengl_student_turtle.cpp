@@ -42,27 +42,19 @@ TurtleAction studentTurtleStep(bool wall_ahead, bool at_goal, TurtleState* curre
 
     switch (*current_state) {
         case TurtleState::EXPLORING:
-            if (!wall_ahead) {
-                turn_count = 0;
-                return TurtleAction::MOVE;
-            } else {
-                *current_state = TurtleState::TURNING;
-                turn_count = 1;
-                return TurtleAction::TURN_RIGHT;
-            }
-
         case TurtleState::TURNING:
-            if (wall_ahead) {
+            if (!wall_ahead) {
+                *current_state = TurtleState::EXPLORING;
+                turn_count = 0;
+                return TurtleAction::TURN_RIGHT;  // Always try to turn right first
+            } else {
                 turn_count++;
-                if (turn_count >= FULL_ROTATION) {
+                if (turn_count >= 4) {
                     *current_state = TurtleState::BACKTRACKING;
                     turn_count = 0;
                     return TurtleAction::TURN_LEFT;
                 }
-                return TurtleAction::TURN_RIGHT;
-            } else {
-                *current_state = TurtleState::EXPLORING;
-                return TurtleAction::MOVE;
+                return TurtleAction::TURN_LEFT;  // If can't turn right, turn left
             }
 
         case TurtleState::BACKTRACKING:
