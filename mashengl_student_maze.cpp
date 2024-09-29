@@ -82,11 +82,15 @@ QPointF translatePos(QPointF pos_, int orientation) {
 
 int translateOrnt(int orientation, TurtleCommand nextMove) {
     switch (nextMove) {
-        case TurtleCommand::ROTATE_CW:  return (orientation + 1) % DIRECTION_COUNT;
-        case TurtleCommand::ROTATE_CCW: return (orientation + DIRECTION_COUNT - 1) % DIRECTION_COUNT;
-        default: return orientation;
+        case TurtleCommand::ROTATE_CW:
+            return (orientation + 1) % DIRECTION_COUNT;
+        case TurtleCommand::ROTATE_CCW:
+            return (orientation - 1 + DIRECTION_COUNT) % DIRECTION_COUNT;
+        default:
+            return orientation;
     }
 }
+
 
 bool detectObstacle(QPointF pos_, int orient) {
     int x1 = pos_.x(), y1 = pos_.y();
