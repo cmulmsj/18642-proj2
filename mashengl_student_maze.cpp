@@ -22,6 +22,7 @@
  */
 
 #include "student.h"
+#include "mashengl_maze_params.h"
 
 bool moveTurtle(QPointF& pos_, int& nw_or) {
     static int count_down = 0;
