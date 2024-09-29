@@ -57,7 +57,9 @@ TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_stat
                 rotation_count++;
                 if (rotation_count >= DIRECTION_COUNT) {
                     rotation_count = 0;
-                    return TurtleCommand::ROTATE_CCW;
+                    // After rotating in all directions, stop if no path found
+                    *cur_state = NavigationMode::COMPLETE;
+                    return TurtleCommand::HALT;
                 }
                 return TurtleCommand::ROTATE_CW;
             } else {
