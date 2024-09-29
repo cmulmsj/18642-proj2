@@ -26,50 +26,48 @@
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     static int count_down = 0;
-    static NavigationMode current_mode = INITIAL;
+    static State current_state = INIT;
 
     if (count_down == 0) {
-        if (current_mode == INITIAL) {
+        if (current_state == INIT) {
             addVisit(pos_);
             displayVisits(getVisit(pos_));
+            ROS_INFO("moveTurtle: Initial position recorded and visits displayed.");
         }
 
+        bool has_wall = check_bumped(pos_, static_cast<Orientation>(nw_or));
         bool at_goal = atend(pos_.x(), pos_.y());
 
-        // Detect obstacle based on current orientation before deciding the next move
-        bool has_wall = detectObstacle(pos_, static_cast<TurtleDirection>(nw_or));
+        ROS_INFO("moveTurtle: Checking obstacles - Has Wall: %d, At Goal: %d", has_wall, at_goal);
 
-        // Decide the next move based on the current state and obstacle detection
-        TurtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_mode);
-
-        // Update orientation based on the decided move
+        turtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_state);
         nw_or = translateOrnt(nw_or, nextMove);
 
-        ROS_INFO("Orientation=%d  Mode=%d  NextMove=%d", nw_or, current_mode, nextMove);
+        ROS_INFO("moveTurtle: Orientation updated to %d after move %d", nw_or, nextMove);
 
-        // Move the turtle forward if the next move is ADVANCE and there's no wall
-        if (nextMove == ADVANCE) {
+        if (nextMove == MOVE) {
             if (!has_wall) {
-                pos_ = translatePos(pos_, static_cast<TurtleDirection>(nw_or));
+                pos_ = translatePos(pos_, static_cast<Orientation>(nw_or));
                 addVisit(pos_);
                 displayVisits(getVisit(pos_));
-                ROS_INFO("Moved to (%.0f, %.0f)", pos_.x(), pos_.y());
+                ROS_INFO("moveTurtle: Moved to new position (%.0f, %.0f)", pos_.x(), pos_.y());
             } else {
-                ROS_WARN("Attempted to move forward but detected a wall.");
+                ROS_WARN("moveTurtle: Attempted to move forward but a wall was detected. Position unchanged.");
             }
         }
 
-        // Check if the turtle has reached the goal
-        if (current_mode == COMPLETE) {
-            ROS_INFO("Turtle has reached the goal.");
+        if (current_state == GOAL) {
+            ROS_INFO("moveTurtle: Turtle has reached the goal. Halting.");
             return false;
         }
 
         count_down = TIMEOUT;
+        ROS_INFO("moveTurtle: Move completed. Countdown reset to %d.", count_down);
         return true;
     }
 
     count_down--;
+    ROS_DEBUG("moveTurtle: Countdown decreased to %d.", count_down);
     return false;
 }
 
