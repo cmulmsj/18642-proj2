@@ -68,3 +68,4 @@ TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_stat
 
     return nextMove;
 }
+
