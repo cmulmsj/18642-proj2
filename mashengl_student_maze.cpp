@@ -40,10 +40,20 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         ROS_INFO("Position: (%.0f, %.0f), Facing: %d, Action: %d, State: %d", 
                  pos_.x(), pos_.y(), nw_or, static_cast<int>(next_action), static_cast<int>(current_state));
 
-        if (next_action == TurtleAction::MOVE && !wall_ahead) {
-            pos_ = translatePos(pos_, nw_or);
-        } else if (next_action != TurtleAction::STOP) {
-            nw_or = translateOrnt(nw_or, next_action);
+        switch (next_action) {
+            case TurtleAction::MOVE:
+                if (!wall_ahead) {
+                    pos_ = translatePos(pos_, nw_or);
+                }
+                break;
+            case TurtleAction::TURN_RIGHT:
+                nw_or = (nw_or + 1) % ORIENTATION_COUNT;
+                break;
+            case TurtleAction::TURN_LEFT:
+                nw_or = (nw_or + ORIENTATION_COUNT - 1) % ORIENTATION_COUNT;
+                break;
+            case TurtleAction::STOP:
+                return false;
         }
 
         if (current_state == TurtleState::FINISHED) {
