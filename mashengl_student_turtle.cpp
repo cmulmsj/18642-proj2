@@ -13,50 +13,60 @@
 
 #include "student.h"
 
-static int8_t visited[MAZE_SIZE][MAZE_SIZE] = {0};
+static int8_t visit_record[GRID_SIZE][GRID_SIZE] = {0};
 
-void record_visited(QPointF& pos_) {
-    visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())]++;
+void addVisit(QPointF& pos_) {
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+        visit_record[x][y]++;
+    }
 }
 
-uint8_t get_visited(QPointF& pos_) {
-    return visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())];
+uint8_t getVisit(QPointF& pos_) {
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+        return visit_record[x][y];
+    }
+    return 0;
 }
 
-turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
-    turtleMove nextMove;
+TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state) {
+    static int rotation_count = 0;
 
-    switch (*cur_state) {
-        case INIT:
-        case GO:
-            if (goal) {
-                *cur_state = GOAL;
-                nextMove = STOP;
-            } else {
-                *cur_state = TURN;
-                nextMove = TURNRIGHT;
-            }
-            break;
-
-        case TURN:
-            if (bumped) {
-                *cur_state = TURN;
-                nextMove = TURNLEFT;
-            } else {
-                *cur_state = GO;
-                nextMove = MOVE;
-            }
-            break;
-
-        case GOAL:
-            nextMove = STOP;
-            break;
-
-        default:
-            ROS_ERROR("Invalid State");
-            nextMove = STOP;
-            break;
+    if (goal) {
+        *cur_state = NavigationMode::COMPLETE;
+        return TurtleCommand::HALT;
     }
 
-    return nextMove;
+    switch (*cur_state) {
+        case NavigationMode::INITIAL:
+        case NavigationMode::FORWARD:
+            if (bumped) {
+                *cur_state = NavigationMode::ADJUST;
+                rotation_count = 1;
+                return TurtleCommand::ROTATE_CW;
+            } else {
+                *cur_state = NavigationMode::FORWARD;
+                return TurtleCommand::ADVANCE;
+            }
+
+        case NavigationMode::ADJUST:
+            if (bumped) {
+                rotation_count++;
+                if (rotation_count >= DIRECTION_COUNT) {
+                    rotation_count = 0;
+                    return TurtleCommand::ROTATE_CCW;
+                }
+                return TurtleCommand::ROTATE_CW;
+            } else {
+                *cur_state = NavigationMode::FORWARD;
+                return TurtleCommand::ADVANCE;
+            }
+
+        default:
+            ROS_ERROR("Invalid Navigation Mode");
+            return TurtleCommand::HALT;
+    }
 }
