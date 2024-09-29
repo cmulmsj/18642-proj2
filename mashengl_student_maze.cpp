@@ -73,9 +73,9 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
 QPointF translatePos(QPointF pos_, int orientation) {
     switch (static_cast<TurtleDirection>(orientation)) {
         case TurtleDirection::WEST:  pos_.setX(pos_.x() - 1); break;
-        case TurtleDirection::SOUTH: pos_.setY(pos_.y() + 1); break;
+        case TurtleDirection::SOUTH: pos_.setY(pos_.y() - 1); break;
         case TurtleDirection::EAST:  pos_.setX(pos_.x() + 1); break;
-        case TurtleDirection::NORTH: pos_.setY(pos_.y() - 1); break;
+        case TurtleDirection::NORTH: pos_.setY(pos_.y() + 1); break;
     }
     return pos_;
 }
