@@ -26,71 +26,84 @@
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     static int count_down = 0;
-    static State current_state = INIT;
+    static TurtleState current_state = INIT;
 
     if (count_down == 0) {
+        ROS_INFO("MoveTurtle called with position=(%.2f, %.2f), orientation=%d, state=%d",
+                 pos_.x(), pos_.y(), nw_or, current_state);
+
         if (current_state == INIT) {
             addVisit(pos_);
-            displayVisits(getVisit(pos_));
-            ROS_INFO("moveTurtle: Initial position recorded and visits displayed.");
+            displayVisits(retrieveVisitCount(pos_));
+            ROS_INFO("Initialized: Recorded initial position and displayed visit count.");
         }
 
         bool has_wall = detectObstacle(pos_, static_cast<Orientation>(nw_or));
-        bool at_goal = atend(pos_.x(), pos_.y());
+        ROS_DEBUG("Obstacle detection result: %s", has_wall ? "True" : "False");
 
-        ROS_INFO("moveTurtle: Checking obstacles - Has Wall: %d, At Goal: %d", has_wall, at_goal);
+        bool at_goal = atend(static_cast<int>(pos_.x()), static_cast<int>(pos_.y()));
+        ROS_DEBUG("At goal detection result: %s", at_goal ? "True" : "False");
 
         turtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_state);
+        ROS_INFO("Determined next move: %d", nextMove);
+
         nw_or = translateOrnt(nw_or, nextMove);
+        ROS_INFO("Updated orientation to: %d", nw_or);
 
-        ROS_INFO("moveTurtle: Orientation updated to %d after move %d", nw_or, nextMove);
-
-        if (nextMove == MOVE) {
-            if (!has_wall) {
+        switch (nextMove) {
+            case MOVING:
                 pos_ = translatePos(pos_, static_cast<Orientation>(nw_or));
+                ROS_INFO("Moving to new position: (%.2f, %.2f)", pos_.x(), pos_.y());
                 addVisit(pos_);
-                displayVisits(getVisit(pos_));
-                ROS_INFO("moveTurtle: Moved to new position (%.0f, %.0f)", pos_.x(), pos_.y());
-            } else {
-                ROS_WARN("moveTurtle: Attempted to move forward but a wall was detected. Position unchanged.");
-            }
+                displayVisits(retrieveVisitCount(pos_));
+                break;
+            case TURNING_RIGHT:
+                ROS_INFO("Turning right. New orientation: %d", nw_or);
+                break;
+            case TURNING_LEFT:
+                ROS_INFO("Turning left. New orientation: %d", nw_or);
+                break;
+            case STOPPING:
+                ROS_INFO("Stopping movement.");
+                break;
+            default:
+                ROS_ERROR("Received invalid move command: %d", nextMove);
+                break;
         }
 
         if (current_state == GOAL) {
-            ROS_INFO("moveTurtle: Turtle has reached the goal. Halting.");
+            ROS_INFO("Goal reached. Stopping turtle.");
             return false;
         }
 
-        count_down = TIMEOUT;
-        ROS_INFO("moveTurtle: Move completed. Countdown reset to %d.", count_down);
+        count_down = MOVE_DELAY;
         return true;
     }
 
     count_down--;
-    ROS_DEBUG("moveTurtle: Countdown decreased to %d.", count_down);
     return false;
 }
 
 QPointF translatePos(QPointF pos_, Orientation orientation) {
     switch (orientation) {
-        case LEFT:
+        case WEST:
             pos_.setX(pos_.x() - 1);
-            ROS_INFO("translatePos: Moving LEFT to (%.0f, %.0f)", pos_.x(), pos_.y());
+            ROS_DEBUG("Translated position west to (%.2f, %.2f)", pos_.x(), pos_.y());
             break;
-        case DOWN:
-            pos_.setY(pos_.y() - 1); // Assuming y decreases when moving south
-            ROS_INFO("translatePos: Moving DOWN to (%.0f, %.0f)", pos_.x(), pos_.y());
+        case SOUTH:
+            pos_.setY(pos_.y() - 1);
+            ROS_DEBUG("Translated position south to (%.2f, %.2f)", pos_.x(), pos_.y());
             break;
-        case RIGHT:
+        case EAST:
             pos_.setX(pos_.x() + 1);
-            ROS_INFO("translatePos: Moving RIGHT to (%.0f, %.0f)", pos_.x(), pos_.y());
+            ROS_DEBUG("Translated position east to (%.2f, %.2f)", pos_.x(), pos_.y());
             break;
-        case UP:
-            pos_.setY(pos_.y() + 1); // Assuming y increases when moving north
-            ROS_INFO("translatePos: Moving UP to (%.0f, %.0f)", pos_.x(), pos_.y());
+        case NORTH:
+            pos_.setY(pos_.y() + 1);
+            ROS_DEBUG("Translated position north to (%.2f, %.2f)", pos_.x(), pos_.y());
             break;
         default:
-            ROS_ERROR("translatePos: Invalid Orientation %d", orientation);
+            ROS_ERROR("Invalid Orientation: %d", orientation);
             break;
     }
     return pos_;
@@ -99,46 +112,51 @@ QPointF translatePos(QPointF pos_, Orientation orientation) {
 int translateOrnt(int orientation, turtleMove nextMove) {
     int new_orientation = orientation;
     switch (nextMove) {
-        case TURNRIGHT:
-            new_orientation = (orientation + 1) % NUM_ORIENTATIONS;
-            ROS_INFO("translateOrnt: TURNRIGHT. New Orientation: %d", new_orientation);
+        case TURNING_RIGHT:
+            new_orientation = (orientation + 1) % ORIENTATION_COUNT;
+            ROS_DEBUG("Orientation changed to (TURNING_RIGHT): %d", new_orientation);
             break;
-        case TURNLEFT:
-            new_orientation = (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
-            ROS_INFO("translateOrnt: TURNLEFT. New Orientation: %d", new_orientation);
+        case TURNING_LEFT:
+            new_orientation = (orientation - 1 + ORIENTATION_COUNT) % ORIENTATION_COUNT;
+            ROS_DEBUG("Orientation changed to (TURNING_LEFT): %d", new_orientation);
             break;
-        case MOVE:
-        case STOP:
-            ROS_INFO("translateOrnt: %s. Orientation remains at %d", 
-                     (nextMove == MOVE) ? "MOVE" : "STOP", new_orientation);
+        case MOVING:
+        case STOPPING:
+            ROS_DEBUG("Orientation remains the same: %d", new_orientation);
             break;
         default:
-            ROS_ERROR("translateOrnt: Invalid Move %d. Orientation remains at %d", nextMove, new_orientation);
+            ROS_ERROR("Invalid Move Command: %d", nextMove);
             break;
     }
     return new_orientation;
 }
 
 bool detectObstacle(QPointF pos_, Orientation orient) {
-    int x1 = pos_.x(), y1 = pos_.y();
-    int x2 = x1, y2 = y1;
+    int start_x = static_cast<int>(pos_.x());
+    int start_y = static_cast<int>(pos_.y());
+    int end_x = start_x;
+    int end_y = start_y;
 
     switch (orient) {
-        case LEFT:
-            y2 += 1;
+        case WEST:
+            end_y += 1;
+            ROS_DEBUG("Orientation WEST: Incremented end_y to %d", end_y);
             break;
-        case DOWN:
-            x2 += 1;
+        case SOUTH:
+            end_x += 1;
+            ROS_DEBUG("Orientation SOUTH: Incremented end_x to %d", end_x);
             break;
-        case RIGHT:
-            x1 += 1;
-            x2 += 1;
-            y2 += 1;
+        case EAST:
+            start_x += 1;
+            end_x += 1;
+            end_y += 1;
+            ROS_DEBUG("Orientation EAST: Incremented start_x to %d, end_x to %d, end_y to %d", start_x, end_x, end_y);
             break;
-        case UP:
-            x2 += 1;
-            y2 += 1;
-            y1 += 1;
+        case NORTH:
+            end_x += 1;
+            end_y += 1;
+            start_y += 1;
+            ROS_DEBUG("Orientation NORTH: Incremented end_x to %d, end_y to %d, start_y to %d", end_x, end_y, start_y);
             break;
         default:
             ROS_ERROR("detectObstacle: Invalid Orientation %d", orient);
@@ -146,13 +164,11 @@ bool detectObstacle(QPointF pos_, Orientation orient) {
     }
 
     // Log the coordinates being checked for a wall
-    ROS_INFO("detectObstacle: Checking wall between (%d, %d) and (%d, %d)", x1, y1, x2, y2);
+    ROS_INFO("detectObstacle: Checking wall between (%d, %d) and (%d, %d)", start_x, start_y, end_x, end_y);
 
-    bool wall_detected = bumped(x1, y1, x2, y2);
+    // Check for a wall between the start and end coordinates
+    bool wall_detected = bumped(start_x, start_y, end_x, end_y);
 
-    ROS_INFO("detectObstacle: Wall detected: %d", wall_detected);
+    ROS_INFO("detectObstacle: Wall detected: %s", wall_detected ? "Yes" : "No");
     return wall_detected;
 }
-
-
-
