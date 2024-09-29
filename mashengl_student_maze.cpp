@@ -21,46 +21,44 @@
  *
  */
 
-#include "student.h"
-
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
-    static int cooldown = 0;
+    static int count_down = 0;
     static NavigationMode current_mode = NavigationMode::INITIAL;
 
-    if (cooldown == 0) {
+    if (count_down == 0) {
         if (current_mode == NavigationMode::INITIAL) {
-            logVisit(pos_);
-            displayVisits(getVisitCount(pos_));
+            record_visited(pos_);
+            displayVisits(get_visited(pos_));
         }
 
-        bool obstacle_detected = detectObstacle(pos_, nw_or);
-        bool goal_reached = atend(pos_.x(), pos_.y());
+        bool has_wall = check_bumped(pos_, nw_or);
+        bool at_goal = atend(pos_.x(), pos_.y());
 
-        TurtleCommand next_command = decideTurtleAction(obstacle_detected, goal_reached, &current_mode);
-        nw_or = updateOrientation(nw_or, next_command);
+        TurtleCommand nextMove = studentTurtleStep(has_wall, at_goal, &current_mode);
+        nw_or = translateOrnt(nw_or, nextMove);
 
-        ROS_INFO("Facing=%d  Mode=%d  Command=%d", nw_or, static_cast<int>(current_mode), static_cast<int>(next_command));
+        ROS_INFO("Orientation=%d  Mode=%d  NextMove=%d", nw_or, static_cast<int>(current_mode), static_cast<int>(nextMove));
 
-        if (next_command == TurtleCommand::ADVANCE && !obstacle_detected) {
-            pos_ = updatePosition(pos_, nw_or);
-            logVisit(pos_);
-            displayVisits(getVisitCount(pos_));
+        if (nextMove == TurtleCommand::ADVANCE && !has_wall) {
+            pos_ = translatePos(pos_, nw_or);
+            record_visited(pos_);
+            displayVisits(get_visited(pos_));
         }
 
         if (current_mode == NavigationMode::COMPLETE) {
             return false;
         }
 
-        cooldown = MOVE_DELAY;
+        count_down = MOVE_DELAY;
         return true;
     }
 
-    cooldown--;
+    count_down--;
     return false;
 }
 
-QPointF updatePosition(QPointF pos_, int orientation) {
+QPointF translatePos(QPointF pos_, int orientation) {
     switch (static_cast<TurtleDirection>(orientation)) {
         case TurtleDirection::WEST:  pos_.setX(pos_.x() - 1); break;
         case TurtleDirection::SOUTH: pos_.setY(pos_.y() + 1); break;
@@ -70,19 +68,19 @@ QPointF updatePosition(QPointF pos_, int orientation) {
     return pos_;
 }
 
-int updateOrientation(int orientation, TurtleCommand next_command) {
-    switch (next_command) {
+int translateOrnt(int orientation, TurtleCommand nextMove) {
+    switch (nextMove) {
         case TurtleCommand::ROTATE_CW:  return (orientation + 1) % DIRECTION_COUNT;
         case TurtleCommand::ROTATE_CCW: return (orientation - 1 + DIRECTION_COUNT) % DIRECTION_COUNT;
         default: return orientation;
     }
 }
 
-bool detectObstacle(QPointF pos_, int facing) {
+bool detectObstacle(QPointF pos_, int orient) {
     int x1 = pos_.x(), y1 = pos_.y();
     int x2 = x1, y2 = y1;
 
-    switch (static_cast<TurtleDirection>(facing)) {
+    switch (static_cast<TurtleDirection>(orient)) {
         case TurtleDirection::WEST:  x2--; break;
         case TurtleDirection::SOUTH: y2++; break;
         case TurtleDirection::EAST:  x2++; break;
