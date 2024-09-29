@@ -7,24 +7,24 @@ const int ORIENTATION_COUNT = 4;
 const int FULL_ROTATION = 4;
 
 enum class MazeDirection : int {
-    WESTWARD = 0,
-    SOUTHWARD = 1,
-    EASTWARD = 2,
-    NORTHWARD = 3
+    WEST = 0,
+    SOUTH = 1,
+    EAST = 2,
+    NORTH = 3
 };
 
 enum class TurtleAction : int {
-    PROCEED,
-    PIVOT_CLOCKWISE,
-    PIVOT_COUNTERCLOCKWISE,
-    HALT
+    MOVE,
+    TURN_RIGHT,
+    TURN_LEFT,
+    STOP
 };
 
-enum class NavigationPhase : int {
-    SCOUTING,
-    REORIENTING,
-    RETREATING,
-    MISSION_COMPLETE
+enum class TurtleState : int {
+    EXPLORING,
+    TURNING,
+    BACKTRACKING,
+    FINISHED
 };
 
 #endif // MAZE_PARAMS_H
