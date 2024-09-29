@@ -25,78 +25,61 @@
 
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
-    static int count_down = 0;
-    static State current_state = EXPLORE;
+    static int cooldown_timer = 0;
+    static NavigationPhase current_phase = NavigationPhase::SCOUTING;
 
-    if (count_down == 0) {
-        record_visited(pos_);
-        displayVisits(get_visited(pos_));
+    if (cooldown_timer == 0) {
+        logVisit(pos_);
+        displayVisits(getVisitCount(pos_));
 
-        bool has_wall = check_bumped(pos_, nw_or);
-        bool at_goal = atend(pos_.x(), pos_.y());
+        bool obstacle_detected = detectObstacle(pos_, nw_or);
+        bool goal_reached = atend(pos_.x(), pos_.y());
 
-        turtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_state);
+        TurtleAction next_action = studentTurtleStep(obstacle_detected, goal_reached, &current_phase);
         
-        ROS_INFO("Before Move - Pos: (%.0f, %.0f), Orientation: %d, Move: %d, State: %d", 
-                 pos_.x(), pos_.y(), nw_or, nextMove, current_state);
+        ROS_INFO("Position: (%.0f, %.0f), Facing: %d, Action: %d, Phase: %d", 
+                 pos_.x(), pos_.y(), nw_or, static_cast<int>(next_action), static_cast<int>(current_phase));
 
-        if (nextMove == FORWARD && !has_wall) {
+        if (next_action == TurtleAction::PROCEED && !obstacle_detected) {
             pos_ = translatePos(pos_, nw_or);
-        } else if (nextMove == TURN_RIGHT) {
-            nw_or = translateOrnt(nw_or, TURN_RIGHT);
-        } else if (nextMove == TURN_LEFT) {
-            nw_or = translateOrnt(nw_or, TURN_LEFT);
+        } else if (next_action != TurtleAction::HALT) {
+            nw_or = translateOrnt(nw_or, next_action);
         }
 
-        ROS_INFO("After Move - Pos: (%.0f, %.0f), New Orientation: %d", 
-                 pos_.x(), pos_.y(), nw_or);
-
-        if (current_state == FINISH) {
+        if (current_phase == NavigationPhase::MISSION_COMPLETE) {
             return false;
         }
 
-        count_down = TIMEOUT;
+        cooldown_timer = MOVE_COOLDOWN;
         return true;
     }
 
-    count_down--;
+    cooldown_timer--;
     return false;
 }
 
 QPointF translatePos(QPointF pos_, int orientation) {
-    switch (static_cast<Orientation>(orientation)) {
-        case LEFT:  pos_.setX(pos_.x() - 1); break;
-        case DOWN:  pos_.setY(pos_.y() + 1); break;
-        case RIGHT: pos_.setX(pos_.x() + 1); break;
-        case UP:    pos_.setY(pos_.y() - 1); break;
-        default:    ROS_ERROR("Invalid Orientation"); break;
+    switch (static_cast<MazeDirection>(orientation)) {
+        case MazeDirection::WESTWARD:  pos_.setX(pos_.x() - 1); break;
+        case MazeDirection::SOUTHWARD: pos_.setY(pos_.y() + 1); break;
+        case MazeDirection::EASTWARD:  pos_.setX(pos_.x() + 1); break;
+        case MazeDirection::NORTHWARD: pos_.setY(pos_.y() - 1); break;
     }
     return pos_;
 }
 
-int translateOrnt(int orientation, turtleMove nextMove) {
-    switch (nextMove) {
-        case TURN_RIGHT: return (orientation + 1) % NUM_ORIENTATIONS;
-        case TURN_LEFT:  return (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
-        case FORWARD:
-        case STOP:       return orientation;
-        default:         ROS_ERROR("Invalid Move"); return orientation;
+int translateOrnt(int orientation, TurtleAction next_action) {
+    if (next_action == TurtleAction::PIVOT_CLOCKWISE) {
+        return (orientation + 1) % ORIENTATION_COUNT;
+    } else if (next_action == TurtleAction::PIVOT_COUNTERCLOCKWISE) {
+        return (orientation + ORIENTATION_COUNT - 1) % ORIENTATION_COUNT;
     }
+    return orientation;
 }
 
-bool check_bumped(QPointF pos_, int orient) {
-    int x1 = pos_.x(), y1 = pos_.y();
-    int x2 = x1, y2 = y1;
-
-    switch (static_cast<Orientation>(orient)) {
-        case LEFT:  x2 = x1 - 1; break;
-        case DOWN:  y2 = y1 + 1; break;
-        case RIGHT: x2 = x1 + 1; break;
-        case UP:    y2 = y1 - 1; break;
-        default:    ROS_ERROR("Invalid Orientation"); return false;
-    }
-
-    return bumped(x1, y1, x2, y2);
+bool detectObstacle(QPointF pos_, int facing) {
+    QPointF next_pos = translatePos(pos_, facing);
+    return bumped(pos_.x(), pos_.y(), next_pos.x(), next_pos.y());
 }
 
 
