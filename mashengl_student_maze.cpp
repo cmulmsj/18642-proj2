@@ -26,27 +26,27 @@
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     static int cooldown_timer = 0;
-    static NavigationPhase current_phase = NavigationPhase::SCOUTING;
+    static TurtleState current_state = TurtleState::EXPLORING;
 
     if (cooldown_timer == 0) {
         logVisit(pos_);
         displayVisits(getVisitCount(pos_));
 
-        bool obstacle_detected = detectObstacle(pos_, nw_or);
-        bool goal_reached = atend(pos_.x(), pos_.y());
+        bool wall_ahead = detectObstacle(pos_, nw_or);
+        bool at_goal = atend(pos_.x(), pos_.y());
 
-        TurtleAction next_action = studentTurtleStep(obstacle_detected, goal_reached, &current_phase);
+        TurtleAction next_action = studentTurtleStep(wall_ahead, at_goal, &current_state);
         
-        ROS_INFO("Position: (%.0f, %.0f), Facing: %d, Action: %d, Phase: %d", 
-                 pos_.x(), pos_.y(), nw_or, static_cast<int>(next_action), static_cast<int>(current_phase));
+        ROS_INFO("Position: (%.0f, %.0f), Facing: %d, Action: %d, State: %d", 
+                 pos_.x(), pos_.y(), nw_or, static_cast<int>(next_action), static_cast<int>(current_state));
 
-        if (next_action == TurtleAction::PROCEED && !obstacle_detected) {
+        if (next_action == TurtleAction::MOVE && !wall_ahead) {
             pos_ = translatePos(pos_, nw_or);
-        } else if (next_action != TurtleAction::HALT) {
+        } else if (next_action != TurtleAction::STOP) {
             nw_or = translateOrnt(nw_or, next_action);
         }
 
-        if (current_phase == NavigationPhase::MISSION_COMPLETE) {
+        if (current_state == TurtleState::FINISHED) {
             return false;
         }
 
