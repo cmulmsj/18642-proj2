@@ -21,8 +21,9 @@
  *
  */
 
-bool moveTurtle(QPointF& pos_, int& nw_or)
-{
+#include "student.h"
+
+bool moveTurtle(QPointF& pos_, int& nw_or) {
     static int count_down = 0;
     static NavigationMode current_mode = NavigationMode::INITIAL;
 
