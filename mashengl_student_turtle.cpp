@@ -32,49 +32,49 @@ uint8_t get_visited(QPointF& pos_) {
     return 0;
 }
 
-turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
-    static int turns = 0;
+TurtleAction studentTurtleStep(bool wall_ahead, bool at_goal, TurtleState* current_state) {
+    static int turn_count = 0;
 
-    if (goal) {
-        *cur_state = FINISH;
-        return STOP;
+    if (at_goal) {
+        *current_state = TurtleState::FINISHED;
+        return TurtleAction::STOP;
     }
 
-    switch (*cur_state) {
-        case EXPLORE:
-            if (!bumped) {
-                turns = 0;
-                return FORWARD;
+    switch (*current_state) {
+        case TurtleState::EXPLORING:
+            if (!wall_ahead) {
+                turn_count = 0;
+                return TurtleAction::MOVE;
             } else {
-                *cur_state = ROTATE;
-                turns = 1;
-                return TURN_RIGHT;
+                *current_state = TurtleState::TURNING;
+                turn_count = 1;
+                return TurtleAction::TURN_RIGHT;
             }
 
-        case ROTATE:
-            if (bumped) {
-                turns++;
-                if (turns >= 4) {
-                    *cur_state = BACKTRACK;
-                    return TURN_LEFT;
+        case TurtleState::TURNING:
+            if (wall_ahead) {
+                turn_count++;
+                if (turn_count >= FULL_ROTATION) {
+                    *current_state = TurtleState::BACKTRACKING;
+                    turn_count = 0;
+                    return TurtleAction::TURN_LEFT;
                 }
-                return TURN_RIGHT;
+                return TurtleAction::TURN_RIGHT;
             } else {
-                *cur_state = EXPLORE;
-                return FORWARD;
+                *current_state = TurtleState::EXPLORING;
+                return TurtleAction::MOVE;
             }
 
-        case BACKTRACK:
-            if (!bumped) {
-                *cur_state = EXPLORE;
-                turns = 0;
-                return FORWARD;
+        case TurtleState::BACKTRACKING:
+            if (!wall_ahead) {
+                *current_state = TurtleState::EXPLORING;
+                return TurtleAction::MOVE;
             } else {
-                return TURN_LEFT;
+                return TurtleAction::TURN_LEFT;
             }
 
         default:
-            ROS_ERROR("Invalid State");
-            return STOP;
+            ROS_ERROR("Invalid Turtle State");
+            return TurtleAction::STOP;
     }
 }
