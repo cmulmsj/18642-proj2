@@ -23,8 +23,8 @@ QPointF translatePos(QPointF pos_, int orientation);
 int translateOrnt(int orientation, TurtleCommand nextMove);
 TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state);
 
-bool check_bumped(QPointF pos_, int orient);
-void add_visit(QPointF& pos_);
-uint8_t get_visit(QPointF& pos_);
+bool detectObstacle(QPointF pos_, int orient);
+void addVisit(QPointF& pos_);
+uint8_t getVisit(QPointF& pos_);
 
 #endif // STUDENT_H
