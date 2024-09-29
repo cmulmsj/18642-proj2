@@ -13,20 +13,20 @@
 
 #include "student.h"
 
-static int8_t visited[MAZE_SIZE][MAZE_SIZE] = {0};
+static int8_t visited[GRID_DIMENSION][GRID_DIMENSION] = {0};
 
-void record_visited(QPointF& pos_) {
+void logVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+    if (x >= 0 && x < GRID_DIMENSION && y >= 0 && y < GRID_DIMENSION) {
         visited[x][y]++;
     }
 }
 
-uint8_t get_visited(QPointF& pos_) {
+uint8_t getVisitCount(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+    if (x >= 0 && x < GRID_DIMENSION && y >= 0 && y < GRID_DIMENSION) {
         return visited[x][y];
     }
     return 0;
