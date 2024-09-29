@@ -22,87 +22,56 @@
  */
 
 #include "student.h"
-#include "mashengl_maze_params.h"
 
+// Translates relative move requests to absolute coordinates and updates the maze display.
 bool moveTurtle(QPointF& pos_, int& nw_or) {
-    static int count_down = 0;
-    static NavigationMode current_mode = NavigationMode::INITIAL;
+    bool bumped = checkWall(pos_, nw_or); // Check if the turtle is facing a wall
+    turtleMove nextMove = studentTurtleStep(bumped); // Get the next move from the turtle logic
 
-    if (count_down == 0) {
-        if (current_mode == NavigationMode::INITIAL) {
-            addVisit(pos_);
-            displayVisits(getVisit(pos_));
-        }
+    // Translate the relative move to absolute coordinates
+    pos_ = translatePos(pos_, nextMove);
+    nw_or = translateOrnt(nw_or, nextMove);
 
-        // Step 1: Detect obstacle before updating orientation
-        bool has_wall = detectObstacle(pos_, nw_or);
-        bool at_goal = atend(pos_.x(), pos_.y());
+    // Update display based on the number of visits in the current cell
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    int visits = getVisitCount(x, y);
+    displayVisits(visits); // Display the number of visits
 
-        // Step 2: Decide next move based on current state and obstacle
-        TurtleCommand nextMove = studentTurtleStep(has_wall, at_goal, &current_mode);
-
-        // Step 3: Update orientation after determining the next move
-        nw_or = translateOrnt(nw_or, nextMove);
-
-        ROS_INFO("Orientation=%d  Mode=%d  NextMove=%d", nw_or, static_cast<int>(current_mode), static_cast<int>(nextMove));
-
-        // Step 4: Move the turtle if the next move is to move forward
-        if (nextMove == TurtleCommand::ADVANCE) {
-            if (!has_wall) {
-                pos_ = translatePos(pos_, nw_or);
-                addVisit(pos_);
-                displayVisits(getVisit(pos_));
-            } else {
-                ROS_WARN("Cannot move forward; wall detected ahead.");
-            }
-        }
-
-        // Step 5: Check if the turtle has reached the goal
-        if (current_mode == NavigationMode::COMPLETE) {
-            return false;
-        }
-
-        count_down = MOVE_DELAY;
-        return true;
+    // If turtle reaches the goal, stop moving
+    if (atEnd(x, y)) {
+        return false;
     }
 
-    count_down--;
-    return false;
+    return true; // Turtle continues to move
 }
 
-QPointF translatePos(QPointF pos_, int orientation) {
-    switch (static_cast<TurtleDirection>(orientation)) {
-        case TurtleDirection::WEST:  pos_.setX(pos_.x() - 1); break;
-        case TurtleDirection::SOUTH: pos_.setY(pos_.y() - 1); break; // Adjusted to decrease y
-        case TurtleDirection::EAST:  pos_.setX(pos_.x() + 1); break;
-        case TurtleDirection::NORTH: pos_.setY(pos_.y() + 1); break; // Adjusted to increase y
+// Translates turtleMove (e.g., forward, left, right) to new absolute position
+QPointF translatePos(QPointF pos_, turtleMove nextMove) {
+    switch (nextMove) {
+        case FORWARD:
+            if (nw_or == NORTH) pos_.setY(pos_.y() - 1);
+            if (nw_or == SOUTH) pos_.setY(pos_.y() + 1);
+            if (nw_or == EAST) pos_.setX(pos_.x() + 1);
+            if (nw_or == WEST) pos_.setX(pos_.x() - 1);
+            break;
+        default:
+            break;
     }
     return pos_;
 }
 
-int translateOrnt(int orientation, TurtleCommand nextMove) {
+// Translates turtleMove (e.g., left, right) to new orientation (NORTH, SOUTH, EAST, WEST)
+int translateOrnt(int orientation, turtleMove nextMove) {
     switch (nextMove) {
-        case TurtleCommand::ROTATE_CW:
-            return (orientation + 1) % DIRECTION_COUNT;
-        case TurtleCommand::ROTATE_CCW:
-            return (orientation - 1 + DIRECTION_COUNT) % DIRECTION_COUNT;
+        case LEFT:
+            orientation = (orientation + 3) % 4; // Turning left
+            break;
+        case RIGHT:
+            orientation = (orientation + 1) % 4; // Turning right
+            break;
         default:
-            return orientation;
+            break;
     }
+    return orientation;
 }
-
-
-bool detectObstacle(QPointF pos_, int orient) {
-    int x1 = pos_.x(), y1 = pos_.y();
-    int x2 = x1, y2 = y1;
-
-    switch (static_cast<TurtleDirection>(orient)) {
-        case TurtleDirection::WEST:  x2 = x1 - 1; break;
-        case TurtleDirection::SOUTH: y2 = y1 - 1; break; // Adjusted to decrease y
-        case TurtleDirection::EAST:  x2 = x1 + 1; break;
-        case TurtleDirection::NORTH: y2 = y1 + 1; break; // Adjusted to increase y
-    }
-
-    return bumped(x1, y1, x2, y2);
-}
-
