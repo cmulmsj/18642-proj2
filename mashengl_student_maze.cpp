@@ -35,7 +35,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
             ROS_INFO("moveTurtle: Initial position recorded and visits displayed.");
         }
 
-        bool has_wall = check_bumped(pos_, static_cast<Orientation>(nw_or));
+        bool has_wall = detectObstacle(pos_, static_cast<Orientation>(nw_or));
         bool at_goal = atend(pos_.x(), pos_.y());
 
         ROS_INFO("moveTurtle: Checking obstacles - Has Wall: %d, At Goal: %d", has_wall, at_goal);
@@ -78,7 +78,7 @@ QPointF translatePos(QPointF pos_, Orientation orientation) {
             ROS_INFO("translatePos: Moving LEFT to (%.0f, %.0f)", pos_.x(), pos_.y());
             break;
         case DOWN:
-            pos_.setY(pos_.y() - 1);
+            pos_.setY(pos_.y() - 1); // Assuming y decreases when moving south
             ROS_INFO("translatePos: Moving DOWN to (%.0f, %.0f)", pos_.x(), pos_.y());
             break;
         case RIGHT:
@@ -86,7 +86,7 @@ QPointF translatePos(QPointF pos_, Orientation orientation) {
             ROS_INFO("translatePos: Moving RIGHT to (%.0f, %.0f)", pos_.x(), pos_.y());
             break;
         case UP:
-            pos_.setY(pos_.y() + 1);
+            pos_.setY(pos_.y() + 1); // Assuming y increases when moving north
             ROS_INFO("translatePos: Moving UP to (%.0f, %.0f)", pos_.x(), pos_.y());
             break;
         default:
@@ -96,8 +96,7 @@ QPointF translatePos(QPointF pos_, Orientation orientation) {
     return pos_;
 }
 
-
-int translateOrnt(int orientation, TurtleMove nextMove) {
+int translateOrnt(int orientation, turtleMove nextMove) {
     int new_orientation = orientation;
     switch (nextMove) {
         case TURNRIGHT:
@@ -119,7 +118,6 @@ int translateOrnt(int orientation, TurtleMove nextMove) {
     }
     return new_orientation;
 }
-
 
 bool detectObstacle(QPointF pos_, Orientation orient) {
     int x1 = pos_.x(), y1 = pos_.y();
@@ -155,5 +153,6 @@ bool detectObstacle(QPointF pos_, Orientation orient) {
     ROS_INFO("detectObstacle: Wall detected: %d", wall_detected);
     return wall_detected;
 }
+
 
 
