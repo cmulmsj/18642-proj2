@@ -60,18 +60,18 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
 
 QPointF translatePos(QPointF pos_, int orientation) {
     switch (static_cast<MazeDirection>(orientation)) {
-        case MazeDirection::WESTWARD:  pos_.setX(pos_.x() - 1); break;
-        case MazeDirection::SOUTHWARD: pos_.setY(pos_.y() + 1); break;
-        case MazeDirection::EASTWARD:  pos_.setX(pos_.x() + 1); break;
-        case MazeDirection::NORTHWARD: pos_.setY(pos_.y() - 1); break;
+        case MazeDirection::WEST:  pos_.setX(pos_.x() - 1); break;
+        case MazeDirection::SOUTH: pos_.setY(pos_.y() + 1); break;
+        case MazeDirection::EAST:  pos_.setX(pos_.x() + 1); break;
+        case MazeDirection::NORTH: pos_.setY(pos_.y() - 1); break;
     }
     return pos_;
 }
 
 int translateOrnt(int orientation, TurtleAction next_action) {
-    if (next_action == TurtleAction::PIVOT_CLOCKWISE) {
+    if (next_action == TurtleAction::TURN_RIGHT) {
         return (orientation + 1) % ORIENTATION_COUNT;
-    } else if (next_action == TurtleAction::PIVOT_COUNTERCLOCKWISE) {
+    } else if (next_action == TurtleAction::TURN_LEFT) {
         return (orientation + ORIENTATION_COUNT - 1) % ORIENTATION_COUNT;
     }
     return orientation;
