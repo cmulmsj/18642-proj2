@@ -13,85 +13,79 @@
 
 #include "student.h"
 
-// Initialize the visit map to keep track of visited cells
-static int8_t visit_map[MAZE_SIZE][MAZE_SIZE] = {0};
+static int8_t visit_record[MAZE_GRID_SIZE][MAZE_GRID_SIZE] = {0};
 
-// Renamed to addVisit
 void addVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
-        visit_map[x][y]++;
-        ROS_INFO("addVisit: Visited (%d, %d). Visit count: %d", x, y, visit_map[x][y]);
-    } else {
-        ROS_WARN("addVisit: Attempted to visit out-of-bounds position (%d, %d). Ignoring.", x, y);
+
+    if (x < 0 || x >= MAZE_GRID_SIZE || y < 0 || y >= MAZE_GRID_SIZE) {
+        ROS_ERROR("Attempted to add visit outside maze boundaries: (%d, %d)", x, y);
+        return;
     }
+
+    visit_record[x][y]++;
+    ROS_DEBUG("Recorded visit at (%d, %d). Total visits: %d", x, y, visit_record[x][y]);
 }
 
-// Renamed to getVisit
-uint8_t getVisit(QPointF& pos_) {
+uint8_t retrieveVisitCount(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
-        ROS_INFO("getVisit: Visit count at (%d, %d): %d", x, y, visit_map[x][y]);
-        return visit_map[x][y];
+
+    if (x < 0 || x >= MAZE_GRID_SIZE || y < 0 || y >= MAZE_GRID_SIZE) {
+        ROS_ERROR("Attempted to retrieve visit count outside maze boundaries: (%d, %d)", x, y);
+        return 0;
     }
-    ROS_WARN("getVisit: Attempted to get visit count for out-of-bounds position (%d, %d). Returning 0.", x, y);
-    return 0;
+
+    ROS_DEBUG("Retrieved visit count at (%d, %d): %d", x, y, visit_record[x][y]);
+    return visit_record[x][y];
 }
 
-turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
+turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state) {
     turtleMove nextMove;
 
-    // Log the current state and sensor inputs
-    ROS_INFO("studentTurtleStep called with - Bumped: %d, Goal: %d, Current State: %d",
-             bumped, goal, *cur_state);
-
-    if (goal) {
-        *cur_state = GOAL;
-        nextMove = STOP;
-        ROS_INFO("studentTurtleStep: Goal reached. Transitioning to GOAL state. Next Move: STOP");
-        return nextMove;
-    }
+    ROS_INFO("Current State: %d, Obstacle: %s, Goal: %s",
+             *cur_state, bumped ? "Yes" : "No", goal ? "Yes" : "No");
 
     switch (*cur_state) {
         case INIT:
         case GO:
-            if (!bumped) {
-                *cur_state = GO;
-                nextMove = MOVE;
-                ROS_INFO("studentTurtleStep: State %d: Path is clear. Advancing forward. Next Move: MOVE", *cur_state);
+            if (goal) {
+                *cur_state = GOAL;
+                nextMove = STOPPING;
+                ROS_INFO("Goal reached. Transitioning to GOAL state.");
             } else {
                 *cur_state = TURN;
-                nextMove = TURNRIGHT;
-                ROS_INFO("studentTurtleStep: State %d: Path is blocked. Turning right. Next Move: TURNRIGHT", *cur_state);
+                nextMove = TURNING_RIGHT;
+                ROS_INFO("Transitioning to TURN state. Next move: TURNING_RIGHT.");
             }
             break;
 
         case TURN:
             if (bumped) {
                 *cur_state = TURN;
-                nextMove = TURNLEFT;
-                ROS_WARN("studentTurtleStep: State TURN: Still blocked after turning right. Turning left. Next Move: TURNLEFT");
+                nextMove = TURNING_LEFT;
+                ROS_INFO("Obstacle detected while turning. Next move: TURNING_LEFT.");
             } else {
                 *cur_state = GO;
-                nextMove = MOVE;
-                ROS_INFO("studentTurtleStep: State TURN: Path is now clear after turning. Advancing forward. Next Move: MOVE");
+                nextMove = MOVING;
+                ROS_INFO("No obstacle detected. Transitioning to GO state. Next move: MOVING.");
             }
             break;
 
         case GOAL:
-            nextMove = STOP;
-            ROS_INFO("studentTurtleStep: State GOAL: Halting the turtle.");
+            nextMove = STOPPING;
+            ROS_INFO("Already in GOAL state. Next move: STOPPING.");
             break;
 
         default:
-            ROS_ERROR("studentTurtleStep: Encountered invalid state %d. Halting.", *cur_state);
-            nextMove = STOP;
+            ROS_ERROR("Invalid TurtleState encountered: %d", *cur_state);
+            nextMove = STOPPING;
             break;
     }
 
-    ROS_INFO("studentTurtleStep: Transitioned to state %d with next move %d", *cur_state, nextMove);
+    ROS_INFO("Selected Next Move: %d", nextMove);
     return nextMove;
 }
+
 
