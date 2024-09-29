@@ -119,39 +119,33 @@ int translateOrnt(int orientation, turtleMove nextMove) {
     return new_orientation;
 }
 
-bool detectObstacle(QPointF pos_, Orientation orient) {
-    int x1 = pos_.x(), y1 = pos_.y();
+bool detectObstacle(QPointF current_pos, CompassDirection direction) {
+    int x1 = static_cast<int>(current_pos.x());
+    int y1 = static_cast<int>(current_pos.y());
     int x2 = x1, y2 = y1;
 
-    switch (orient) {
-        case LEFT:
-            y2 = y1 + 1;
+    switch (direction) {
+        case CompassDirection::WEST:
+            x2 = x1 - 1;
             break;
-        case DOWN:
+        case CompassDirection::SOUTH:
+            y2 = y1 - 1;
+            break;
+        case CompassDirection::EAST:
             x2 = x1 + 1;
             break;
-        case RIGHT:
-            x2 = x1 + 1;
+        case CompassDirection::NORTH:
             y2 = y1 + 1;
-            x1 = x1 + 1;
-            break;
-        case UP:
-            x2 = x1 + 1;
-            y2 = y1 + 1;
-            y1 = y1 + 1;
             break;
         default:
-            ROS_ERROR("detectObstacle: Invalid Orientation %d", orient);
+            ROS_ERROR("Invalid Compass Direction in detectObstacle.");
             return false;
     }
 
-    // Log the coordinates being checked for a wall
-    ROS_INFO("detectObstacle: Checking wall between (%d, %d) and (%d, %d)", x1, y1, x2, y2);
-
-    bool wall_detected = bumped(x1, y1, x2, y2);
-
-    ROS_INFO("detectObstacle: Wall detected: %d", wall_detected);
-    return wall_detected;
+    ROS_DEBUG("Checking for obstacle between (%d, %d) and (%d, %d)", x1, y1, x2, y2);
+    bool is_bumped = bumped(x1, y1, x2, y2);
+    ROS_INFO("Obstacle detected ahead: %s", is_bumped ? "Yes" : "No");
+    return is_bumped;
 }
 
 
