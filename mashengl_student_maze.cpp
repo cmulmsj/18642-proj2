@@ -27,6 +27,7 @@
 bool moveTurtle(QPointF& pos_, int& nw_or) {
     static int count_down = 0;
     static NavigationMode current_mode = NavigationMode::INITIAL;
+    static bool last_bumped = false; // Store the last bumped value
 
     if (count_down == 0) {
         if (current_mode == NavigationMode::INITIAL) {
@@ -34,13 +35,18 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
             displayVisits(getVisit(pos_));
         }
 
-        bool has_wall = detectObstacle(pos_, nw_or);
         bool at_goal = atend(pos_.x(), pos_.y());
 
-        TurtleCommand nextMove = studentTurtleStep(has_wall, at_goal, &current_mode);
+        // Pass the previous bumped value to studentTurtleStep
+        TurtleCommand nextMove = studentTurtleStep(last_bumped, at_goal, &current_mode);
+
+        // Update the orientation based on the turtle's move
         nw_or = translateOrnt(nw_or, nextMove);
 
-        ROS_INFO("Orientation=%d  Mode=%d  NextMove=%d", nw_or, static_cast<int>(current_mode), static_cast<int>(nextMove));
+        // Now detect obstacles using the updated orientation
+        bool has_wall = detectObstacle(pos_, nw_or);
+
+        ROS_INFO("Orientation=%d  Mode=%d  NextMove=%d  HasWall=%d", nw_or, static_cast<int>(current_mode), static_cast<int>(nextMove), has_wall);
 
         if (nextMove == TurtleCommand::ADVANCE && !has_wall) {
             pos_ = translatePos(pos_, nw_or);
@@ -49,8 +55,11 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
         }
 
         if (current_mode == NavigationMode::COMPLETE) {
-            return false;
+            return false; // Turtle has reached the goal
         }
+
+        // Store the current has_wall value for the next iteration
+        last_bumped = has_wall;
 
         count_down = MOVE_DELAY;
         return true;
