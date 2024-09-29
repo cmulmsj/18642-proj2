@@ -13,60 +13,75 @@
 
 #include "student.h"
 
-static int8_t visit_record[GRID_SIZE][GRID_SIZE] = {0};
+bool moveTurtle(QPointF& pos_, int& nw_or)
+{
+    static int count_down = 0;
+    static State current_state = INIT;
 
-void addVisit(QPointF& pos_) {
-    int x = static_cast<int>(pos_.x());
-    int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
-        visit_record[x][y]++;
+    if (count_down == 0) {
+        if (current_state == INIT) {
+            record_visited(pos_);
+            displayVisits(get_visited(pos_));
+        }
+
+        bool has_wall = check_bumped(pos_, nw_or);
+        bool at_goal = atend(pos_.x(), pos_.y());
+
+        turtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_state);
+        nw_or = translateOrnt(nw_or, nextMove);
+
+        ROS_INFO("Orientation=%d  State=%d  NextMove=%d", nw_or, current_state, nextMove);
+
+        if (nextMove == MOVE) {
+            pos_ = translatePos(pos_, nw_or);
+            record_visited(pos_);
+            displayVisits(get_visited(pos_));
+        }
+
+        if (current_state == GOAL) {
+            return false;
+        }
+
+        count_down = TIMEOUT;
+        return true;
+    }
+
+    count_down--;
+    return false;
+}
+
+QPointF translatePos(QPointF pos_, int orientation) {
+    switch (static_cast<Orientation>(orientation)) {
+        case LEFT:  pos_.setX(pos_.x() - 1); break;
+        case DOWN:  pos_.setY(pos_.y() + 1); break;
+        case RIGHT: pos_.setX(pos_.x() + 1); break;
+        case UP:    pos_.setY(pos_.y() - 1); break;
+        default:    ROS_ERROR("Invalid Orientation"); break;
+    }
+    return pos_;
+}
+
+int translateOrnt(int orientation, turtleMove nextMove) {
+    switch (nextMove) {
+        case TURNRIGHT: return (orientation + 1) % NUM_ORIENTATIONS;
+        case TURNLEFT:  return (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
+        case MOVE:
+        case STOP:      return orientation;
+        default:        ROS_ERROR("Invalid Move"); return orientation;
     }
 }
 
-uint8_t getVisit(QPointF& pos_) {
-    int x = static_cast<int>(pos_.x());
-    int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
-        return visit_record[x][y];
-    }
-    return 0;
-}
+bool check_bumped(QPointF pos_, int orient) {
+    int x1 = pos_.x(), y1 = pos_.y();
+    int x2 = x1, y2 = y1;
 
-TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state) {
-    static int rotation_count = 0;
-
-    if (goal) {
-        *cur_state = NavigationMode::COMPLETE;
-        return TurtleCommand::HALT;
+    switch (static_cast<Orientation>(orient)) {
+        case LEFT:  x2--; break;
+        case DOWN:  y2++; break;
+        case RIGHT: x2++; break;
+        case UP:    y2--; break;
+        default:    ROS_ERROR("Invalid Orientation"); return false;
     }
 
-    switch (*cur_state) {
-        case NavigationMode::INITIAL:
-        case NavigationMode::FORWARD:
-            if (bumped) {
-                *cur_state = NavigationMode::ADJUST;
-                rotation_count = 1;
-                return TurtleCommand::ROTATE_CW;
-            } else {
-                *cur_state = NavigationMode::FORWARD;
-                return TurtleCommand::ADVANCE;
-            }
-
-        case NavigationMode::ADJUST:
-            if (bumped) {
-                rotation_count++;
-                if (rotation_count >= DIRECTION_COUNT) {
-                    rotation_count = 0;
-                    return TurtleCommand::ROTATE_CCW;
-                }
-                return TurtleCommand::ROTATE_CW;
-            } else {
-                *cur_state = NavigationMode::FORWARD;
-                return TurtleCommand::ADVANCE;
-            }
-
-        default:
-            ROS_ERROR("Invalid Navigation Mode");
-            return TurtleCommand::HALT;
-    }
+    return bumped(x1, y1, x2, y2);
 }
