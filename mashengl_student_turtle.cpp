@@ -13,75 +13,52 @@
 
 #include "student.h"
 
-bool moveTurtle(QPointF& pos_, int& nw_or)
-{
-    static int count_down = 0;
-    static State current_state = INIT;
+static int8_t visited[MAZE_SIZE][MAZE_SIZE] = {0};
 
-    if (count_down == 0) {
-        if (current_state == INIT) {
-            record_visited(pos_);
-            displayVisits(get_visited(pos_));
-        }
-
-        bool has_wall = check_bumped(pos_, nw_or);
-        bool at_goal = atend(pos_.x(), pos_.y());
-
-        turtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_state);
-        nw_or = translateOrnt(nw_or, nextMove);
-
-        ROS_INFO("Orientation=%d  State=%d  NextMove=%d", nw_or, current_state, nextMove);
-
-        if (nextMove == MOVE) {
-            pos_ = translatePos(pos_, nw_or);
-            record_visited(pos_);
-            displayVisits(get_visited(pos_));
-        }
-
-        if (current_state == GOAL) {
-            return false;
-        }
-
-        count_down = TIMEOUT;
-        return true;
-    }
-
-    count_down--;
-    return false;
-}
-
-QPointF translatePos(QPointF pos_, int orientation) {
-    switch (static_cast<Orientation>(orientation)) {
-        case LEFT:  pos_.setX(pos_.x() - 1); break;
-        case DOWN:  pos_.setY(pos_.y() + 1); break;
-        case RIGHT: pos_.setX(pos_.x() + 1); break;
-        case UP:    pos_.setY(pos_.y() - 1); break;
-        default:    ROS_ERROR("Invalid Orientation"); break;
-    }
-    return pos_;
-}
-
-int translateOrnt(int orientation, turtleMove nextMove) {
-    switch (nextMove) {
-        case TURNRIGHT: return (orientation + 1) % NUM_ORIENTATIONS;
-        case TURNLEFT:  return (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
-        case MOVE:
-        case STOP:      return orientation;
-        default:        ROS_ERROR("Invalid Move"); return orientation;
+void record_visited(QPointF& pos_) {
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        visited[x][y]++;
     }
 }
 
-bool check_bumped(QPointF pos_, int orient) {
-    int x1 = pos_.x(), y1 = pos_.y();
-    int x2 = x1, y2 = y1;
+uint8_t get_visited(QPointF& pos_) {
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        return visited[x][y];
+    }
+    return 0;
+}
 
-    switch (static_cast<Orientation>(orient)) {
-        case LEFT:  x2--; break;
-        case DOWN:  y2++; break;
-        case RIGHT: x2++; break;
-        case UP:    y2--; break;
-        default:    ROS_ERROR("Invalid Orientation"); return false;
+turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
+    if (goal) {
+        *cur_state = GOAL;
+        return STOP;
     }
 
-    return bumped(x1, y1, x2, y2);
+    switch (*cur_state) {
+        case INIT:
+        case GO:
+            if (bumped) {
+                *cur_state = TURN;
+                return TURNRIGHT;
+            } else {
+                *cur_state = GO;
+                return MOVE;
+            }
+
+        case TURN:
+            if (bumped) {
+                return TURNRIGHT;
+            } else {
+                *cur_state = GO;
+                return MOVE;
+            }
+
+        default:
+            ROS_ERROR("Invalid State");
+            return STOP;
+    }
 }
