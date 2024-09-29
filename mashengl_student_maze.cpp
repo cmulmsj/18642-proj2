@@ -22,37 +22,37 @@
  */
 
 #include "student.h"
+#include "mashengl_maze_params.h"
 
-bool moveTurtle(QPointF& pos_, int& nw_or)
-{
+bool moveTurtle(QPointF& pos_, int& nw_or) {
     static int count_down = 0;
-    static State current_state = INIT;
+    static NavigationMode current_mode = NavigationMode::INITIAL;
 
     if (count_down == 0) {
-        if (current_state == INIT) {
-            record_visited(pos_);
-            displayVisits(get_visited(pos_));
+        if (current_mode == NavigationMode::INITIAL) {
+            addVisit(pos_);
+            displayVisits(getVisit(pos_));
         }
 
-        bool has_wall = check_bumped(pos_, static_cast<Orientation>(nw_or));
+        bool has_wall = detectObstacle(pos_, nw_or);
         bool at_goal = atend(pos_.x(), pos_.y());
 
-        turtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_state);
+        TurtleCommand nextMove = studentTurtleStep(has_wall, at_goal, &current_mode);
         nw_or = translateOrnt(nw_or, nextMove);
 
-        ROS_INFO("Orientation=%d  State=%d  NextMove=%d", nw_or, current_state, nextMove);
+        ROS_INFO("Orientation=%d  Mode=%d  NextMove=%d", nw_or, static_cast<int>(current_mode), static_cast<int>(nextMove));
 
-        if (nextMove == MOVE) {
-            pos_ = translatePos(pos_, static_cast<Orientation>(nw_or));
-            record_visited(pos_);
-            displayVisits(get_visited(pos_));
+        if (nextMove == TurtleCommand::ADVANCE && !has_wall) {
+            pos_ = translatePos(pos_, nw_or);
+            addVisit(pos_);
+            displayVisits(getVisit(pos_));
         }
 
-        if (current_state == GOAL) {
+        if (current_mode == NavigationMode::COMPLETE) {
             return false;
         }
 
-        count_down = TIMEOUT;
+        count_down = MOVE_DELAY;
         return true;
     }
 
@@ -60,37 +60,33 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return false;
 }
 
-QPointF translatePos(QPointF pos_, Orientation orientation) {
-    switch (orientation) {
-        case LEFT:  pos_.setX(pos_.x() - 1); break;
-        case DOWN:  pos_.setY(pos_.y() - 1); break;
-        case RIGHT: pos_.setX(pos_.x() + 1); break;
-        case UP:    pos_.setY(pos_.y() + 1); break;
-        default:    ROS_ERROR("Invalid Orientation"); break;
+QPointF translatePos(QPointF pos_, int orientation) {
+    switch (static_cast<TurtleDirection>(orientation)) {
+        case TurtleDirection::WEST:  pos_.setX(pos_.x() - 1); break;
+        case TurtleDirection::SOUTH: pos_.setY(pos_.y() + 1); break;
+        case TurtleDirection::EAST:  pos_.setX(pos_.x() + 1); break;
+        case TurtleDirection::NORTH: pos_.setY(pos_.y() - 1); break;
     }
     return pos_;
 }
 
-int translateOrnt(int orientation, turtleMove nextMove) {
+int translateOrnt(int orientation, TurtleCommand nextMove) {
     switch (nextMove) {
-        case TURNRIGHT: return (orientation + 1) % NUM_ORIENTATIONS;
-        case TURNLEFT:  return (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
-        case MOVE:
-        case STOP:      return orientation;
-        default:        ROS_ERROR("Invalid Move"); return orientation;
+        case TurtleCommand::ROTATE_CW:  return (orientation + 1) % DIRECTION_COUNT;
+        case TurtleCommand::ROTATE_CCW: return (orientation - 1 + DIRECTION_COUNT) % DIRECTION_COUNT;
+        default: return orientation;
     }
 }
 
-bool check_bumped(QPointF pos_, Orientation orient) {
+bool detectObstacle(QPointF pos_, int orient) {
     int x1 = pos_.x(), y1 = pos_.y();
     int x2 = x1, y2 = y1;
 
-    switch (orient) {
-        case LEFT:  y2++; break;
-        case DOWN:  x2++; break;
-        case RIGHT: x2++; y2++; x1++; break;
-        case UP:    x2++; y2++; y1++; break;
-        default:    ROS_ERROR("Invalid Orientation"); return false;
+    switch (static_cast<TurtleDirection>(orient)) {
+        case TurtleDirection::WEST:  x2--; break;
+        case TurtleDirection::SOUTH: y2++; break;
+        case TurtleDirection::EAST:  x2++; break;
+        case TurtleDirection::NORTH: y2--; break;
     }
 
     return bumped(x1, y1, x2, y2);
