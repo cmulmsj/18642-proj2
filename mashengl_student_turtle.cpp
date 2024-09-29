@@ -16,6 +16,7 @@
 // Initialize the visit map to keep track of visited cells
 static int8_t visit_map[MAZE_SIZE][MAZE_SIZE] = {0};
 
+// Renamed to addVisit
 void addVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
@@ -27,7 +28,7 @@ void addVisit(QPointF& pos_) {
     }
 }
 
-
+// Renamed to getVisit
 uint8_t getVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
@@ -39,9 +40,8 @@ uint8_t getVisit(QPointF& pos_) {
     return 0;
 }
 
-
-TurtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
-    TurtleMove nextMove;
+turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
+    turtleMove nextMove;
 
     // Log the current state and sensor inputs
     ROS_INFO("studentTurtleStep called with - Bumped: %d, Goal: %d, Current State: %d",
@@ -49,8 +49,8 @@ TurtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
 
     if (goal) {
         *cur_state = GOAL;
-        nextMove = HALT;
-        ROS_INFO("Goal reached. Transitioning to GOAL state. Next Move: HALT");
+        nextMove = STOP;
+        ROS_INFO("studentTurtleStep: Goal reached. Transitioning to GOAL state. Next Move: STOP");
         return nextMove;
     }
 
@@ -60,11 +60,11 @@ TurtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
             if (!bumped) {
                 *cur_state = GO;
                 nextMove = MOVE;
-                ROS_INFO("State %d: Path is clear. Advancing forward. Next Move: MOVE", *cur_state);
+                ROS_INFO("studentTurtleStep: State %d: Path is clear. Advancing forward. Next Move: MOVE", *cur_state);
             } else {
                 *cur_state = TURN;
                 nextMove = TURNRIGHT;
-                ROS_INFO("State %d: Path is blocked. Turning right. Next Move: TURNRIGHT", *cur_state);
+                ROS_INFO("studentTurtleStep: State %d: Path is blocked. Turning right. Next Move: TURNRIGHT", *cur_state);
             }
             break;
 
@@ -72,22 +72,22 @@ TurtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
             if (bumped) {
                 *cur_state = TURN;
                 nextMove = TURNLEFT;
-                ROS_WARN("State TURN: Still blocked after turning right. Turning left. Next Move: TURNLEFT");
+                ROS_WARN("studentTurtleStep: State TURN: Still blocked after turning right. Turning left. Next Move: TURNLEFT");
             } else {
                 *cur_state = GO;
                 nextMove = MOVE;
-                ROS_INFO("State TURN: Path is now clear after turning. Advancing forward. Next Move: MOVE");
+                ROS_INFO("studentTurtleStep: State TURN: Path is now clear after turning. Advancing forward. Next Move: MOVE");
             }
             break;
 
         case GOAL:
-            nextMove = HALT;
-            ROS_INFO("State GOAL: Halting the turtle.");
+            nextMove = STOP;
+            ROS_INFO("studentTurtleStep: State GOAL: Halting the turtle.");
             break;
 
         default:
             ROS_ERROR("studentTurtleStep: Encountered invalid state %d. Halting.", *cur_state);
-            nextMove = HALT;
+            nextMove = STOP;
             break;
     }
 
