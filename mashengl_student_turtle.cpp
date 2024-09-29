@@ -13,48 +13,81 @@
 
 #include "student.h"
 
-static int8_t visited[MAZE_SIZE][MAZE_SIZE] = {0};
+// Initialize the visit map to keep track of visited cells
+static int8_t visit_map[MAZE_SIZE][MAZE_SIZE] = {0};
 
-void record_visited(QPointF& pos_) {
-    visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())]++;
+// Renamed to addVisit
+void addVisit(QPointF& pos_) {
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        visit_map[x][y]++;
+        ROS_INFO("Visited (%d, %d): %d times", x, y, visit_map[x][y]);
+    } else {
+        ROS_WARN("Attempted to visit out-of-bounds position (%d, %d)", x, y);
+    }
 }
 
-uint8_t get_visited(QPointF& pos_) {
-    return visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())];
+// Renamed to getVisit
+uint8_t getVisit(QPointF& pos_) {
+    int x = static_cast<int>(pos_.x());
+    int y = static_cast<int>(pos_.y());
+    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        return visit_map[x][y];
+    }
+    ROS_WARN("Attempted to get visit count for out-of-bounds position (%d, %d)", x, y);
+    return 0;
 }
 
-turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
-    turtleMove nextMove;
+TurtleMove studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state) {
+    TurtleMove nextMove;
+
+    if (goal) {
+        *cur_state = COMPLETE;
+        nextMove = HALT;
+        ROS_INFO("Goal reached. Halting.");
+        return nextMove;
+    }
 
     switch (*cur_state) {
-        case INIT:
-        case GO:
-            if (goal) {
-                *cur_state = GOAL;
-                nextMove = STOP;
+        case INITIAL:
+        case PROCEED:
+            // In INITIAL and PROCEED states, attempt to rotate clockwise to find a path
+            if (!bumped) {
+                *cur_state = PROCEED;
+                nextMove = ADVANCE;
+                ROS_INFO("State PROCEED: Advancing forward.");
             } else {
-                *cur_state = TURN;
-                nextMove = TURNRIGHT;
+                *cur_state = ADJUST;
+                nextMove = ROTATE_CW;
+                ROS_INFO("State ADJUST: Rotating clockwise.");
             }
             break;
 
-        case TURN:
+        case ADJUST:
+            // In ADJUST state, decide whether to rotate counter-clockwise or advance
             if (bumped) {
-                *cur_state = TURN;
-                nextMove = TURNLEFT;
+                // If bumped after rotation, rotate counter-clockwise to try another direction
+                nextMove = ROTATE_CCW;
+                ROS_INFO("State ADJUST: Bumped after rotation. Rotating counter-clockwise.");
             } else {
-                *cur_state = GO;
-                nextMove = MOVE;
+                // If no bump after rotation, proceed to advance
+                *cur_state = PROCEED;
+                nextMove = ADVANCE;
+                ROS_INFO("State ADJUST: No bump. Advancing forward.");
             }
             break;
 
-        case GOAL:
-            nextMove = STOP;
+        case COMPLETE:
+            // In COMPLETE state, halt the turtle
+            nextMove = HALT;
+            ROS_INFO("State COMPLETE: Halting.");
             break;
 
         default:
-            ROS_ERROR("Invalid State");
-            nextMove = STOP;
+            // Handle unexpected states
+            ROS_ERROR("Invalid Navigation Mode encountered.");
+            nextMove = HALT;
             break;
     }
 
