@@ -1,30 +1,29 @@
-#ifndef MAZE_PARAMS_H
-#define MAZE_PARAMS_H
+#ifndef MASHENGL_MAZE_PARAMS_H
+#define MASHENGL_MAZE_PARAMS_H
 
-const int GRID_DIMENSION = 23;
-const int MOVE_COOLDOWN = 40;
-const int ORIENTATION_COUNT = 4;
-const int FULL_ROTATION = 4;
+const int GRID_SIZE = 23;
+const int MOVE_DELAY = 40;
+const int DIRECTION_COUNT = 4;
 
-enum class MazeDirection : int {
+enum class TurtleDirection : int {
     WEST = 0,
     SOUTH = 1,
     EAST = 2,
     NORTH = 3
 };
 
-enum class TurtleAction : int {
-    MOVE,
-    TURN_RIGHT,
-    TURN_LEFT,
-    STOP
+enum class TurtleCommand : int {
+    ADVANCE,
+    ROTATE_CW,
+    ROTATE_CCW,
+    HALT
 };
 
-enum class TurtleState : int {
-    EXPLORING,
-    TURNING,
-    BACKTRACKING,
-    FINISHED
+enum class NavigationMode : int {
+    INITIAL,
+    FORWARD,
+    ADJUST,
+    COMPLETE
 };
 
-#endif // MAZE_PARAMS_H
+#endif // MASHENGL_MAZE_PARAMS_H
