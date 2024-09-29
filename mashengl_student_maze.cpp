@@ -34,7 +34,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
             displayVisits(get_visited(pos_));
         }
 
-        bool has_wall = check_bumped(pos_, nw_or);
+        bool has_wall = check_bumped(pos_, static_cast<Orientation>(nw_or));
         bool at_goal = atend(pos_.x(), pos_.y());
 
         turtleMove nextMove = studentTurtleStep(has_wall, at_goal, &current_state);
@@ -43,7 +43,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
         ROS_INFO("Orientation=%d  State=%d  NextMove=%d", nw_or, current_state, nextMove);
 
         if (nextMove == MOVE) {
-            pos_ = translatePos(pos_, nw_or);
+            pos_ = translatePos(pos_, static_cast<Orientation>(nw_or));
             record_visited(pos_);
             displayVisits(get_visited(pos_));
         }
@@ -60,12 +60,12 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return false;
 }
 
-QPointF translatePos(QPointF pos_, int orientation) {
-    switch (static_cast<Orientation>(orientation)) {
+QPointF translatePos(QPointF pos_, Orientation orientation) {
+    switch (orientation) {
         case LEFT:  pos_.setX(pos_.x() - 1); break;
-        case DOWN:  pos_.setY(pos_.y() + 1); break;
+        case DOWN:  pos_.setY(pos_.y() - 1); break;
         case RIGHT: pos_.setX(pos_.x() + 1); break;
-        case UP:    pos_.setY(pos_.y() - 1); break;
+        case UP:    pos_.setY(pos_.y() + 1); break;
         default:    ROS_ERROR("Invalid Orientation"); break;
     }
     return pos_;
@@ -81,15 +81,15 @@ int translateOrnt(int orientation, turtleMove nextMove) {
     }
 }
 
-bool check_bumped(QPointF pos_, int orient) {
+bool check_bumped(QPointF pos_, Orientation orient) {
     int x1 = pos_.x(), y1 = pos_.y();
     int x2 = x1, y2 = y1;
 
-    switch (static_cast<Orientation>(orient)) {
-        case LEFT:  x2--; break;
-        case DOWN:  y2++; break;
-        case RIGHT: x2++; break;
-        case UP:    y2--; break;
+    switch (orient) {
+        case LEFT:  y2++; break;
+        case DOWN:  x2++; break;
+        case RIGHT: x2++; y2++; x1++; break;
+        case UP:    x2++; y2++; y1++; break;
         default:    ROS_ERROR("Invalid Orientation"); return false;
     }
 
