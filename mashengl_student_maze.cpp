@@ -29,24 +29,37 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
     static NavigationMode current_mode = NavigationMode::INITIAL;
 
     if (count_down == 0) {
-        if (current_mode == NavigationMode::INITIAL) {
-            addVisit(pos_);
-            displayVisits(getVisit(pos_));
-        }
+        addVisit(pos_);
+        displayVisits(getVisit(pos_));
 
-        bool has_wall = detectObstacle(pos_, nw_or);
+        bool wall_ahead = detectObstacle(pos_, nw_or);
+        bool wall_to_right = detectObstacle(pos_, (nw_or + 1) % DIRECTION_COUNT);
         bool at_goal = atend(pos_.x(), pos_.y());
 
-        TurtleCommand nextMove = studentTurtleStep(has_wall, at_goal, &current_mode);
-        nw_or = translateOrnt(nw_or, nextMove);
-
+        TurtleCommand nextMove = studentTurtleStep(wall_to_right, at_goal, &current_mode);
+        
         ROS_INFO("Orientation=%d  Mode=%d  NextMove=%d", nw_or, static_cast<int>(current_mode), static_cast<int>(nextMove));
 
-        if (nextMove == TurtleCommand::ADVANCE && !has_wall) {
-            pos_ = translatePos(pos_, nw_or);
-            addVisit(pos_);
-            displayVisits(getVisit(pos_));
+        switch (nextMove) {
+            case TurtleCommand::ADVANCE:
+                if (!wall_ahead) {
+                    pos_ = translatePos(pos_, nw_or);
+                } else {
+                    current_mode = NavigationMode::ADJUST;
+                }
+                break;
+            case TurtleCommand::ROTATE_CW:
+                nw_or = (nw_or + 1) % DIRECTION_COUNT;
+                break;
+            case TurtleCommand::ROTATE_CCW:
+                nw_or = (nw_or + DIRECTION_COUNT - 1) % DIRECTION_COUNT;
+                break;
+            case TurtleCommand::HALT:
+                return false;
         }
+
+        addVisit(pos_);
+        displayVisits(getVisit(pos_));
 
         if (current_mode == NavigationMode::COMPLETE) {
             return false;
