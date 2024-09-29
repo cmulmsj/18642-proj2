@@ -48,7 +48,7 @@ void record_visited(QPointF& pos_);
 uint8_t get_visited(QPointF& pos_);
 
 const uint8_t NUM_ORIENTATIONS = 4;
-const uint8_t TIMEOUT = 40;
+const uint8_t TIMEOUT = 5;
 const uint8_t MAZE_SIZE = 23;
 
 #endif // STUDENT_H
