@@ -38,59 +38,58 @@ uint8_t getVisit(QPointF& pos_) {
     ROS_WARN("Attempted to get visit count for out-of-bounds position (%d, %d)", x, y);
     return 0;
 }
-
-TurtleMove studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state) {
+TurtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
     TurtleMove nextMove;
 
+    // Log the current state and sensor inputs
+    ROS_INFO("studentTurtleStep called with - Bumped: %d, Goal: %d, Current State: %d",
+             bumped, goal, *cur_state);
+
     if (goal) {
-        *cur_state = COMPLETE;
+        *cur_state = GOAL;
         nextMove = HALT;
-        ROS_INFO("Goal reached. Halting.");
+        ROS_INFO("Goal reached. Transitioning to GOAL state. Next Move: HALT");
         return nextMove;
     }
 
     switch (*cur_state) {
-        case INITIAL:
-        case PROCEED:
-            // In INITIAL and PROCEED states, attempt to rotate clockwise to find a path
+        case INIT:
+        case GO:
             if (!bumped) {
-                *cur_state = PROCEED;
-                nextMove = ADVANCE;
-                ROS_INFO("State PROCEED: Advancing forward.");
+                *cur_state = GO;
+                nextMove = MOVE;
+                ROS_INFO("State %d: Path is clear. Advancing forward. Next Move: MOVE", *cur_state);
             } else {
-                *cur_state = ADJUST;
-                nextMove = ROTATE_CW;
-                ROS_INFO("State ADJUST: Rotating clockwise.");
+                *cur_state = TURN;
+                nextMove = TURNRIGHT;
+                ROS_INFO("State %d: Path is blocked. Turning right. Next Move: TURNRIGHT", *cur_state);
             }
             break;
 
-        case ADJUST:
-            // In ADJUST state, decide whether to rotate counter-clockwise or advance
+        case TURN:
             if (bumped) {
-                // If bumped after rotation, rotate counter-clockwise to try another direction
-                nextMove = ROTATE_CCW;
-                ROS_INFO("State ADJUST: Bumped after rotation. Rotating counter-clockwise.");
+                *cur_state = TURN;
+                nextMove = TURNLEFT;
+                ROS_WARN("State TURN: Still blocked after turning right. Turning left. Next Move: TURNLEFT");
             } else {
-                // If no bump after rotation, proceed to advance
-                *cur_state = PROCEED;
-                nextMove = ADVANCE;
-                ROS_INFO("State ADJUST: No bump. Advancing forward.");
+                *cur_state = GO;
+                nextMove = MOVE;
+                ROS_INFO("State TURN: Path is now clear after turning. Advancing forward. Next Move: MOVE");
             }
             break;
 
-        case COMPLETE:
-            // In COMPLETE state, halt the turtle
+        case GOAL:
             nextMove = HALT;
-            ROS_INFO("State COMPLETE: Halting.");
+            ROS_INFO("State GOAL: Halting the turtle.");
             break;
 
         default:
-            // Handle unexpected states
-            ROS_ERROR("Invalid Navigation Mode encountered.");
+            ROS_ERROR("studentTurtleStep: Encountered invalid state %d. Halting.", *cur_state);
             nextMove = HALT;
             break;
     }
 
+    ROS_INFO("studentTurtleStep: Transitioned to state %d with next move %d", *cur_state, nextMove);
     return nextMove;
 }
 
