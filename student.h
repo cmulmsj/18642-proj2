@@ -39,11 +39,11 @@ enum State : int8_t {
     GOAL
 };
 
-QPointF translatePos(QPointF pos_, int orientation);
+QPointF translatePos(QPointF pos_, Orientation orientation);
 int translateOrnt(int orientation, turtleMove nextMove);
 turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state);
 
-bool check_bumped(QPointF pos_, int orient);
+bool check_bumped(QPointF pos_, Orientation orient);
 void record_visited(QPointF& pos_);
 uint8_t get_visited(QPointF& pos_);
 
