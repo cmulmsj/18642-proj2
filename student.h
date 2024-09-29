@@ -16,37 +16,43 @@
 bool bumped(int x1, int y1, int x2, int y2);
 bool atend(int x, int y);
 void displayVisits(int visits);
-bool moveTurtle(QPointF& pos_, int& nw_or);
+bool updateTurtle(QPointF& position, int& current_orientation);
 
-enum turtleMove : int8_t {
-    MOVING,
-    TURNING_RIGHT,
-    TURNING_LEFT,
-    STOPPING
+// Enumerations for turtle actions, orientations, and states
+enum class TurtleAction : int8_t {
+    ADVANCE,
+    ROTATE_RIGHT,
+    ROTATE_LEFT,
+    HALT
 };
 
-enum Orientation : int8_t {
+enum class CompassDirection : int8_t {
     WEST,
     SOUTH,
     EAST,
     NORTH
 };
 
-enum TurtleState : int8_t {
-    INIT,
-    GO,
-    TURN,
-    GOAL
+enum class TurtleState : int8_t {
+    INITIAL_STATE,
+    MOVING_STATE,
+    ADJUSTING_STATE,
+    GOAL_REACHED
 };
 
-QPointF translatePos(QPointF pos_, Orientation orientation);
-int translateOrnt(int orientation, turtleMove nextMove);
-turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state);
+// Helper functions for position and orientation translations
+QPointF computeNextPosition(QPointF current_pos, CompassDirection direction);
+int updateOrientation(int orientation, TurtleAction action);
 
-bool detectObstacle(QPointF pos_, Orientation orient);
-void addVisit(QPointF& pos_);
-uint8_t retrieveVisitCount(QPointF& pos_);
+// Turtle decision-making function
+TurtleAction determineNextAction(bool is_bumped, bool at_goal, TurtleState* current_state);
 
+// Obstacle detection and visit tracking
+bool detectObstacle(QPointF current_pos, CompassDirection direction);
+void addVisit(QPointF& position);
+uint8_t retrieveVisitCount(QPointF& position);
+
+// Constants
 const uint8_t ORIENTATION_COUNT = 4;
 const uint8_t MOVE_DELAY = 10;
 const uint8_t MAZE_GRID_SIZE = 23;
