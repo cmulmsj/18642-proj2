@@ -16,49 +16,47 @@
 static int8_t visited[MAZE_SIZE][MAZE_SIZE] = {0};
 
 void record_visited(QPointF& pos_) {
-    int x = static_cast<int>(pos_.x());
-    int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
-        visited[x][y]++;
-    }
+    visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())]++;
 }
 
 uint8_t get_visited(QPointF& pos_) {
-    int x = static_cast<int>(pos_.x());
-    int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
-        return visited[x][y];
-    }
-    return 0;
+    return visited[static_cast<int>(pos_.x())][static_cast<int>(pos_.y())];
 }
 
 turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
-    if (goal) {
-        *cur_state = GOAL;
-        return STOP;
-    }
+    turtleMove nextMove;
 
     switch (*cur_state) {
         case INIT:
         case GO:
-            if (bumped) {
-                *cur_state = TURN;
-                return TURNRIGHT;
+            if (goal) {
+                *cur_state = GOAL;
+                nextMove = STOP;
             } else {
-                *cur_state = GO;
-                return MOVE;
+                *cur_state = TURN;
+                nextMove = TURNRIGHT;
             }
+            break;
 
         case TURN:
             if (bumped) {
-                return TURNRIGHT;
+                *cur_state = TURN;
+                nextMove = TURNLEFT;
             } else {
                 *cur_state = GO;
-                return MOVE;
+                nextMove = MOVE;
             }
+            break;
+
+        case GOAL:
+            nextMove = STOP;
+            break;
 
         default:
             ROS_ERROR("Invalid State");
-            return STOP;
+            nextMove = STOP;
+            break;
     }
+
+    return nextMove;
 }
