@@ -33,6 +33,8 @@ uint8_t getVisit(QPointF& pos_) {
 }
 
 TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state) {
+    static int rotation_count = 0;
+
     if (goal) {
         *cur_state = NavigationMode::COMPLETE;
         return TurtleCommand::HALT;
@@ -41,23 +43,24 @@ TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_stat
     switch (*cur_state) {
         case NavigationMode::INITIAL:
         case NavigationMode::FORWARD:
-            if (!bumped) {
-                // If there's no wall to the right, turn right
-                *cur_state = NavigationMode::FORWARD;
+            if (bumped) {
+                *cur_state = NavigationMode::ADJUST;
+                rotation_count = 1;
                 return TurtleCommand::ROTATE_CW;
             } else {
-                // If there's a wall to the right, move forward
                 *cur_state = NavigationMode::FORWARD;
                 return TurtleCommand::ADVANCE;
             }
 
         case NavigationMode::ADJUST:
             if (bumped) {
-                // If we bump into a wall while moving forward, turn left
-                *cur_state = NavigationMode::FORWARD;
-                return TurtleCommand::ROTATE_CCW;
+                rotation_count++;
+                if (rotation_count >= DIRECTION_COUNT) {
+                    rotation_count = 0;
+                    return TurtleCommand::ROTATE_CCW;
+                }
+                return TurtleCommand::ROTATE_CW;
             } else {
-                // This state should not be reached in normal operation
                 *cur_state = NavigationMode::FORWARD;
                 return TurtleCommand::ADVANCE;
             }
