@@ -16,17 +16,17 @@
 // Initialize the visit map to keep track of visited cells
 static int8_t visit_map[MAZE_SIZE][MAZE_SIZE] = {0};
 
-// Renamed to addVisit
 void addVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
     if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
         visit_map[x][y]++;
-        ROS_INFO("Visited (%d, %d): %d times", x, y, visit_map[x][y]);
+        ROS_INFO("addVisit: Visited (%d, %d). Visit count: %d", x, y, visit_map[x][y]);
     } else {
-        ROS_WARN("Attempted to visit out-of-bounds position (%d, %d)", x, y);
+        ROS_WARN("addVisit: Attempted to visit out-of-bounds position (%d, %d). Ignoring.", x, y);
     }
 }
+
 
 // Renamed to getVisit
 uint8_t getVisit(QPointF& pos_) {
