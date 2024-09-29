@@ -2,9 +2,9 @@
  * Originally by Philip Koopman (koopman@cmu.edu)
  * and Milda Zizyte (milda@cmu.edu)
  *
- * STUDENT NAME:
- * ANDREW ID:
- * LAST UPDATE:
+ * STUDENT NAME: Mashengjun Li
+ * ANDREW ID: mashengl
+ * LAST UPDATE: 09/28/2024
  *
  * This file keeps track of where the turtle is in the maze
  * and updates the location when the turtle is moved. It shall not
@@ -26,13 +26,13 @@
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
     static int count_down = 0;
-    static TurtleState current_state = INIT;
+    static TurtleState current_state = INITIALIZING;
 
     if (count_down == 0) {
-        ROS_INFO("MoveTurtle called with position=(%.2f, %.2f), orientation=%d, state=%d",
+        ROS_INFO("moveTurtle called with position=(%.2f, %.2f), orientation=%d, state=%d",
                  pos_.x(), pos_.y(), nw_or, current_state);
 
-        if (current_state == INIT) {
+        if (current_state == INITIALIZING) {
             addVisit(pos_);
             displayVisits(retrieveVisitCount(pos_));
             ROS_INFO("Initialized: Recorded initial position and displayed visit count.");
@@ -71,7 +71,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
                 break;
         }
 
-        if (current_state == GOAL) {
+        if (current_state == GOAL_REACHED) {
             ROS_INFO("Goal reached. Stopping turtle.");
             return false;
         }
@@ -103,7 +103,7 @@ QPointF translatePos(QPointF pos_, Orientation orientation) {
             ROS_DEBUG("Translated position north to (%.2f, %.2f)", pos_.x(), pos_.y());
             break;
         default:
-            ROS_ERROR("Invalid Orientation: %d", orientation);
+            ROS_ERROR("translatePos: Invalid Orientation %d", orientation);
             break;
     }
     return pos_;
@@ -125,7 +125,7 @@ int translateOrnt(int orientation, turtleMove nextMove) {
             ROS_DEBUG("Orientation remains the same: %d", new_orientation);
             break;
         default:
-            ROS_ERROR("Invalid Move Command: %d", nextMove);
+            ROS_ERROR("translateOrnt: Invalid Move Command %d", nextMove);
             break;
     }
     return new_orientation;
