@@ -71,26 +71,31 @@ bool moveTurtle(QPointF& pos_, int& nw_or)
     return false;
 }
 
-QPointF translatePos(QPointF pos_, TurtleDirection orientation) {
+QPointF translatePos(QPointF pos_, Orientation orientation) {
     switch (orientation) {
-        case WEST:
+        case LEFT:
             pos_.setX(pos_.x() - 1);
+            ROS_INFO("translatePos: Moving LEFT to (%.0f, %.0f)", pos_.x(), pos_.y());
             break;
-        case SOUTH:
-            pos_.setY(pos_.y() - 1); // Assuming y decreases when moving south
+        case DOWN:
+            pos_.setY(pos_.y() - 1);
+            ROS_INFO("translatePos: Moving DOWN to (%.0f, %.0f)", pos_.x(), pos_.y());
             break;
-        case EAST:
+        case RIGHT:
             pos_.setX(pos_.x() + 1);
+            ROS_INFO("translatePos: Moving RIGHT to (%.0f, %.0f)", pos_.x(), pos_.y());
             break;
-        case NORTH:
-            pos_.setY(pos_.y() + 1); // Assuming y increases when moving north
+        case UP:
+            pos_.setY(pos_.y() + 1);
+            ROS_INFO("translatePos: Moving UP to (%.0f, %.0f)", pos_.x(), pos_.y());
             break;
         default:
-            ROS_ERROR("Invalid Orientation in translatePos");
+            ROS_ERROR("translatePos: Invalid Orientation %d", orientation);
             break;
     }
     return pos_;
 }
+
 
 int translateOrnt(int orientation, TurtleMove nextMove) {
     switch (nextMove) {
