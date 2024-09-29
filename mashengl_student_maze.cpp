@@ -31,7 +31,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
     if (count_down == 0) {
         if (current_mode == NavigationMode::INITIAL) {
             addVisit(pos_);
-            displayVisits(get_visited(pos_));
+            displayVisits(getVisit(pos_));
         }
 
         bool has_wall = detectObstacle(pos_, nw_or);
