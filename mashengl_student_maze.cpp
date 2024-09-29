@@ -25,77 +25,68 @@
 
 bool moveTurtle(QPointF& pos_, int& nw_or)
 {
-    static int cooldown_timer = 0;
-    static TurtleState current_state = TurtleState::EXPLORING;
+    static int cooldown = 0;
+    static NavigationMode current_mode = NavigationMode::INITIAL;
 
-    if (cooldown_timer == 0) {
-        logVisit(pos_);
-        displayVisits(getVisitCount(pos_));
-
-        bool wall_ahead = detectObstacle(pos_, nw_or);
-        bool at_goal = atend(pos_.x(), pos_.y());
-
-        TurtleAction next_action = studentTurtleStep(wall_ahead, at_goal, &current_state);
-        
-        ROS_INFO("Position: (%.0f, %.0f), Facing: %d, Action: %d, State: %d", 
-                 pos_.x(), pos_.y(), nw_or, static_cast<int>(next_action), static_cast<int>(current_state));
-
-        switch (next_action) {
-            case TurtleAction::MOVE:
-                if (!wall_ahead) {
-                    pos_ = translatePos(pos_, nw_or);
-                }
-                break;
-            case TurtleAction::TURN_RIGHT:
-                nw_or = (nw_or + 1) % ORIENTATION_COUNT;
-                break;
-            case TurtleAction::TURN_LEFT:
-                nw_or = (nw_or + ORIENTATION_COUNT - 1) % ORIENTATION_COUNT;
-                break;
-            case TurtleAction::STOP:
-                return false;
+    if (cooldown == 0) {
+        if (current_mode == NavigationMode::INITIAL) {
+            logVisit(pos_);
+            displayVisits(getVisitCount(pos_));
         }
 
-        if (current_state == TurtleState::FINISHED) {
+        bool obstacle_detected = detectObstacle(pos_, nw_or);
+        bool goal_reached = atend(pos_.x(), pos_.y());
+
+        TurtleCommand next_command = decideTurtleAction(obstacle_detected, goal_reached, &current_mode);
+        nw_or = updateOrientation(nw_or, next_command);
+
+        ROS_INFO("Facing=%d  Mode=%d  Command=%d", nw_or, static_cast<int>(current_mode), static_cast<int>(next_command));
+
+        if (next_command == TurtleCommand::ADVANCE && !obstacle_detected) {
+            pos_ = updatePosition(pos_, nw_or);
+            logVisit(pos_);
+            displayVisits(getVisitCount(pos_));
+        }
+
+        if (current_mode == NavigationMode::COMPLETE) {
             return false;
         }
 
-        cooldown_timer = MOVE_COOLDOWN;
+        cooldown = MOVE_DELAY;
         return true;
     }
 
-    cooldown_timer--;
+    cooldown--;
     return false;
 }
 
-QPointF translatePos(QPointF pos_, int orientation) {
-    switch (static_cast<MazeDirection>(orientation)) {
-        case MazeDirection::WEST:  pos_.setX(pos_.x() - 1); break;
-        case MazeDirection::SOUTH: pos_.setY(pos_.y() + 1); break;
-        case MazeDirection::EAST:  pos_.setX(pos_.x() + 1); break;
-        case MazeDirection::NORTH: pos_.setY(pos_.y() - 1); break;
+QPointF updatePosition(QPointF pos_, int orientation) {
+    switch (static_cast<TurtleDirection>(orientation)) {
+        case TurtleDirection::WEST:  pos_.setX(pos_.x() - 1); break;
+        case TurtleDirection::SOUTH: pos_.setY(pos_.y() + 1); break;
+        case TurtleDirection::EAST:  pos_.setX(pos_.x() + 1); break;
+        case TurtleDirection::NORTH: pos_.setY(pos_.y() - 1); break;
     }
     return pos_;
 }
 
-int translateOrnt(int orientation, TurtleAction next_action) {
-    if (next_action == TurtleAction::TURN_RIGHT) {
-        return (orientation + 1) % ORIENTATION_COUNT;
-    } else if (next_action == TurtleAction::TURN_LEFT) {
-        return (orientation + ORIENTATION_COUNT - 1) % ORIENTATION_COUNT;
+int updateOrientation(int orientation, TurtleCommand next_command) {
+    switch (next_command) {
+        case TurtleCommand::ROTATE_CW:  return (orientation + 1) % DIRECTION_COUNT;
+        case TurtleCommand::ROTATE_CCW: return (orientation - 1 + DIRECTION_COUNT) % DIRECTION_COUNT;
+        default: return orientation;
     }
-    return orientation;
 }
 
 bool detectObstacle(QPointF pos_, int facing) {
     int x1 = pos_.x(), y1 = pos_.y();
     int x2 = x1, y2 = y1;
 
-    switch (static_cast<MazeDirection>(facing)) {
-        case MazeDirection::WEST:  x2--; break;
-        case MazeDirection::SOUTH: y2++; break;
-        case MazeDirection::EAST:  x2++; break;
-        case MazeDirection::NORTH: y2--; break;
+    switch (static_cast<TurtleDirection>(facing)) {
+        case TurtleDirection::WEST:  x2--; break;
+        case TurtleDirection::SOUTH: y2++; break;
+        case TurtleDirection::EAST:  x2++; break;
+        case TurtleDirection::NORTH: y2--; break;
     }
 
     return bumped(x1, y1, x2, y2);
