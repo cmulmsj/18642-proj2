@@ -13,47 +13,47 @@
 
 #include "student.h"
 
-static int8_t visit_count[GRID_SIZE][GRID_SIZE] = {0};
+static int8_t visit_record[GRID_SIZE][GRID_SIZE] = {0};
 
-void logVisit(QPointF& pos_) {
+void addVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
     if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
-        visit_count[x][y]++;
+        visit_record[x][y]++;
     }
 }
 
-uint8_t getVisitCount(QPointF& pos_) {
+uint8_t getVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
     if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
-        return visit_count[x][y];
+        return visit_record[x][y];
     }
     return 0;
 }
 
-TurtleCommand decideTurtleAction(bool obstacle_detected, bool goal_reached, NavigationMode* current_mode) {
+TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state) {
     static int rotation_count = 0;
 
-    if (goal_reached) {
-        *current_mode = NavigationMode::COMPLETE;
+    if (goal) {
+        *cur_state = NavigationMode::COMPLETE;
         return TurtleCommand::HALT;
     }
 
-    switch (*current_mode) {
+    switch (*cur_state) {
         case NavigationMode::INITIAL:
         case NavigationMode::FORWARD:
-            if (obstacle_detected) {
-                *current_mode = NavigationMode::ADJUST;
+            if (bumped) {
+                *cur_state = NavigationMode::ADJUST;
                 rotation_count = 1;
                 return TurtleCommand::ROTATE_CW;
             } else {
-                *current_mode = NavigationMode::FORWARD;
+                *cur_state = NavigationMode::FORWARD;
                 return TurtleCommand::ADVANCE;
             }
 
         case NavigationMode::ADJUST:
-            if (obstacle_detected) {
+            if (bumped) {
                 rotation_count++;
                 if (rotation_count >= DIRECTION_COUNT) {
                     rotation_count = 0;
@@ -61,7 +61,7 @@ TurtleCommand decideTurtleAction(bool obstacle_detected, bool goal_reached, Navi
                 }
                 return TurtleCommand::ROTATE_CW;
             } else {
-                *current_mode = NavigationMode::FORWARD;
+                *cur_state = NavigationMode::FORWARD;
                 return TurtleCommand::ADVANCE;
             }
 
