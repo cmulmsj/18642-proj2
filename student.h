@@ -18,37 +18,39 @@ bool atend(int x, int y);
 void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
 
-enum turtleMove : int8_t {
-    MOVE,
-    TURNRIGHT,
-    TURNLEFT,
-    STOP
+// Enumerations for turtle moves and orientations
+enum TurtleMove : int8_t {
+    ADVANCE,
+    ROTATE_CW,
+    ROTATE_CCW,
+    HALT
 };
 
-enum Orientation : int8_t {
-    LEFT,
-    DOWN,
-    RIGHT,
-    UP
+enum TurtleDirection : int8_t {
+    WEST,  // 0
+    SOUTH, // 1
+    EAST,  // 2
+    NORTH  // 3
 };
 
-enum State : int8_t {
-    INIT,
-    GO,
-    TURN,
-    GOAL
+enum NavigationMode : int8_t {
+    INITIAL,
+    PROCEED,
+    ADJUST,
+    COMPLETE
 };
 
-QPointF translatePos(QPointF pos_, Orientation orientation);
-int translateOrnt(int orientation, turtleMove nextMove);
-turtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state);
+// Function prototypes with updated naming conventions
+QPointF translatePos(QPointF pos_, TurtleDirection orientation);
+int translateOrnt(int orientation, TurtleMove nextMove);
+TurtleMove studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state);
 
-bool check_bumped(QPointF pos_, Orientation orient);
-void record_visited(QPointF& pos_);
-uint8_t get_visited(QPointF& pos_);
+bool detectObstacle(QPointF pos_, TurtleDirection orient);
+void addVisit(QPointF& pos_);
+uint8_t getVisit(QPointF& pos_);
 
 const uint8_t NUM_ORIENTATIONS = 4;
-const uint8_t TIMEOUT = 5;
+const uint8_t TIMEOUT = 40;
 const uint8_t MAZE_SIZE = 23;
 
 #endif // STUDENT_H
