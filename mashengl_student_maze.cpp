@@ -98,19 +98,28 @@ QPointF translatePos(QPointF pos_, Orientation orientation) {
 
 
 int translateOrnt(int orientation, TurtleMove nextMove) {
+    int new_orientation = orientation;
     switch (nextMove) {
-        case ROTATE_CW:
-            return (orientation + 1) % NUM_ORIENTATIONS;
-        case ROTATE_CCW:
-            return (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
-        case ADVANCE:
-        case HALT:
-            return orientation; // No orientation change for ADVANCE or HALT
+        case TURNRIGHT:
+            new_orientation = (orientation + 1) % NUM_ORIENTATIONS;
+            ROS_INFO("translateOrnt: TURNRIGHT. New Orientation: %d", new_orientation);
+            break;
+        case TURNLEFT:
+            new_orientation = (orientation - 1 + NUM_ORIENTATIONS) % NUM_ORIENTATIONS;
+            ROS_INFO("translateOrnt: TURNLEFT. New Orientation: %d", new_orientation);
+            break;
+        case MOVE:
+        case STOP:
+            ROS_INFO("translateOrnt: %s. Orientation remains at %d", 
+                     (nextMove == MOVE) ? "MOVE" : "STOP", new_orientation);
+            break;
         default:
-            ROS_ERROR("Invalid Move in translateOrnt");
-            return orientation;
+            ROS_ERROR("translateOrnt: Invalid Move %d. Orientation remains at %d", nextMove, new_orientation);
+            break;
     }
+    return new_orientation;
 }
+
 
 bool detectObstacle(QPointF pos_, Orientation orient) {
     int x1 = pos_.x(), y1 = pos_.y();
