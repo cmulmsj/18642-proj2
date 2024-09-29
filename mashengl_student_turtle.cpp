@@ -33,42 +33,38 @@ uint8_t getVisit(QPointF& pos_) {
 }
 
 TurtleCommand studentTurtleStep(bool bumped, bool goal, NavigationMode* cur_state) {
-    static int rotation_count = 0;
-
-    if (goal) {
-        *cur_state = NavigationMode::COMPLETE;
-        return TurtleCommand::HALT;
-    }
+    TurtleCommand nextMove;
 
     switch (*cur_state) {
         case NavigationMode::INITIAL:
         case NavigationMode::FORWARD:
-            if (bumped) {
-                *cur_state = NavigationMode::ADJUST;
-                rotation_count = 1;
-                return TurtleCommand::ROTATE_CW;
+            if (goal) {
+                *cur_state = NavigationMode::COMPLETE;
+                nextMove = TurtleCommand::HALT;
             } else {
-                *cur_state = NavigationMode::FORWARD;
-                return TurtleCommand::ADVANCE;
+                *cur_state = NavigationMode::ADJUST;
+                nextMove = TurtleCommand::ROTATE_CW;
             }
+            break;
 
         case NavigationMode::ADJUST:
             if (bumped) {
-                rotation_count++;
-                if (rotation_count >= DIRECTION_COUNT) {
-                    rotation_count = 0;
-                    // After rotating in all directions, stop if no path found
-                    *cur_state = NavigationMode::COMPLETE;
-                    return TurtleCommand::HALT;
-                }
-                return TurtleCommand::ROTATE_CW;
+                nextMove = TurtleCommand::ROTATE_CCW;
             } else {
                 *cur_state = NavigationMode::FORWARD;
-                return TurtleCommand::ADVANCE;
+                nextMove = TurtleCommand::ADVANCE;
             }
+            break;
+
+        case NavigationMode::COMPLETE:
+            nextMove = TurtleCommand::HALT;
+            break;
 
         default:
             ROS_ERROR("Invalid Navigation Mode");
-            return TurtleCommand::HALT;
+            nextMove = TurtleCommand::HALT;
+            break;
     }
+
+    return nextMove;
 }
