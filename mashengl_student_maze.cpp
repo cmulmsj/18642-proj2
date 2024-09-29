@@ -93,11 +93,12 @@ bool detectObstacle(QPointF pos_, int orient) {
     int x2 = x1, y2 = y1;
 
     switch (static_cast<TurtleDirection>(orient)) {
-        case TurtleDirection::WEST:  x2--; break;
-        case TurtleDirection::SOUTH: y2++; break;
-        case TurtleDirection::EAST:  x2++; break;
-        case TurtleDirection::NORTH: y2--; break;
+        case TurtleDirection::WEST:  x2 = x1 - 1; break;
+        case TurtleDirection::SOUTH: y2 = y1 - 1; break; // Adjusted to decrease y
+        case TurtleDirection::EAST:  x2 = x1 + 1; break;
+        case TurtleDirection::NORTH: y2 = y1 + 1; break; // Adjusted to increase y
     }
 
     return bumped(x1, y1, x2, y2);
 }
+
