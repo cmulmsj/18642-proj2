@@ -13,48 +13,47 @@
 #include <QPointF>
 
 // Functions to interface with ROS. Don't change these lines!
-bool bumped(int x1, int y1, int x2, int y2);
+bool bumped(int start_x, int start_y, int end_x, int end_y);
 bool atend(int x, int y);
 void displayVisits(int visits);
-bool updateTurtle(QPointF& position, int& current_orientation);
+bool moveTurtle(QPointF& pos_, int& nw_or);
 
-// Enumerations for turtle actions, orientations, and states
-enum class TurtleAction : int8_t {
-    ADVANCE,
-    ROTATE_RIGHT,
-    ROTATE_LEFT,
-    HALT
+// Movement Commands
+enum turtleMove : int8_t {
+    MOVING,
+    TURNING_RIGHT,
+    TURNING_LEFT,
+    STOPPING
 };
 
-enum class CompassDirection : int8_t {
+// Orientations
+enum Orientation : int8_t {
     WEST,
     SOUTH,
     EAST,
     NORTH
 };
 
-enum class TurtleState : int8_t {
-    INITIAL_STATE,
-    MOVING_STATE,
-    ADJUSTING_STATE,
-    GOAL_REACHED
+// Turtle States
+enum TurtleState : int8_t {
+    INITIALIZING,  // Renamed from INIT
+    MOVING_STATE,  // Renamed from GO
+    TURNING_STATE, // Renamed from TURN
+    GOAL_REACHED    // Renamed from GOAL
 };
 
-// Helper functions for position and orientation translations
-QPointF computeNextPosition(QPointF current_pos, CompassDirection direction);
-int updateOrientation(int orientation, TurtleAction action);
+// Function Declarations
+QPointF translatePos(QPointF pos_, Orientation orientation);
+int translateOrnt(int orientation, turtleMove nextMove);
+turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state);
 
-// Turtle decision-making function
-TurtleAction determineNextAction(bool is_bumped, bool at_goal, TurtleState* current_state);
-
-// Obstacle detection and visit tracking
-bool detectObstacle(QPointF current_pos, CompassDirection direction);
-void addVisit(QPointF& position);
-uint8_t retrieveVisitCount(QPointF& position);
+bool detectObstacle(QPointF pos_, Orientation orient);
+void addVisit(QPointF& pos_);
+uint8_t retrieveVisitCount(QPointF& pos_);
 
 // Constants
-const uint8_t ORIENTATION_COUNT = 4;
-const uint8_t MOVE_DELAY = 10;
-const uint8_t MAZE_GRID_SIZE = 23;
+const uint8_t ORIENTATION_COUNT = 4; // Renamed from NUM_ORIENTATIONS
+const uint8_t MOVE_DELAY = 40;        // Renamed from TIMEOUT
+const uint8_t MAZE_GRID_SIZE = 23;    // Renamed from MAZE_SIZE
 
 #endif // STUDENT_H
