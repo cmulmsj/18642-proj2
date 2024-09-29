@@ -19,9 +19,9 @@ bool atend(int x, int y);
 void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
 
-QPointF translatePos(QPointF pos_, int orientation);
-int translateOrnt(int orientation, TurtleAction nextMove);
-TurtleAction studentTurtleStep(bool wall_ahead, bool at_goal, TurtleState* current_state);
+QPointF updatePosition(QPointF pos_, int orientation);
+int updateOrientation(int orientation, TurtleCommand nextCommand);
+TurtleCommand decideTurtleAction(bool obstacle_detected, bool goal_reached, NavigationMode* current_mode);
 
 bool detectObstacle(QPointF pos_, int facing);
 void logVisit(QPointF& pos_);
