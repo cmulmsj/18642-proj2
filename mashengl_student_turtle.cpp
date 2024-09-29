@@ -28,16 +28,18 @@ void addVisit(QPointF& pos_) {
 }
 
 
-// Renamed to getVisit
 uint8_t getVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
     if (x >= 0 && x < MAZE_SIZE && y >= 0 && y < MAZE_SIZE) {
+        ROS_INFO("getVisit: Visit count at (%d, %d): %d", x, y, visit_map[x][y]);
         return visit_map[x][y];
     }
-    ROS_WARN("Attempted to get visit count for out-of-bounds position (%d, %d)", x, y);
+    ROS_WARN("getVisit: Attempted to get visit count for out-of-bounds position (%d, %d). Returning 0.", x, y);
     return 0;
 }
+
+
 TurtleMove studentTurtleStep(bool bumped, bool goal, State* cur_state) {
     TurtleMove nextMove;
 
