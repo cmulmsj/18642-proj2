@@ -13,60 +13,60 @@
 
 #include "student.h"
 
-static int8_t visited[GRID_DIMENSION][GRID_DIMENSION] = {0};
+static int8_t visit_count[GRID_SIZE][GRID_SIZE] = {0};
 
 void logVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < GRID_DIMENSION && y >= 0 && y < GRID_DIMENSION) {
-        visited[x][y]++;
+    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+        visit_count[x][y]++;
     }
 }
 
 uint8_t getVisitCount(QPointF& pos_) {
     int x = static_cast<int>(pos_.x());
     int y = static_cast<int>(pos_.y());
-    if (x >= 0 && x < GRID_DIMENSION && y >= 0 && y < GRID_DIMENSION) {
-        return visited[x][y];
+    if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
+        return visit_count[x][y];
     }
     return 0;
 }
 
-TurtleAction studentTurtleStep(bool wall_ahead, bool at_goal, TurtleState* current_state) {
-    static int turn_count = 0;
+TurtleCommand decideTurtleAction(bool obstacle_detected, bool goal_reached, NavigationMode* current_mode) {
+    static int rotation_count = 0;
 
-    if (at_goal) {
-        *current_state = TurtleState::FINISHED;
-        return TurtleAction::STOP;
+    if (goal_reached) {
+        *current_mode = NavigationMode::COMPLETE;
+        return TurtleCommand::HALT;
     }
 
-    switch (*current_state) {
-        case TurtleState::EXPLORING:
-        case TurtleState::TURNING:
-            if (!wall_ahead) {
-                *current_state = TurtleState::EXPLORING;
-                turn_count = 0;
-                return TurtleAction::TURN_RIGHT;  // Always try to turn right first
+    switch (*current_mode) {
+        case NavigationMode::INITIAL:
+        case NavigationMode::FORWARD:
+            if (obstacle_detected) {
+                *current_mode = NavigationMode::ADJUST;
+                rotation_count = 1;
+                return TurtleCommand::ROTATE_CW;
             } else {
-                turn_count++;
-                if (turn_count >= 4) {
-                    *current_state = TurtleState::BACKTRACKING;
-                    turn_count = 0;
-                    return TurtleAction::TURN_LEFT;
-                }
-                return TurtleAction::TURN_LEFT;  // If can't turn right, turn left
+                *current_mode = NavigationMode::FORWARD;
+                return TurtleCommand::ADVANCE;
             }
 
-        case TurtleState::BACKTRACKING:
-            if (!wall_ahead) {
-                *current_state = TurtleState::EXPLORING;
-                return TurtleAction::MOVE;
+        case NavigationMode::ADJUST:
+            if (obstacle_detected) {
+                rotation_count++;
+                if (rotation_count >= DIRECTION_COUNT) {
+                    rotation_count = 0;
+                    return TurtleCommand::ROTATE_CCW;
+                }
+                return TurtleCommand::ROTATE_CW;
             } else {
-                return TurtleAction::TURN_LEFT;
+                *current_mode = NavigationMode::FORWARD;
+                return TurtleCommand::ADVANCE;
             }
 
         default:
-            ROS_ERROR("Invalid Turtle State");
-            return TurtleAction::STOP;
+            ROS_ERROR("Invalid Navigation Mode");
+            return TurtleCommand::HALT;
     }
 }
