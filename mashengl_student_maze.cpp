@@ -30,11 +30,11 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
 
     if (count_down == 0) {
         if (current_mode == NavigationMode::INITIAL) {
-            record_visited(pos_);
+            addVisit(pos_);
             displayVisits(get_visited(pos_));
         }
 
-        bool has_wall = check_bumped(pos_, nw_or);
+        bool has_wall = detectObstacle(pos_, nw_or);
         bool at_goal = atend(pos_.x(), pos_.y());
 
         TurtleCommand nextMove = studentTurtleStep(has_wall, at_goal, &current_mode);
@@ -44,8 +44,8 @@ bool moveTurtle(QPointF& pos_, int& nw_or) {
 
         if (nextMove == TurtleCommand::ADVANCE && !has_wall) {
             pos_ = translatePos(pos_, nw_or);
-            record_visited(pos_);
-            displayVisits(get_visited(pos_));
+            addVisit(pos_);
+            displayVisits(getVisit(pos_));
         }
 
         if (current_mode == NavigationMode::COMPLETE) {
