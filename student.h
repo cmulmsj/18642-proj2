@@ -21,7 +21,7 @@ bool moveTurtle(QPointF& pos_, int& nw_or);
 
 QPointF translatePos(QPointF pos_, int orientation);
 int translateOrnt(int orientation, TurtleAction nextMove);
-TurtleAction studentTurtleStep(bool obstacle_detected, bool goal_reached, NavigationPhase* current_phase);
+TurtleAction studentTurtleStep(bool wall_ahead, bool at_goal, TurtleState* current_state);
 
 bool detectObstacle(QPointF pos_, int facing);
 void logVisit(QPointF& pos_);
