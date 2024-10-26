@@ -90,12 +90,11 @@ static Orientation selectLowestVisitCount() {
 
 turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state) {
     static turtleMove next_move = STOPPING;
-    static TurtleState internal_state = INITIALIZING;
     static Orientation target_orientation = NORTH;
     static int remaining_rotation = 0;
     
     ROS_INFO("studentTurtleStep: Current State: %d, Bumped: %s, Goal: %s",
-             internal_state, bumped ? "Yes" : "No", goal ? "Yes" : "No");
+             *cur_state, bumped ? "Yes" : "No", goal ? "Yes" : "No");
 
     // Update adjacent cells information
     QPointF current_pos(0, 0);  // Will be set by maze.cpp
@@ -107,108 +106,72 @@ turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state) {
     }
 
     // Main state machine
-    switch (internal_state) {
-        case EVALUATING: {  // S1: EVALUATING state
-            ROS_INFO("State S1: EVALUATING");
-            next_move = STOPPING;
-
+    switch (*cur_state) {
+        case INITIALIZING: {  // S1: Initial evaluation state
+            ROS_INFO("State S1: INITIALIZING");
+            
             Orientation nextOrient = findLowestVisitCount();
-            if (nextOrient != current_orientation) {
-                target_orientation = nextOrient;
-                remaining_rotation = getRequiredRotation(target_orientation);
-                
-                // T1: Transition to ROTATING if rotation needed
-                if (remaining_rotation != 0) {
-                    internal_state = ROTATING;
-                    next_move = (remaining_rotation > 0) ? TURNING_RIGHT : TURNING_LEFT;
-                    ROS_INFO("Transition T1: EVALUATING -> ROTATING");
-                }
-                // T2: Transition to MOVING if no rotation needed
-                else {
-                    internal_state = MOVING;
-                    next_move = MOVING;
-                    ROS_INFO("Transition T2: EVALUATING -> MOVING");
-                }
-            }
-            // T3: Transition to BACKTRACKING if needed
-            else if (!adjacent_cells[nextOrient].accessible) {
-                internal_state = BACKTRACKING;
+            if (goal) {
+                *cur_state = GOAL_REACHED;
                 next_move = STOPPING;
-                ROS_INFO("Transition T3: EVALUATING -> BACKTRACKING");
-            }
-            else {
-                internal_state = MOVING;
+                ROS_INFO("Goal reached from INITIALIZING");
+            } else if (nextOrient != current_orientation) {
+                *cur_state = TURNING_STATE;
+                next_move = TURNING_RIGHT;
+                target_orientation = nextOrient;
+                ROS_INFO("Transition to TURNING_STATE for orientation change");
+            } else if (!adjacent_cells[nextOrient].accessible) {
+                next_move = TURNING_RIGHT;
+                ROS_INFO("Obstacle detected, turning right");
+            } else {
+                *cur_state = MOVING_STATE;
                 next_move = MOVING;
                 ROS_INFO("Moving forward in current direction");
             }
             break;
         }
 
-        case ROTATING: {  // S2: ROTATING state
-            ROS_INFO("State S2: ROTATING");
-            if (remaining_rotation != 0) {
-                next_move = (remaining_rotation > 0) ? TURNING_RIGHT : TURNING_LEFT;
-                remaining_rotation += (remaining_rotation > 0) ? -1 : 1;
-                current_orientation = static_cast<Orientation>((current_orientation + 
-                    (remaining_rotation > 0 ? 1 : 3)) % ORIENTATION_COUNT);
-            }
-            // T4: Transition back to EVALUATING when rotation complete
-            else {
-                internal_state = EVALUATING;
-                next_move = STOPPING;
-                ROS_INFO("Transition T4: ROTATING -> EVALUATING");
-            }
-            break;
-        }
-
-        case MOVING: {  // S3: MOVING state
-            ROS_INFO("State S3: MOVING");
+        case TURNING_STATE: {  // S2: Turning state
+            ROS_INFO("State S2: TURNING_STATE");
             if (bumped) {
-                internal_state = EVALUATING;
-                next_move = STOPPING;
-                ROS_INFO("Hit wall, returning to EVALUATING");
-            }
-            else if (goal) {  // T6: Transition to GOAL_REACHED
-                internal_state = GOAL_REACHED;
-                next_move = STOPPING;
-                ROS_INFO("Transition T6: MOVING -> GOAL_REACHED");
-            }
-            else {  // T5: Transition back to EVALUATING after move
-                internal_state = EVALUATING;
+                next_move = TURNING_LEFT;
+                ROS_INFO("Obstacle detected while turning, turning left");
+            } else {
+                *cur_state = MOVING_STATE;
                 next_move = MOVING;
-                ROS_INFO("Transition T5: MOVING -> EVALUATING");
+                ROS_INFO("Clear path after turn, moving forward");
             }
             break;
         }
 
-        case BACKTRACKING: {  // S4: BACKTRACKING state
-            ROS_INFO("State S4: BACKTRACKING");
-            Orientation backtrackOrient = selectLowestVisitCount();
-            if (backtrackOrient != current_orientation) {
-                target_orientation = backtrackOrient;
-                // T7: Transition back to EVALUATING for rotation/movement
-                internal_state = EVALUATING;
+        case MOVING_STATE: {  // S3: Moving state
+            ROS_INFO("State S3: MOVING_STATE");
+            if (goal) {
+                *cur_state = GOAL_REACHED;
                 next_move = STOPPING;
-                ROS_INFO("Transition T7: BACKTRACKING -> EVALUATING");
+                ROS_INFO("Goal reached while moving");
+            } else {
+                *cur_state = TURNING_STATE;
+                next_move = TURNING_RIGHT;
+                ROS_INFO("Completed move, evaluating next direction");
             }
             break;
         }
 
-        case GOAL_REACHED: {  // S5: GOAL_REACHED state
-            ROS_INFO("State S5: GOAL_REACHED");
+        case GOAL_REACHED: {  // S4: Goal reached state
+            ROS_INFO("State S4: GOAL_REACHED");
             next_move = STOPPING;
             break;
         }
 
         default: {
-            ROS_ERROR("Invalid state, resetting to EVALUATING");
-            internal_state = EVALUATING;
+            ROS_ERROR("Invalid state encountered: %d", *cur_state);
+            *cur_state = INITIALIZING;
             next_move = STOPPING;
             break;
         }
     }
 
-    *cur_state = internal_state;
     ROS_INFO("Next move: %d", next_move);
     return next_move;
 }
