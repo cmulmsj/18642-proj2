@@ -4,133 +4,190 @@
  *
  * STUDENT NAME: Mashengjun Li
  * ANDREW ID: mashengl
- * LAST UPDATE: 09/21/2024
- *
- * This file is an algorithm to solve the ece642rtle maze
- * using the left-hand rule. The code is intentionaly left obfuscated.
- *
+ * LAST UPDATE: 09/28/2024
  */
 
 #include "student.h"
-#include <stdint.h>
-#include <ros/ros.h>
 
-// Ignore this line until project 5
-turtleMove studentTurtleStep(bool bumped) { return MOVE; }
-
-#include "student.h"
-#include <stdint.h>
-#include <ros/ros.h>
-
-// Constants
-const int32_t TIMEOUT = 40;
-const int32_t MAZE_SIZE = 23;
-const int32_t START_POS = MAZE_SIZE / 2;
-
-// Enum for directions
-enum Direction {
-    LEFT = 0,
-    UP = 1,
-    RIGHT = 2,
-    DOWN = 3
+// Internal helper struct to track directions and their visit counts
+struct DirectionInfo {
+    bool accessible;
+    uint8_t visit_count;
 };
 
-// States
-const int32_t STATE_MOVING = 2;
-const int32_t STATE_TURNED = 1;
-const int32_t STATE_BUMPED = 0;
+static DirectionInfo adjacent_cells[4];  // Indexed by Direction enum
+static Direction current_direction = NORTH;
 
-// Global variables
-static int32_t timeoutCounter = 0;
-static int32_t currentState = STATE_MOVING;
-static bool atEnd = false;
-static int32_t visitMap[MAZE_SIZE][MAZE_SIZE] = {0};
-static int32_t currentX = START_POS;
-static int32_t currentY = START_POS;
-
-// Function prototypes
-int32_t getVisitCount(int32_t x, int32_t y);
-void setVisitCount(int32_t x, int32_t y, int32_t count);
-int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentState);
-
-// Getter for visit map
-int32_t getVisitCount(int32_t x, int32_t y) {
-    return visitMap[y][x];
-}
-
-// Setter for visit map
-void setVisitCount(int32_t x, int32_t y, int32_t count) {
-    visitMap[y][x] = count;
-    displayVisits(count);
-}
-
-// Update orientation function
-int32_t updateOrientation(int32_t orientation, bool isBumped, int32_t& currentState) {
-    if (orientation == LEFT) {
-        if (currentState == STATE_MOVING) { orientation = UP; currentState = STATE_TURNED; }
-        else if (isBumped)                { orientation = DOWN; currentState = STATE_BUMPED; }
-        else currentState = STATE_MOVING;
-    } else if (orientation == UP) {
-        if (currentState == STATE_MOVING) { orientation = RIGHT; currentState = STATE_TURNED; }
-        else if (isBumped)                { orientation = LEFT; currentState = STATE_BUMPED; }
-        else currentState = STATE_MOVING;
-    } else if (orientation == RIGHT) {
-        if (currentState == STATE_MOVING) { orientation = DOWN; currentState = STATE_TURNED; }
-        else if (isBumped)                { orientation = UP; currentState = STATE_BUMPED; }
-        else currentState = STATE_MOVING;
-    } else if (orientation == DOWN) {
-        if (currentState == STATE_MOVING) { orientation = LEFT; currentState = STATE_TURNED; }
-        else if (isBumped)                { orientation = RIGHT; currentState = STATE_BUMPED; }
-        else currentState = STATE_MOVING;
+// Helper function to get position of adjacent cell in given direction
+static QPointF getAdjacentPosition(QPointF current_pos, Direction dir) {
+    QPointF adj_pos = current_pos;
+    switch(dir) {
+        case NORTH: adj_pos.setY(adj_pos.y() + 1); break;
+        case EAST:  adj_pos.setX(adj_pos.x() + 1); break;
+        case SOUTH: adj_pos.setY(adj_pos.y() - 1); break;
+        case WEST:  adj_pos.setX(adj_pos.x() - 1); break;
     }
-    return orientation;
+    return adj_pos;
 }
 
-bool studentMoveTurtle(QPointF& pos_, int32_t& nw_or) 
-{
-    static bool firstCall = true;
-    if (firstCall) {
-        setVisitCount(currentX, currentY, 1);
-        firstCall = false;
-    }
-
-    ROS_INFO("Turtle update Called timeoutCounter=%d", timeoutCounter);
-
-    if (timeoutCounter == 0) {
-        int32_t futureX = pos_.x(), futureY = pos_.y();
-        int32_t futureX2 = pos_.x(), futureY2 = pos_.y();
-
-        if (nw_or < RIGHT) {  
-            if (nw_or == LEFT) futureY2 += 1;
-            else               futureX2 += 1;
-        } else {  
-            futureX2 += 1; futureY2 += 1;
-            if (nw_or == RIGHT) futureX += 1;
-            else                futureY += 1;
-        }
-
-        bool isBumped = bumped(futureX, futureY, futureX2, futureY2);
-        atEnd = atend(pos_.x(), pos_.y());
-
-        nw_or = updateOrientation(nw_or, isBumped, currentState);
-        ROS_INFO("Orientation=%d  STATE=%d", nw_or, currentState);
-
-        if (currentState == STATE_MOVING && !atEnd) {
-            switch (nw_or) {
-                case LEFT:  pos_.setX(pos_.x() - 1); currentX--; break;
-                case UP:    pos_.setY(pos_.y() - 1); currentY--; break;
-                case RIGHT: pos_.setX(pos_.x() + 1); currentX++; break;
-                case DOWN:  pos_.setY(pos_.y() + 1); currentY++; break;
+// C1: Implementation of findLowestVisitCount compute function
+static Direction findLowestVisitCount() {
+    uint8_t min_count = UINT8_MAX;
+    Direction selected_dir = current_direction;
+    
+    // First pass: look for unvisited cells
+    for (int dir = 0; dir < 4; dir++) {
+        if (adjacent_cells[dir].accessible && adjacent_cells[dir].visit_count == 0) {
+            // Prioritize forward direction if unvisited
+            if (dir == current_direction) {
+                return static_cast<Direction>(dir);
             }
-            int32_t visits = getVisitCount(currentX, currentY) + 1;
-            setVisitCount(currentX, currentY, visits);
+            if (adjacent_cells[dir].visit_count < min_count) {
+                min_count = adjacent_cells[dir].visit_count;
+                selected_dir = static_cast<Direction>(dir);
+            }
         }
-
-        if (atEnd) return false;
-        timeoutCounter = TIMEOUT;
-    } else {
-        timeoutCounter--;
     }
 
-    return (timeoutCounter == TIMEOUT);
+    // Second pass: if no unvisited cells, find lowest visit count
+    if (min_count == UINT8_MAX) {
+        for (int dir = 0; dir < 4; dir++) {
+            if (adjacent_cells[dir].accessible && adjacent_cells[dir].visit_count < min_count) {
+                min_count = adjacent_cells[dir].visit_count;
+                selected_dir = static_cast<Direction>(dir);
+            }
+        }
+    }
+
+    return selected_dir;
+}
+
+// C2: Implementation of getRequiredRotation compute function
+static int getRequiredRotation(Direction target_direction) {
+    int diff = (target_direction - current_direction + 4) % 4;
+    if (diff > 2) {
+        return diff - 4;  // Turn left
+    }
+    return diff;  // Turn right
+}
+
+// C3: Implementation of selectLowestVisitCount compute function
+static Direction selectLowestVisitCount() {
+    uint8_t min_count = UINT8_MAX;
+    Direction backtrack_dir = current_direction;
+
+    // Find accessible cell with lowest visit count
+    for (int dir = 0; dir < 4; dir++) {
+        if (adjacent_cells[dir].accessible && adjacent_cells[dir].visit_count < min_count) {
+            min_count = adjacent_cells[dir].visit_count;
+            backtrack_dir = static_cast<Direction>(dir);
+        }
+    }
+
+    return backtrack_dir;
+}
+
+turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state) {
+    static turtleMove next_move = STOPPING;
+    static TurtleState internal_state = INITIALIZING;
+    static Direction target_direction = NORTH;
+    static int remaining_rotation = 0;
+
+    // Update adjacent cells information
+    QPointF current_pos(0, 0);  // Will be set by maze.cpp
+    for (int dir = 0; dir < 4; dir++) {
+        QPointF adj_pos = getAdjacentPosition(current_pos, static_cast<Direction>(dir));
+        adjacent_cells[dir].accessible = !detectObstacle(current_pos, static_cast<Orientation>(dir));
+        adjacent_cells[dir].visit_count = retrieveVisitCount(adj_pos);
+    }
+
+    // Main state machine
+    switch (internal_state) {
+        case EVALUATING: {  // S1: EVALUATING state
+            next_move = STOPPING;
+
+            Direction nextDir = findLowestVisitCount();
+            if (nextDir != current_direction) {
+                target_direction = nextDir;
+                remaining_rotation = getRequiredRotation(target_direction);
+                
+                // T1: Transition to ROTATING if rotation needed
+                if (remaining_rotation != 0) {
+                    internal_state = ROTATING;
+                    next_move = (remaining_rotation > 0) ? TURNING_RIGHT : TURNING_LEFT;
+                }
+                // T2: Transition to MOVING if no rotation needed
+                else {
+                    internal_state = MOVING;
+                    next_move = MOVING;
+                }
+            }
+            // T3: Transition to BACKTRACKING if needed
+            else if (!adjacent_cells[nextDir].accessible) {
+                internal_state = BACKTRACKING;
+                next_move = STOPPING;
+            }
+            else {
+                internal_state = MOVING;
+                next_move = MOVING;
+            }
+            break;
+        }
+
+        case ROTATING: {  // S2: ROTATING state
+            if (remaining_rotation != 0) {
+                next_move = (remaining_rotation > 0) ? TURNING_RIGHT : TURNING_LEFT;
+                remaining_rotation += (remaining_rotation > 0) ? -1 : 1;
+                current_direction = static_cast<Direction>((current_direction + 
+                    (remaining_rotation > 0 ? 1 : 3)) % 4);
+            }
+            // T4: Transition back to EVALUATING when rotation complete
+            else {
+                internal_state = EVALUATING;
+                next_move = STOPPING;
+            }
+            break;
+        }
+
+        case MOVING: {  // S3: MOVING state
+            if (bumped) {
+                internal_state = EVALUATING;
+                next_move = STOPPING;
+            }
+            else if (goal) {  // T6: Transition to GOAL_REACHED
+                internal_state = GOAL_REACHED;
+                next_move = STOPPING;
+            }
+            else {  // T5: Transition back to EVALUATING after move
+                internal_state = EVALUATING;
+                next_move = MOVING;
+            }
+            break;
+        }
+
+        case BACKTRACKING: {  // S4: BACKTRACKING state
+            Direction backtrackDir = selectLowestVisitCount();
+            if (backtrackDir != current_direction) {
+                target_direction = backtrackDir;
+                // T7: Transition back to EVALUATING for rotation/movement
+                internal_state = EVALUATING;
+                next_move = STOPPING;
+            }
+            break;
+        }
+
+        case GOAL_REACHED: {  // S5: GOAL_REACHED state
+            next_move = STOPPING;
+            break;
+        }
+
+        default: {
+            internal_state = EVALUATING;
+            next_move = STOPPING;
+            break;
+        }
+    }
+
+    *cur_state = internal_state;
+    return next_move;
 }
