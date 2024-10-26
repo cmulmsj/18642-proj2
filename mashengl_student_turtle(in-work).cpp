@@ -9,169 +9,147 @@
 
 #include "student.h"
 
-// Internal helper struct to track directions and their visit counts
-struct DirectionInfo {
-    bool accessible;
-    uint8_t visit_count;
-};
+bool need_second_turn = false;
 
-static DirectionInfo adjacent_cells[ORIENTATION_COUNT];  // Indexed by Orientation enum
-static Orientation current_orientation = NORTH;
+// Visit tracking array
+static int visit_number[23][23] = {0};
+TurtleState state = INIT;
 
-// Helper function to get position of adjacent cell in given orientation
-static QPointF getAdjacentPosition(QPointF current_pos, Orientation orient) {
-    QPointF adj_pos = current_pos;
-    switch(orient) {
-        case NORTH: adj_pos.setY(adj_pos.y() + 1); break;
-        case EAST:  adj_pos.setX(adj_pos.x() + 1); break;
-        case SOUTH: adj_pos.setY(adj_pos.y() - 1); break;
-        case WEST:  adj_pos.setX(adj_pos.x() - 1); break;
-        default: break;
-    }
-    return adj_pos;
+// Function: record_path
+// Purpose:
+//   Records the turtle's path in the maze by incrementing the visit count
+//   for the current position.
+// Inputs:
+//   - pos_: Current position of the turtle.
+void record_path(QPointF &pos_)
+{
+    const int TURTLE_START = 11;
+    int x = static_cast<int>(pos_.x()) + TURTLE_START;
+    int y = static_cast<int>(pos_.y()) + TURTLE_START;
+    visit_number[x][y] += 1;
 }
 
-// C1: Implementation of findLowestVisitCount compute function
-static Orientation findLowestVisitCount() {
-    uint8_t min_count = UINT8_MAX;
-    Orientation selected_orient = current_orientation;
-    
-    // First pass: look for unvisited cells
-    for (int i = 0; i < ORIENTATION_COUNT; i++) {
-        Orientation orient = static_cast<Orientation>(i);
-        if (adjacent_cells[i].accessible && adjacent_cells[i].visit_count == 0) {
-            // Prioritize forward direction if unvisited
-            if (orient == current_orientation) {
-                return orient;
-            }
-            if (adjacent_cells[i].visit_count < min_count) {
-                min_count = adjacent_cells[i].visit_count;
-                selected_orient = orient;
-            }
-        }
-    }
-
-    // Second pass: if no unvisited cells, find lowest visit count
-    if (min_count == UINT8_MAX) {
-        for (int i = 0; i < ORIENTATION_COUNT; i++) {
-            if (adjacent_cells[i].accessible && adjacent_cells[i].visit_count < min_count) {
-                min_count = adjacent_cells[i].visit_count;
-                selected_orient = static_cast<Orientation>(i);
-            }
-        }
-    }
-
-    return selected_orient;
+// Function: getVisitNumber
+// Purpose:
+//   Gets the visit count for a specific position in the maze.
+// Inputs:
+//   - pos_: Current position of the turtle.
+int getVisitNumber(Point &pos_)
+{
+    const int TURTLE_START = 11;
+    Point turtle_location;
+    turtle_location.x = pos_.x + TURTLE_START;
+    turtle_location.y = pos_.y + TURTLE_START;
+    return visit_number[turtle_location.x][turtle_location.y];
 }
 
-// C2: Implementation of getRequiredRotation compute function
-static int getRequiredRotation(Orientation target_orientation) {
-    int diff = (target_orientation - current_orientation + ORIENTATION_COUNT) % ORIENTATION_COUNT;
-    if (diff > 2) {
-        return diff - ORIENTATION_COUNT;  // Turn left
+// Function: studentTurtleStep
+// Purpose:
+//   Determines the turtle's next move based on its current state, orientation, the least-visited direction,
+//   and the presence of any obstacles (bumps). Handles necessary turns, including 180-degree turns,
+//   to align the turtle towards the least-visited direction.
+// Inputs:
+//   - at_end: Boolean indicating if the turtle has reached the goal position.
+//   - least_visited_direction: Integer representing the direction with the least visits (0-3), or -1 if no valid direction.
+//   - bump: Boolean indicating if there's an obstacle directly ahead in the current orientation.
+//   - orientation: Integer representing the turtle's current orientation (0-3).
+// Outputs:
+//   - Returns a turtleMove enum value indicating the turtle's next action (MOVE, TURNLEFT, TURNRIGHT, STOP).
+turtleMove studentTurtleStep(bool at_end, int32_t least_visited_direction, bool bump, int32_t orientation)
+{
+    turtleMove nextMove = STOP;
+
+    if (at_end)
+    {
+        state = AT_GOAL;
     }
-    return diff;  // Turn right
+
+    if (least_visited_direction == -1)
+    {
+        state = AT_GOAL;
+    }
+
+    int direction_gap = (least_visited_direction - orientation + 4) % 4;
+
+    switch (state)
+    {
+    case INIT:
+        nextMove = MOVE;
+        state = DECIDE;
+        break;
+
+    case DECIDE:
+        if (need_second_turn)
+        {
+            nextMove = TURNLEFT;
+            need_second_turn = false;
+        }
+        else
+        {
+            switch (direction_gap)
+            {
+            case FORWARD:
+                if (bump)
+                {
+                    nextMove = STOP;
+                    break;
+                }
+                else
+                {
+                    nextMove = MOVE;
+                    break;
+                }
+            case TURN_RIGHT:
+                nextMove = TURNRIGHT;
+                state = TURNING_RIGHT;
+                break;
+            case TURN_LEFT:
+                nextMove = TURNLEFT;
+                state = TURNING_LEFT;
+                break;
+            case TURN_AROUND:
+                nextMove = TURNLEFT;
+                need_second_turn = true;
+                state = TURNING_AROUND;
+                break;
+            default:
+                ROS_ERROR("Invalid direction gap calculation");
+                nextMove = STOP;
+                state = AT_GOAL;
+                break;
+            }
+        }
+        break;
+    case TURNING_LEFT:
+        nextMove = STOP;
+        state = DECIDE;
+        break;
+    case TURNING_RIGHT:
+        nextMove = STOP;
+        state = DECIDE;
+        break;
+    case TURNING_AROUND:
+        if (need_second_turn)
+        {
+            nextMove = TURNLEFT;
+            need_second_turn = false;
+        }
+        else
+        {
+            nextMove = STOP;
+            state = DECIDE;
+        }
+        break;
+    case AT_GOAL:
+        nextMove = STOP;
+        break;
+    default:
+        ROS_ERROR("Invalid state");
+        nextMove = STOP;
+        state = AT_GOAL;
+        break;
+    }
+
+    return nextMove;
 }
 
-// C3: Implementation of selectLowestVisitCount compute function
-static Orientation selectLowestVisitCount() {
-    uint8_t min_count = UINT8_MAX;
-    Orientation backtrack_orient = current_orientation;
-
-    for (int i = 0; i < ORIENTATION_COUNT; i++) {
-        if (adjacent_cells[i].accessible && adjacent_cells[i].visit_count < min_count) {
-            min_count = adjacent_cells[i].visit_count;
-            backtrack_orient = static_cast<Orientation>(i);
-        }
-    }
-
-    return backtrack_orient;
-}
-
-turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state) {
-    static turtleMove next_move = STOPPING;
-    static Orientation target_orientation = NORTH;
-    static int remaining_rotation = 0;
-    
-    ROS_INFO("studentTurtleStep: Current State: %d, Bumped: %s, Goal: %s",
-             *cur_state, bumped ? "Yes" : "No", goal ? "Yes" : "No");
-
-    // Update adjacent cells information
-    QPointF current_pos(0, 0);  // Will be set by maze.cpp
-    for (int i = 0; i < ORIENTATION_COUNT; i++) {
-        Orientation orient = static_cast<Orientation>(i);
-        QPointF adj_pos = getAdjacentPosition(current_pos, orient);
-        adjacent_cells[i].accessible = !detectObstacle(current_pos, orient);
-        adjacent_cells[i].visit_count = retrieveVisitCount(adj_pos);
-    }
-
-    // Main state machine
-    switch (*cur_state) {
-        case INITIALIZING: {  // S1: Initial evaluation state
-            ROS_INFO("State S1: INITIALIZING");
-            
-            Orientation nextOrient = findLowestVisitCount();
-            if (goal) {
-                *cur_state = GOAL_REACHED;
-                next_move = STOPPING;
-                ROS_INFO("Goal reached from INITIALIZING");
-            } else if (nextOrient != current_orientation) {
-                *cur_state = TURNING_STATE;
-                next_move = TURNING_RIGHT;
-                target_orientation = nextOrient;
-                ROS_INFO("Transition to TURNING_STATE for orientation change");
-            } else if (!adjacent_cells[nextOrient].accessible) {
-                next_move = TURNING_RIGHT;
-                ROS_INFO("Obstacle detected, turning right");
-            } else {
-                *cur_state = MOVING_STATE;
-                next_move = MOVING;
-                ROS_INFO("Moving forward in current direction");
-            }
-            break;
-        }
-
-        case TURNING_STATE: {  // S2: Turning state
-            ROS_INFO("State S2: TURNING_STATE");
-            if (bumped) {
-                next_move = TURNING_LEFT;
-                ROS_INFO("Obstacle detected while turning, turning left");
-            } else {
-                *cur_state = MOVING_STATE;
-                next_move = MOVING;
-                ROS_INFO("Clear path after turn, moving forward");
-            }
-            break;
-        }
-
-        case MOVING_STATE: {  // S3: Moving state
-            ROS_INFO("State S3: MOVING_STATE");
-            if (goal) {
-                *cur_state = GOAL_REACHED;
-                next_move = STOPPING;
-                ROS_INFO("Goal reached while moving");
-            } else {
-                *cur_state = TURNING_STATE;
-                next_move = TURNING_RIGHT;
-                ROS_INFO("Completed move, evaluating next direction");
-            }
-            break;
-        }
-
-        case GOAL_REACHED: {  // S4: Goal reached state
-            ROS_INFO("State S4: GOAL_REACHED");
-            next_move = STOPPING;
-            break;
-        }
-
-        default: {
-            ROS_ERROR("Invalid state encountered: %d", *cur_state);
-            *cur_state = INITIALIZING;
-            next_move = STOPPING;
-            break;
-        }
-    }
-
-    ROS_INFO("Next move: %d", next_move);
-    return next_move;
-}
