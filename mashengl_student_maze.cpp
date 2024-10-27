@@ -9,120 +9,103 @@
 
 #include "student.h"
 
-// Counter for slowing down movement
-static int move_timer = 0;
+static uint8_t delay_timer = 0;
 
-// Test wall collision for given position and orientation
-bool checkWall(QPointF &pos_, int orient) {
-    coordinate wall_test1, wall_test2;
-    wall_test1.x = pos_.x();
-    wall_test2.x = pos_.x();
-    wall_test1.y = pos_.y();
-    wall_test2.y = pos_.y();
+// Check for wall collision
+bool checkWall(QPointF &pos_, int compass_orientation) {
+    coordinate test1, test2;
+    test1.x = pos_.x();
+    test2.x = pos_.x();
+    test1.y = pos_.y();
+    test2.y = pos_.y();
 
-    // Adjust test points based on orientation
-    switch (orient) {
+    switch (compass_orientation) {
         case 0: // West
-            ROS_INFO("[WALL] Testing WEST wall at (%d,%d)", 
-                     wall_test1.x, wall_test1.y);
-            wall_test2.y += 1;
+            test2.y += 1;
             break;
         case 1: // North
-            ROS_INFO("[WALL] Testing NORTH wall at (%d,%d)", 
-                     wall_test1.x, wall_test1.y);
-            wall_test2.x += 1;
+            test2.x += 1;
             break;
         case 2: // East
-            ROS_INFO("[WALL] Testing EAST wall at (%d,%d)", 
-                     wall_test1.x, wall_test1.y);
-            wall_test1.x += 1;
-            wall_test2.x += 1;
-            wall_test2.y += 1;
+            test1.x += 1;
+            test2.x += 1;
+            test2.y += 1;
             break;
         case 3: // South
-            ROS_INFO("[WALL] Testing SOUTH wall at (%d,%d)", 
-                     wall_test1.x, wall_test1.y);
-            wall_test1.y += 1;
-            wall_test2.x += 1;
-            wall_test2.y += 1;
+            test1.y += 1;
+            test2.x += 1;
+            test2.y += 1;
             break;
-        default:
-            ROS_ERROR("[WALL] Invalid orientation: %d", orient);
-            return true;
     }
     
-    bool has_wall = bumped(wall_test1.x, wall_test1.y, wall_test2.x, wall_test2.y);
-    ROS_INFO("[WALL] Wall detected: %s", has_wall ? "YES" : "NO");
+    bool has_wall = bumped(test1.x, test1.y, test2.x, test2.y);
+    ROS_INFO("[WALL] Check at (%d,%d), orient %d: %s", 
+             (int)pos_.x(), (int)pos_.y(), compass_orientation, 
+             has_wall ? "YES" : "NO");
     return has_wall;
 }
 
-// Main movement control function
+// Move the turtle based on state
 bool moveTurtle(QPointF& pos_, int& compass_orientation) {
-    ROS_INFO("[MOVE] Timer: %d, Position: (%.1f,%.1f), Facing: %d", 
-             move_timer, pos_.x(), pos_.y(), compass_orientation);
-
-    // Handle movement delay
-    if (move_timer > 0) {
-        move_timer--;
+    if (delay_timer > 0) {
+        delay_timer--;
         return false;
     }
 
-    // Check current status
-    bool wall_hit = checkWall(pos_, compass_orientation);
-    bool reached_end = atend(pos_.x(), pos_.y());
+    bool wall_detected = checkWall(pos_, compass_orientation);
+    bool goal_reached = atend(pos_.x(), pos_.y());
     
-    ROS_INFO("[STATUS] Wall: %d, End: %d", wall_hit, reached_end);
-
-    // Get next move from algorithm
-    turtleMove next_action = studentTurtleStep(wall_hit, reached_end);
+    ROS_INFO("[STATUS] Pos (%.1f,%.1f) Orient %d Wall %d Goal %d", 
+             pos_.x(), pos_.y(), compass_orientation, wall_detected, goal_reached);
     
-    if (!next_action.validAction) {
-        ROS_INFO("[MOVE] Invalid action, skipping");
-        return false;
+    turtleMove next_move = studentTurtleStep(wall_detected, goal_reached);
+    
+    if (next_move.validAction) {
+        if (next_move.action == FORWARD) {
+            if (!wall_detected) {
+                pos_ = translatePos(pos_, next_move, compass_orientation);
+                displayVisits(next_move.visitCount);
+            }
+        } else {
+            compass_orientation = translateOrnt(compass_orientation, next_move);
+        }
     }
 
-    // Execute movement
-    if (next_action.action == FORWARD && !wall_hit) {
-        ROS_INFO("[MOVE] Moving forward");
-        pos_ = translatePos(pos_, next_action, compass_orientation);
-        displayVisits(next_action.visitCount);
-    } else if (next_action.action != NONE) {
-        ROS_INFO("[MOVE] Turning %s", next_action.action == RIGHT ? "right" : "left");
-        compass_orientation = translateOrnt(compass_orientation, next_action);
-    }
-
-    // Reset movement timer
-    move_timer = MOVE_WAIT;
-    return true;
+    delay_timer = MOVE_WAIT;
+    return next_move.validAction;
 }
 
-// Update position based on orientation
-QPointF translatePos(QPointF pos_, turtleMove nextMove, int compass_orientation) {
+// Translate position based on orientation
+QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
     if (nextMove.action != FORWARD) return pos_;
     
-    switch (compass_orientation) {
-        case 0: pos_.setX(pos_.x() - 1); break; // West
-        case 1: pos_.setY(pos_.y() - 1); break; // North
-        case 2: pos_.setX(pos_.x() + 1); break; // East
-        case 3: pos_.setY(pos_.y() + 1); break; // South
+    switch (orientation) {
+        case 0: // West
+            pos_.setX(pos_.x() - 1);
+            break;
+        case 1: // North
+            pos_.setY(pos_.y() - 1);
+            break;
+        case 2: // East
+            pos_.setX(pos_.x() + 1);
+            break;
+        case 3: // South
+            pos_.setY(pos_.y() + 1);
+            break;
     }
     
-    ROS_INFO("[POS] Updated position to (%.1f,%.1f)", pos_.x(), pos_.y());
+    ROS_INFO("[POS] Updated to (%.1f,%.1f)", pos_.x(), pos_.y());
     return pos_;
 }
 
-// Update orientation based on turn
+// Update orientation after turn
 int translateOrnt(int orientation, turtleMove nextMove) {
     int new_orient = orientation;
     
-    switch (nextMove.action) {
-        case RIGHT: 
-            new_orient = (orientation + 1) % 4; 
-            break;
-        case LEFT:  
-            new_orient = (orientation + 3) % 4; 
-            break;
-        default: break;
+    if (nextMove.action == RIGHT) {
+        new_orient = (orientation + 1) % 4;
+    } else if (nextMove.action == LEFT) {
+        new_orient = (orientation + 3) % 4;
     }
     
     ROS_INFO("[ORIENT] Changed from %d to %d", orientation, new_orient);
