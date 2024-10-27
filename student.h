@@ -18,6 +18,12 @@ bool atend(int x, int y);
 void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
 
+// Basic point structure for grid coordinates
+struct Point {
+    int32_t x;
+    int32_t y;
+};
+
 // Movement Commands
 enum turtleMove : int8_t {
     MOVING,
@@ -61,6 +67,7 @@ bool detectObstacle(QPointF pos_, Orientation orient);
 void addVisit(QPointF& pos_);
 uint8_t retrieveVisitCount(QPointF& pos_);
 AdjacentSquare findBestMove(QPointF pos_, Orientation current_orient);
+int getVisitNumber(Point &pos_);
 
 // Constants
 const uint8_t ORIENTATION_COUNT = 4;   // Number of possible orientations
