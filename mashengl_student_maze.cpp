@@ -9,105 +9,201 @@
 
 #include "student.h"
 
-static uint8_t delay_timer = 0;
+// enums for directionality
+enum DIRECTION { WEST = 0, NORTH = 1, EAST = 2, SOUTH = 3 };
 
-// Check for wall collision
-bool checkWall(QPointF &pos_, int compass_orientation) {
-    coordinate test1, test2;
-    test1.x = pos_.x();
-    test2.x = pos_.x();
-    test1.y = pos_.y();
-    test2.y = pos_.y();
-
-    switch (compass_orientation) {
-        case 0: // West
-            test2.y += 1;
-            break;
-        case 1: // North
-            test2.x += 1;
-            break;
-        case 2: // East
-            test1.x += 1;
-            test2.x += 1;
-            test2.y += 1;
-            break;
-        case 3: // South
-            test1.y += 1;
-            test2.x += 1;
-            test2.y += 1;
-            break;
-    }
-    
-    bool has_wall = bumped(test1.x, test1.y, test2.x, test2.y);
-    ROS_INFO("[WALL] Check at (%d,%d), orient %d: %s", 
-             (int)pos_.x(), (int)pos_.y(), compass_orientation, 
-             has_wall ? "YES" : "NO");
-    return has_wall;
+/*
+ * This procedure takes in the current map (pos_) and the turtle's orientation
+ * (compass_orientation) to figure out if
+ * the turtle will bump into a wall on the next move. This procedure will return
+ * true if it will bump into something
+ * and false if not, taking advantage of the function bumped.
+ */
+bool bumpTest(QPointF &pos_, DIRECTION compass_orientation) {
+  coordinate bumptest1, bumptest2;
+  bumptest1.x = pos_.x();
+  bumptest2.x = pos_.x();
+  bumptest1.y = pos_.y();
+  bumptest2.y = pos_.y();
+  switch (compass_orientation) {
+  case WEST: {
+    bumptest2.y += 1;
+    break;
+  }
+  case NORTH: {
+    bumptest2.x += 1;
+    break;
+  }
+  case EAST: {
+    bumptest2.x += 1;
+    bumptest2.y += 1;
+    bumptest1.x += 1;
+    break;
+  }
+  case SOUTH: {
+    bumptest2.x += 1;
+    bumptest2.y += 1;
+    bumptest1.y += 1;
+    break;
+  }
+  default: {
+    ROS_ERROR("compass_orientation is in undetermined state");
+    break;
+  }
+  }
+  return bumped(bumptest1.x, bumptest1.y, bumptest2.x, bumptest2.y);
 }
 
-// Move the turtle based on state
-bool moveTurtle(QPointF& pos_, int& compass_orientation) {
-    if (delay_timer > 0) {
-        delay_timer--;
-        return false;
-    }
-
-    bool wall_detected = checkWall(pos_, compass_orientation);
-    bool goal_reached = atend(pos_.x(), pos_.y());
-    
-    ROS_INFO("[STATUS] Pos (%.1f,%.1f) Orient %d Wall %d Goal %d", 
-             pos_.x(), pos_.y(), compass_orientation, wall_detected, goal_reached);
-    
-    turtleMove next_move = studentTurtleStep(wall_detected, goal_reached);
-    
-    if (next_move.validAction) {
-        if (next_move.action == FORWARD) {
-            if (!wall_detected) {
-                pos_ = translatePos(pos_, next_move, compass_orientation);
-                displayVisits(next_move.visitCount);
-            }
-        } else {
-            compass_orientation = translateOrnt(compass_orientation, next_move);
-        }
-    }
-
-    delay_timer = MOVE_WAIT;
-    return next_move.validAction;
+/*
+ * This procedure takes the current turtle position and orientation and returns true=accept changes, false=do not accept changes
+ * Ground rule -- you are only allowed to call the three helper functions defined in student.h, and NO other turtle methods or maze methods (no peeking at the maze!)
+ * This file interfaces with functions in student_turtle.cpp
+ */
+bool moveTurtle(QPointF& pos_, int& compass_orientation)
+{
+  bool bumped = bumpTest(pos_, (DIRECTION)compass_orientation); 
+  bool at_end = atend(pos_.x(), pos_.y());
+  turtleMove nextMove = studentTurtleStep(bumped, at_end); 
+  if(nextMove.validAction){
+    translatePosAndOrientation(nextMove, pos_, compass_orientation);
+  }
+  return nextMove.validAction;
 }
 
-// Translate position based on orientation
-QPointF translatePos(QPointF pos_, turtleMove nextMove, int orientation) {
-    if (nextMove.action != FORWARD) return pos_;
-    
-    switch (orientation) {
-        case 0: // West
-            pos_.setX(pos_.x() - 1);
-            break;
-        case 1: // North
-            pos_.setY(pos_.y() - 1);
-            break;
-        case 2: // East
-            pos_.setX(pos_.x() + 1);
-            break;
-        case 3: // South
-            pos_.setY(pos_.y() + 1);
-            break;
+/* This procedure takes in the nextMove's action field and updates by reference the position
+ * and compass orientaiton of the turtle.
+ */
+void translatePosAndOrientation(turtleMove nextMove, QPointF& pos_, int& compass_orientation){
+  switch (nextMove.action){
+    case FORWARD: {
+      pos_ = translatePos(pos_, nextMove, compass_orientation);
+      displayVisits(nextMove.visitCount);
+      break;
     }
-    
-    ROS_INFO("[POS] Updated to (%.1f,%.1f)", pos_.x(), pos_.y());
-    return pos_;
+    case LEFT: {
+      compass_orientation = translateOrnt(compass_orientation, nextMove);
+      break;
+    }
+    case RIGHT: {
+      compass_orientation = translateOrnt(compass_orientation, nextMove);
+      break;
+    }
+    default: {
+      ROS_ERROR("nextMove.action is invalid action");
+      break;
+    }
+  }
+  return;
+}
+/*
+ * Takes a position and a turtleMove and returns a new position
+ * based on the move
+ */
+QPointF translatePos(QPointF pos_, turtleMove nextMove, int compass_orientation) {
+  switch (compass_orientation) {
+  case NORTH: {
+    pos_.setY(pos_.y() - 1);
+    break;
+  }
+  case EAST: {
+    pos_.setX(pos_.x() + 1);
+    break;
+  }
+  case SOUTH: {
+    pos_.setY(pos_.y() + 1);
+    break;
+  }
+  case WEST: {
+    pos_.setX(pos_.x() - 1);
+    break;
+  }
+  default: {
+    ROS_ERROR("compass_orientation is in undetermined state");
+    break;
+  }
+  }
+  return pos_;
 }
 
-// Update orientation after turn
+/*
+ * This procedure takes in a compass_orientation and returns an orientation
+ * representation after the input orientation has been rotated clockwise 90
+ * degrees
+ */
+DIRECTION rotateClockwise(DIRECTION compass_orientation) {
+  switch (compass_orientation) {
+  case NORTH: {
+    compass_orientation = EAST;
+    break;
+  }
+  case EAST: {
+    compass_orientation = SOUTH;
+    break;
+  }
+  case SOUTH: {
+    compass_orientation = WEST;
+    break;
+  }
+  case WEST: {
+    compass_orientation = NORTH;
+    break;
+  }
+  default: {
+    ROS_ERROR("compass_orientation is in undetermined state");
+    break;
+  }
+  }
+  return compass_orientation;
+}
+
+/*
+ * This procedure takes in a compass_orientation and returns an orientation
+ * representation after the input orientation has been rotated counter clockwise
+ * 90 degrees
+ */
+DIRECTION rotateCounterClockwise(DIRECTION compass_orientation) {
+  switch (compass_orientation) {
+  case NORTH: {
+    compass_orientation = WEST;
+    break;
+  }
+  case EAST: {
+    compass_orientation = NORTH;
+    break;
+  }
+  case SOUTH: {
+    compass_orientation = EAST;
+    break;
+  }
+  case WEST: {
+    compass_orientation = SOUTH;
+    break;
+  }
+  default: {
+    ROS_ERROR("compass_orientation is in undetermined state");
+    break;
+  }
+  }
+  return compass_orientation;
+}
+
+/*
+ * Takes an orientation and a turtleMove and returns a new orienation
+ * based on the move
+ */
 int translateOrnt(int orientation, turtleMove nextMove) {
-    int new_orient = orientation;
-    
-    if (nextMove.action == RIGHT) {
-        new_orient = (orientation + 1) % 4;
-    } else if (nextMove.action == LEFT) {
-        new_orient = (orientation + 3) % 4;
+  switch (nextMove.action){
+    case LEFT: {
+      return rotateCounterClockwise((DIRECTION)orientation);
     }
-    
-    ROS_INFO("[ORIENT] Changed from %d to %d", orientation, new_orient);
-    return new_orient;
+    case RIGHT: {
+      return rotateClockwise((DIRECTION)orientation);
+    }
+    default: {
+      ROS_ERROR("nextMove is Unknown");
+      break;
+
+    }
+  }
 }
+
