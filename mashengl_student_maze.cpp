@@ -10,7 +10,7 @@
 #include "student.h"
 
 static int visit_count[MAZE_GRID_SIZE][MAZE_GRID_SIZE] = {0};
-static TurtleState current_state = CHECK_SURROUNDINGS;  // Changed from INITIALIZING
+static TurtleState current_state = EXPLORE;  // Changed to match new enum
 
 void addVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x()) + CENTER_POS;
