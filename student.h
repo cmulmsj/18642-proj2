@@ -40,13 +40,12 @@ enum Orientation : int8_t {
     NORTH = 3
 };
 
-// Turtle's FSM States
+// Simplified state machine
 enum TurtleState : int8_t {
-    MOVE_FORWARD = 0,    // Moving forward
-    TURN_RIGHT = 1,      // Turning right
-    TURN_LEFT = 2,       // Turning left
-    CHECK_SURROUNDINGS = 3, // Checking surroundings
-    AT_END = 4           // Reached the goal
+    EXPLORE = 0,      // Normal exploration mode
+    TURNING = 1,      // Currently executing a turn
+    BACKTRACK = 2,    // Backtracking from dead end
+    AT_END = 3        // Reached the goal
 };
 
 // Function Declarations
