@@ -2,7 +2,7 @@
  * Originally by Philip Koopman (koopman@cmu.edu)
  * and Milda Zizyte (milda@cmu.edu)
  *
- * STUDENT NAME: Mashengjun Li
+ * STUDENT NAME: GL Ma
  * ANDREW ID: mashengl
  * LAST UPDATE: 10/27/2024
  */
@@ -10,7 +10,7 @@
 #include "student.h"
 
 static int visit_count[MAZE_GRID_SIZE][MAZE_GRID_SIZE] = {0};
-static TurtleState current_state = INITIALIZING;
+static TurtleState current_state = CHECK_SURROUNDINGS;  // Changed from INITIALIZING
 
 void addVisit(QPointF& pos_) {
     int x = static_cast<int>(pos_.x()) + CENTER_POS;
