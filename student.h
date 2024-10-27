@@ -26,7 +26,7 @@ enum turtleMove : int8_t {
     STOPPING
 };
 
-// Orientations
+// Cardinal Directions
 enum Orientation : int8_t {
     WEST,
     SOUTH,
@@ -34,12 +34,21 @@ enum Orientation : int8_t {
     NORTH
 };
 
-// Turtle States
+// Turtle States for Priority-Based Navigation
 enum TurtleState : int8_t {
-    INITIALIZING,  // Renamed from INIT
-    MOVING_STATE,  // Renamed from GO
-    TURNING_STATE, // Renamed from TURN
-    GOAL_REACHED    // Renamed from GOAL
+    INITIALIZING,    // Initial state
+    SCANNING,        // Evaluating surroundings
+    MOVING_STATE,    // Moving forward
+    TURNING_STATE,   // Executing a turn
+    BACKTRACKING,    // Reversing from dead end
+    GOAL_REACHED     // Reached target
+};
+
+// Direction finding helper
+struct AdjacentSquare {
+    uint8_t visit_count;   // Number of visits to this square
+    bool is_accessible;    // Whether this square can be reached
+    Orientation direction; // Direction to this square
 };
 
 // Function Declarations
@@ -47,13 +56,16 @@ QPointF translatePos(QPointF pos_, Orientation orientation);
 int translateOrnt(int orientation, turtleMove nextMove);
 turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state);
 
+// Position and navigation helpers
 bool detectObstacle(QPointF pos_, Orientation orient);
 void addVisit(QPointF& pos_);
 uint8_t retrieveVisitCount(QPointF& pos_);
+AdjacentSquare findBestMove(QPointF pos_, Orientation current_orient);
 
 // Constants
-const uint8_t ORIENTATION_COUNT = 4; // Renamed from NUM_ORIENTATIONS
-const uint8_t MOVE_DELAY = 40;        // Renamed from TIMEOUT
-const uint8_t MAZE_GRID_SIZE = 23;    // Renamed from MAZE_SIZE
+const uint8_t ORIENTATION_COUNT = 4;   // Number of possible orientations
+const uint8_t MOVE_DELAY = 40;         // Delay between moves
+const uint8_t MAZE_GRID_SIZE = 23;     // Size of the maze grid
+const uint8_t CENTER_POS = 11;         // Center position (MAZE_GRID_SIZE/2)
 
 #endif // STUDENT_H
