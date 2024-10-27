@@ -24,30 +24,30 @@ struct Point {
     int32_t y;
 };
 
-// Movement Commands
+// Movement Commands - DO NOT MODIFY THESE VALUES
 enum turtleMove : int8_t {
-    MOVING,
-    TURNING_RIGHT,
-    TURNING_LEFT,
-    STOPPING
+    MOVE = 0,           // Move forward one square
+    TURNRIGHT = 1,      // Turn 90 degrees clockwise
+    TURNLEFT = 2,       // Turn 90 degrees counter-clockwise
+    STOP = 3           // Stop moving
 };
 
 // Cardinal Directions
 enum Orientation : int8_t {
-    WEST,
-    SOUTH,
-    EAST,
-    NORTH
+    WEST = 0,
+    SOUTH = 1,
+    EAST = 2,
+    NORTH = 3
 };
 
 // Turtle States for Priority-Based Navigation
 enum TurtleState : int8_t {
-    INITIALIZING,    // Initial state
-    SCANNING,        // Evaluating surroundings
-    MOVING_STATE,    // Moving forward
-    TURNING_STATE,   // Executing a turn
-    BACKTRACKING,    // Reversing from dead end
-    GOAL_REACHED     // Reached target
+    INITIALIZING = 0,    // Initial state
+    SCANNING = 1,        // Evaluating surroundings
+    MOVING_STATE = 2,    // Moving forward
+    TURNING_STATE = 3,   // Executing a turn
+    BACKTRACKING = 4,    // Reversing from dead end
+    GOAL_REACHED = 5     // Reached target
 };
 
 // Direction finding helper
