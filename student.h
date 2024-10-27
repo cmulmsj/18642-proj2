@@ -13,56 +13,47 @@
 #include <QPointF>
 
 // Functions to interface with ROS. Don't change these lines!
-bool bumped(int start_x, int start_y, int end_x, int end_y);
+bool bumped(int x1,int y1,int x2,int y2);
 bool atend(int x, int y);
 void displayVisits(int visits);
 bool moveTurtle(QPointF& pos_, int& nw_or);
 
-// Basic point structure for grid coordinates
-struct Point {
-    int32_t x;
-    int32_t y;
+// Simple coordinate struct
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+} coordinate;
+
+// Movement message struct
+typedef struct {
+    turtleAction action;
+    bool validAction;
+    uint8_t visitCount;
+} turtleMove;
+
+// Action enum - Kept simple for clarity
+enum turtleAction {
+    FORWARD,    // Move forward one cell
+    RIGHT,      // Turn right 90 degrees
+    LEFT,       // Turn left 90 degrees
+    NONE        // No action/stop
 };
 
-// Movement Commands - DO NOT MODIFY THESE VALUES
-enum turtleMove : int8_t {
-    MOVE = 0,           // Move forward one square
-    TURNRIGHT = 1,      // Turn 90 degrees clockwise
-    TURNLEFT = 2,       // Turn 90 degrees counter-clockwise
-    STOP = 3           // Stop moving
-};
-
-// Cardinal Directions
-enum Orientation : int8_t {
-    WEST = 0,
-    SOUTH = 1,
-    EAST = 2,
-    NORTH = 3
-};
-
-// Simplified state machine
-enum TurtleState : int8_t {
-    EXPLORE = 0,      // Normal exploration mode
-    TURNING = 1,      // Currently executing a turn
-    BACKTRACK = 2,    // Backtracking from dead end
-    AT_END = 3        // Reached the goal
-};
-
-// Function Declarations
-QPointF translatePos(QPointF pos_, Orientation orientation);
+// Core function declarations - Required interface
+QPointF translatePos(QPointF pos_, turtleMove nextMove, int compass_orientation);
 int translateOrnt(int orientation, turtleMove nextMove);
-turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state);
+turtleMove studentTurtleStep(bool bumped, bool at_end);
 
-// Position and navigation helpers
-bool detectObstacle(QPointF pos_, Orientation orient);
-void addVisit(QPointF& pos_);
-uint8_t retrieveVisitCount(QPointF& pos_);
-int getVisitNumber(Point &pos_);
+// Helper function declarations
+uint8_t getVisits(coordinate pos);
+void setVisits(coordinate pos, uint8_t val);
+void updatePosition(coordinate& pos, uint8_t direction);
+bool checkWall(coordinate pos, uint8_t direction);
 
-// Constants
-const uint8_t ORIENTATION_COUNT = 4;   // Number of possible orientations
-const uint8_t MOVE_DELAY = 40;         // Delay between moves
-const uint8_t MAZE_GRID_SIZE = 23;     // Size of the maze grid
-const uint8_t CENTER_POS = 11;         // Center position (MAZE_GRID_SIZE/2)
+// Constants for maze navigation
+constexpr uint8_t MAZE_SIZE = 30;
+constexpr uint8_t START_POS = 14;
+constexpr uint8_t MOVE_WAIT = 5;
+constexpr uint8_t MAX_DIRECTIONS = 4;
 
 #endif // STUDENT_H
