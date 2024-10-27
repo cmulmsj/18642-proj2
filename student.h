@@ -40,21 +40,13 @@ enum Orientation : int8_t {
     NORTH = 3
 };
 
-// Turtle States for Priority-Based Navigation
+// Turtle's FSM States
 enum TurtleState : int8_t {
-    INITIALIZING = 0,    // Initial state
-    SCANNING = 1,        // Evaluating surroundings
-    MOVING_STATE = 2,    // Moving forward
-    TURNING_STATE = 3,   // Executing a turn
-    BACKTRACKING = 4,    // Reversing from dead end
-    GOAL_REACHED = 5     // Reached target
-};
-
-// Direction finding helper
-struct AdjacentSquare {
-    uint8_t visit_count;   // Number of visits to this square
-    bool is_accessible;    // Whether this square can be reached
-    Orientation direction; // Direction to this square
+    MOVE_FORWARD = 0,    // Moving forward
+    TURN_RIGHT = 1,      // Turning right
+    TURN_LEFT = 2,       // Turning left
+    CHECK_SURROUNDINGS = 3, // Checking surroundings
+    AT_END = 4           // Reached the goal
 };
 
 // Function Declarations
@@ -66,7 +58,6 @@ turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state);
 bool detectObstacle(QPointF pos_, Orientation orient);
 void addVisit(QPointF& pos_);
 uint8_t retrieveVisitCount(QPointF& pos_);
-AdjacentSquare findBestMove(QPointF pos_, Orientation current_orient);
 int getVisitNumber(Point &pos_);
 
 // Constants
