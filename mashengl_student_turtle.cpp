@@ -9,93 +9,104 @@
 
 #include "student.h"
 
-static int visit_map[MAZE_GRID_SIZE][MAZE_GRID_SIZE] = {0};
-static Point current_pos = {0, 0};
-static Orientation current_direction = NORTH;
+// Track turtle's state between calls
+static struct TurtleData {
+    Point pos = {0, 0};                // Current position
+    Orientation facing = NORTH;         // Current orientation
+    Orientation target_dir = NORTH;     // Direction we want to face
+    bool completing_turn = false;       // True if in middle of turn sequence
+} turtle_data;
 
-// Find best direction to move
-Orientation findBestDirection(bool is_bumped) {
-    uint8_t min_visits = 255;
-    Orientation best_dir = current_direction;
-    QPointF check_pos(current_pos.x, current_pos.y);
+// Find direction with least visits
+Orientation findBestDirection(QPointF current_pos, Orientation current_dir, bool is_bumped) {
+    int min_visits = 999;
+    Orientation best_dir = current_dir;
     
     // Check all directions
-    for (int dir = 0; dir < ORIENTATION_COUNT; dir++) {
-        // Skip current direction if bumped
-        if (dir == current_direction && is_bumped) continue;
+    for (int i = 0; i < ORIENTATION_COUNT; i++) {
+        if (i == current_dir && is_bumped) continue;
         
-        if (!detectObstacle(check_pos, static_cast<Orientation>(dir))) {
-            QPointF next_pos = translatePos(check_pos, static_cast<Orientation>(dir));
-            uint8_t visits = retrieveVisitCount(next_pos);
-            
-            // Prefer unvisited squares
-            if (visits == 0) return static_cast<Orientation>(dir);
-            
-            if (visits < min_visits) {
-                min_visits = visits;
-                best_dir = static_cast<Orientation>(dir);
-            }
+        QPointF test_pos = current_pos;
+        switch (i) {
+            case WEST:  test_pos.setX(current_pos.x() - 1); break;
+            case EAST:  test_pos.setX(current_pos.x() + 1); break;
+            case NORTH: test_pos.setY(current_pos.y() - 1); break;
+            case SOUTH: test_pos.setY(current_pos.y() + 1); break;
+        }
+        
+        // Skip if there's a wall
+        if (detectObstacle(current_pos, static_cast<Orientation>(i))) {
+            continue;
+        }
+        
+        int visits = retrieveVisitCount(test_pos);
+        
+        // Prefer unvisited cells
+        if (visits == 0) {
+            return static_cast<Orientation>(i);
+        }
+        
+        if (visits < min_visits) {
+            min_visits = visits;
+            best_dir = static_cast<Orientation>(i);
         }
     }
     
     return best_dir;
 }
 
-// Calculate optimal turn direction
-turtleMove getOptimalTurn(Orientation current, Orientation target) {
-    int diff = (target - current + ORIENTATION_COUNT) % ORIENTATION_COUNT;
-    if (diff == 0) return MOVE;
-    return (diff == 1 || diff == 2) ? TURNRIGHT : TURNLEFT;
-}
-
 // Main solver function
-turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state) {
+turtleMove studentTurtleStep(bool bumped, bool goal, TurtleState* cur_state) {    
     if (goal) {
         *cur_state = AT_END;
         return STOP;
     }
     
+    QPointF current_pos(turtle_data.pos.x, turtle_data.pos.y);
+    
     switch (*cur_state) {
-        case CHECK_SURROUNDINGS: {
-            Orientation target = findBestDirection(bumped);
-            
-            if (target != current_direction) {
-                *cur_state = (getOptimalTurn(current_direction, target) == TURNRIGHT) ? 
-                            TURN_RIGHT : TURN_LEFT;
-                return getOptimalTurn(current_direction, target);
+        case EXPLORE: {
+            if (bumped) {
+                // Hit wall, need to turn
+                turtle_data.target_dir = findBestDirection(current_pos, turtle_data.facing, true);
+                if (turtle_data.target_dir != turtle_data.facing) {
+                    *cur_state = TURNING;
+                    turtle_data.completing_turn = true;
+                    return ((turtle_data.target_dir - turtle_data.facing + ORIENTATION_COUNT) % ORIENTATION_COUNT == 1) ? 
+                           TURNRIGHT : TURNLEFT;
+                }
+                return STOP;
             }
             
-            if (!bumped) {
-                *cur_state = MOVE_FORWARD;
+            // Check for better direction
+            turtle_data.target_dir = findBestDirection(current_pos, turtle_data.facing, false);
+            if (turtle_data.target_dir != turtle_data.facing) {
+                *cur_state = TURNING;
+                turtle_data.completing_turn = true;
+                return ((turtle_data.target_dir - turtle_data.facing + ORIENTATION_COUNT) % ORIENTATION_COUNT == 1) ? 
+                       TURNRIGHT : TURNLEFT;
+            }
+            
+            // Move forward if no better direction
+            return MOVE;
+        }
+        
+        case TURNING: {
+            if (turtle_data.completing_turn) {
+                turtle_data.completing_turn = false;
+                turtle_data.facing = turtle_data.target_dir;
+                *cur_state = EXPLORE;
                 return MOVE;
             }
-            
-            // If bumped and can't turn, try turning right
-            *cur_state = TURN_RIGHT;
+            return STOP;
+        }
+        
+        case BACKTRACK:
+            // Simple backtracking - just turn right and try a different direction
+            turtle_data.facing = static_cast<Orientation>((turtle_data.facing + 1) % ORIENTATION_COUNT);
+            *cur_state = EXPLORE;
             return TURNRIGHT;
-        }
-        
-        case MOVE_FORWARD: {
-            if (!bumped) {
-                // Update position tracking
-                QPointF new_pos(current_pos.x, current_pos.y);
-                new_pos = translatePos(new_pos, current_direction);
-                current_pos.x = new_pos.x();
-                current_pos.y = new_pos.y();
-            }
-            *cur_state = CHECK_SURROUNDINGS;
-            return STOP;
-        }
-        
-        case TURN_RIGHT:
-        case TURN_LEFT: {
-            current_direction = static_cast<Orientation>(
-                (current_direction + (*cur_state == TURN_RIGHT ? 1 : 3)) % ORIENTATION_COUNT
-            );
-            *cur_state = CHECK_SURROUNDINGS;
-            return STOP;
-        }
-        
+            
         case AT_END:
         default:
             return STOP;
