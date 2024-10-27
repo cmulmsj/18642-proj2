@@ -2,120 +2,117 @@
  * Originally by Philip Koopman (koopman@cmu.edu)
  * and Milda Zizyte (milda@cmu.edu)
  *
- * STUDENT NAME: GL Ma
+ * STUDENT NAME: Mashengjun Li
  * ANDREW ID: mashengl
  * LAST UPDATE: 10/27/2024
- *
- * This file keeps track of where the turtle is in the maze
- * and updates the location when the turtle is moved. It shall not
- * contain the maze solving logic/algorithm.
  */
 
 #include "student.h"
 
-// Current state tracking for the turtle
-static Point current_pos = {0, 0};
-static int current_orientation = 1; // Start facing North
+static int visit_count[MAZE_GRID_SIZE][MAZE_GRID_SIZE] = {0};
+static TurtleState current_state = INITIALIZING;
 
-// Map dimensions and center position
-const int MAP_SIZE = 23;
-const int CENTER = 11;
-static int visit_count[MAP_SIZE][MAP_SIZE] = {0};
-
-// Record visit count for current position
-void record_path(QPointF &pos_) {
-    int x = static_cast<int>(pos_.x()) + CENTER;
-    int y = static_cast<int>(pos_.y()) + CENTER;
-    if (x >= 0 && x < MAP_SIZE && y >= 0 && y < MAP_SIZE) {
+void addVisit(QPointF& pos_) {
+    int x = static_cast<int>(pos_.x()) + CENTER_POS;
+    int y = static_cast<int>(pos_.y()) + CENTER_POS;
+    if (x >= 0 && x < MAZE_GRID_SIZE && y >= 0 && y < MAZE_GRID_SIZE) {
         visit_count[x][y]++;
     }
 }
 
-// Get visit count for a position
+uint8_t retrieveVisitCount(QPointF& pos_) {
+    int x = static_cast<int>(pos_.x()) + CENTER_POS;
+    int y = static_cast<int>(pos_.y()) + CENTER_POS;
+    if (x >= 0 && x < MAZE_GRID_SIZE && y >= 0 && y < MAZE_GRID_SIZE) {
+        return visit_count[x][y];
+    }
+    return 255;
+}
+
 int getVisitNumber(Point &pos_) {
-    int x = pos_.x + CENTER;
-    int y = pos_.y + CENTER;
-    if (x >= 0 && x < MAP_SIZE && y >= 0 && y < MAP_SIZE) {
+    int x = pos_.x + CENTER_POS;
+    int y = pos_.y + CENTER_POS;
+    if (x >= 0 && x < MAZE_GRID_SIZE && y >= 0 && y < MAZE_GRID_SIZE) {
         return visit_count[x][y];
     }
     return 999;
 }
 
-// Check if the turtle will bump into a wall
-bool detectBump(QPointF &pos_, int orientation) {
-    Point pt1, pt2;
-    pt1.x = pos_.x();
-    pt1.y = pos_.y();
-    pt2 = pt1;
+bool detectObstacle(QPointF pos_, Orientation orient) {
+    int x1 = pos_.x(), y1 = pos_.y();
+    int x2 = x1, y2 = y1;
 
-    switch (orientation) {
-        case 0: // West
-            pt2.y += 1;
+    switch (orient) {
+        case WEST:
+            y2 += 1;
             break;
-        case 1: // North
-            pt2.x += 1;
+        case NORTH:
+            x2 += 1;
             break;
-        case 2: // East
-            pt1.x += 1;
-            pt2.x += 1;
-            pt2.y += 1;
+        case EAST:
+            x1 += 1;
+            x2 += 1;
+            y2 += 1;
             break;
-        case 3: // South
-            pt1.y += 1;
-            pt2.x += 1;
-            pt2.y += 1;
+        case SOUTH:
+            y1 += 1;
+            x2 += 1;
+            y2 += 1;
             break;
     }
-    return bumped(pt1.x, pt1.y, pt2.x, pt2.y);
+    return bumped(x1, y1, x2, y2);
 }
 
-// Update turtle position based on orientation
-QPointF updatePosition(QPointF pos_, int orientation) {
+QPointF translatePos(QPointF pos_, Orientation orientation) {
     switch (orientation) {
-        case 0: // West
+        case WEST:
             pos_.setX(pos_.x() - 1);
             break;
-        case 1: // North
+        case NORTH:
             pos_.setY(pos_.y() - 1);
             break;
-        case 2: // East
+        case EAST:
             pos_.setX(pos_.x() + 1);
             break;
-        case 3: // South
+        case SOUTH:
             pos_.setY(pos_.y() + 1);
             break;
     }
     return pos_;
 }
 
-// Main interface function to move the turtle
+int translateOrnt(int orientation, turtleMove nextMove) {
+    switch (nextMove) {
+        case TURNRIGHT:
+            return (orientation + 1) % ORIENTATION_COUNT;
+        case TURNLEFT:
+            return (orientation + ORIENTATION_COUNT - 1) % ORIENTATION_COUNT;
+        default:
+            return orientation;
+    }
+}
+
 bool moveTurtle(QPointF& pos_, int& orientation) {
-    static int time_left = 0;
-    const int TIMEOUT = 5;
-
-    if (time_left == 0) {
-        bool is_bumped = detectBump(pos_, orientation);
-        bool is_at_end = atend(pos_.x(), pos_.y());
-        
-        turtleMove next_move = studentTurtleStep(is_bumped, is_at_end);
-        
-        // Update orientation based on turn
-        if (next_move == TURNRIGHT) {
-            orientation = (orientation + 1) % 4;
-        } else if (next_move == TURNLEFT) {
-            orientation = (orientation + 3) % 4;
-        } else if (next_move == MOVE && !is_bumped) {
-            pos_ = updatePosition(pos_, orientation);
-            record_path(pos_);
-            Point current = {static_cast<int32_t>(pos_.x()), 
-                           static_cast<int32_t>(pos_.y())};
-            displayVisits(getVisitNumber(current));
-        }
-
-        time_left = TIMEOUT;
-        return true;
+    static int delay_counter = 0;
+    
+    if (delay_counter > 0) {
+        delay_counter--;
+        return false;
     }
 
-    time_left--;
-    return false;
+    bool is_bumped = detectObstacle(pos_, static_cast<Orientation>(orientation));
+    bool is_at_end = atend(pos_.x(), pos_.y());
+    
+    turtleMove next_move = studentTurtleStep(is_bumped, is_at_end, &current_state);
+    
+    if (next_move == MOVE && !is_bumped) {
+        pos_ = translatePos(pos_, static_cast<Orientation>(orientation));
+        addVisit(pos_);
+        displayVisits(retrieveVisitCount(pos_));
+    } else if (next_move != STOP) {
+        orientation = translateOrnt(orientation, next_move);
+    }
+
+    delay_counter = MOVE_DELAY;
+    return true;
 }
