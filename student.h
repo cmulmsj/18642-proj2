@@ -24,13 +24,6 @@ typedef struct {
     uint8_t y;
 } coordinate;
 
-// Movement message struct
-typedef struct {
-    turtleAction action;
-    bool validAction;
-    uint8_t visitCount;
-} turtleMove;
-
 // Action enum - Kept simple for clarity
 enum turtleAction {
     FORWARD,    // Move forward one cell
@@ -38,6 +31,13 @@ enum turtleAction {
     LEFT,       // Turn left 90 degrees
     NONE        // No action/stop
 };
+
+// Movement message struct
+typedef struct {
+    turtleAction action;
+    bool validAction;
+    uint8_t visitCount;
+} turtleMove;
 
 // Core function declarations - Required interface
 QPointF translatePos(QPointF pos_, turtleMove nextMove, int compass_orientation);
