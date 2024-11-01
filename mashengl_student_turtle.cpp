@@ -10,17 +10,14 @@
 #include "stdint.h"
 #include "student.h"
 
-// Visit tracking matrix for maze navigation
 static uint8_t visits[30][30] = {{0}};
 
-// Robot navigation states
 enum FSM_STATES { 
-    FORWARD_STATE = 0,           // Moving forward exploring new territory
-    CHECK_UNVISITED_STATE = 1,   // Looking for unvisited paths
-    CHECK_UNBUMPED_STATE = 2     // Finding optimal path when stuck
+    FORWARD_STATE = 0,           
+    CHECK_UNVISITED_STATE = 1,   
+    CHECK_UNBUMPED_STATE = 2  
 };
 
-// Local directional system
 enum LOCAL_DIRECTION { 
     LOCAL_WEST = 0, 
     LOCAL_NORTH = 1, 
@@ -114,7 +111,6 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
     static bool bumpedMap[4] = {false};
     static bool first_run = true;
 
-    // Initialize current_location on first run
     if (first_run) {
         current_location.x = 14;
         current_location.y = 14;
@@ -141,7 +137,6 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
     if (timeout_counter == 0) {
         coordinate check_location = current_location;
         
-        // Calculate next position for forward movement
         switch (current_local_direction) {
             case LOCAL_NORTH: {
                 check_location.y = static_cast<uint8_t>(check_location.y - static_cast<uint8_t>(1));
@@ -170,7 +165,6 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
         ROS_INFO("TURTLE: Forward check - Can move: %s (Wall: %s, Visits: %d)", 
                  canMoveForward ? "YES" : "NO", bumpedIntoWall ? "YES" : "NO", visitCount);
 
-        // Main FSM logic
         switch (current_state) {
             case FORWARD_STATE: {
                 ROS_INFO("TURTLE: In FORWARD state");
@@ -217,7 +211,6 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
                 uint8_t minVisits = UINT8_MAX;
                 LOCAL_DIRECTION minDirection = current_local_direction;
                 
-                // Find direction with least visited accessible cell
                 for(int i = 0; i < 4; i++) {
                     coordinate temp_location = current_location;
                     switch (static_cast<LOCAL_DIRECTION>(i)) {
@@ -267,7 +260,6 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
             }
         }
 
-        // Execute forward movement if in FORWARD state
         if (current_state == FORWARD_STATE) {
             ROS_INFO("TURTLE: Executing forward movement");
             current_location = updateLocalTurtlePosition(current_location, current_local_direction);
