@@ -19,6 +19,9 @@ fi
 echo "Setting up project files..."
 cp -r project_files/ece642rtle ~/catkin_ws/src/
 
+# Make sure scripts are executable
+chmod +x ~/catkin_ws/src/ece642rtle/build_run_turtle.sh
+
 # Initialize catkin workspace
 echo "Initializing catkin workspace..."
 cd ~/catkin_ws
