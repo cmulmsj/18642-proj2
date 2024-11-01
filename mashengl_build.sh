@@ -17,7 +17,7 @@ fi
 
 # Copy project files to appropriate locations
 echo "Setting up project files..."
-cp -r ece642rtle ~/catkin_ws/src/
+cp -r project_files/ece642rtle ~/catkin_ws/src/
 
 # Initialize catkin workspace
 echo "Initializing catkin workspace..."
@@ -32,7 +32,9 @@ source devel/setup.bash
 echo "Building project..."
 catkin_make ece642rtle_student
 
-# Return to home directory
+# Clean up extracted files
+echo "Cleaning up..."
 cd ~
+rm -rf project_files
 
 echo "Build completed successfully!"
