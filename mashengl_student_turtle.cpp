@@ -34,19 +34,19 @@ void setVisit(coordinate local_coord, uint8_t setVal) {
 coordinate updateLocalTurtlePosition(coordinate current_location, LOCAL_DIRECTION local_orientation) {
   switch (local_orientation) {
     case LOCAL_NORTH: {
-      current_location.y -= 1U;
+      current_location.y = static_cast<uint8_t>(current_location.y - static_cast<uint8_t>(1));
       break;
     }
     case LOCAL_EAST: {
-      current_location.x += 1U;
+      current_location.x = static_cast<uint8_t>(current_location.x + static_cast<uint8_t>(1));
       break;
     }
     case LOCAL_SOUTH: {
-      current_location.y += 1U;
+      current_location.y = static_cast<uint8_t>(current_location.y + static_cast<uint8_t>(1));
       break;
     }
     case LOCAL_WEST: {
-      current_location.x -= 1U;
+      current_location.x = static_cast<uint8_t>(current_location.x - static_cast<uint8_t>(1));
       break;
     }
     default: {
@@ -59,13 +59,22 @@ coordinate updateLocalTurtlePosition(coordinate current_location, LOCAL_DIRECTIO
 
 /* Navigation algorithm implementation */
 turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
-  static coordinate current_location = {x: 14, y: 14};
+  // Initialize static variables without designated initializers
+  static coordinate current_location;
   static LOCAL_DIRECTION current_local_direction = LOCAL_NORTH;
   static uint8_t directionsChecked = 0;
-  turtleMove futureMove;
   static FSM_STATES current_state = FORWARD_STATE;
   static bool bumpedMap[4] = {false};
+  static bool first_run = true;
 
+  // Initialize current_location on first run
+  if (first_run) {
+    current_location.x = 14;
+    current_location.y = 14;
+    first_run = false;
+  }
+
+  turtleMove futureMove;
   const uint8_t TIMEOUT = 5;
   static uint8_t timeout_counter;
 
@@ -78,19 +87,19 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
     coordinate check_location = current_location;
     switch (current_local_direction) {
       case LOCAL_NORTH: {
-        check_location.y -= 1U;
+        check_location.y = static_cast<uint8_t>(check_location.y - static_cast<uint8_t>(1));
         break;
       }
       case LOCAL_EAST: {
-        check_location.x += 1U;
+        check_location.x = static_cast<uint8_t>(check_location.x + static_cast<uint8_t>(1));
         break;
       }
       case LOCAL_SOUTH: {
-        check_location.y += 1U;
+        check_location.y = static_cast<uint8_t>(check_location.y + static_cast<uint8_t>(1));
         break;
       }
       case LOCAL_WEST: {
-        check_location.x -= 1U;
+        check_location.x = static_cast<uint8_t>(check_location.x - static_cast<uint8_t>(1));
         break;
       }
       default: {
@@ -142,11 +151,22 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
         
         for(int i = 0; i < 4; i++) {
           coordinate temp_location = current_location;
-          switch (i) {
-            case LOCAL_NORTH: temp_location.y -= 1U; break;
-            case LOCAL_EAST:  temp_location.x += 1U; break;
-            case LOCAL_SOUTH: temp_location.y += 1U; break;
-            case LOCAL_WEST:  temp_location.x -= 1U; break;
+          switch (static_cast<LOCAL_DIRECTION>(i)) {
+            case LOCAL_NORTH:
+              temp_location.y = static_cast<uint8_t>(temp_location.y - static_cast<uint8_t>(1));
+              break;
+            case LOCAL_EAST:
+              temp_location.x = static_cast<uint8_t>(temp_location.x + static_cast<uint8_t>(1));
+              break;
+            case LOCAL_SOUTH:
+              temp_location.y = static_cast<uint8_t>(temp_location.y + static_cast<uint8_t>(1));
+              break;
+            case LOCAL_WEST:
+              temp_location.x = static_cast<uint8_t>(temp_location.x - static_cast<uint8_t>(1));
+              break;
+            default:
+              ROS_ERROR("Invalid direction in switch");
+              break;
           }
           uint8_t visits = getVisit(temp_location);
           if(!bumpedMap[i] && visits < minVisits) {
@@ -167,11 +187,16 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
         }
         break;
       }
+      default: {
+        ROS_ERROR("Invalid state in FSM");
+        break;
+      }
     }
 
     if (current_state == FORWARD_STATE) {
       current_location = updateLocalTurtlePosition(current_location, current_local_direction);
-      setVisit(current_location, getVisit(current_location) + 1U);
+      uint8_t newVisitCount = static_cast<uint8_t>(getVisit(current_location) + static_cast<uint8_t>(1));
+      setVisit(current_location, newVisitCount);
       futureMove.visitCount = getVisit(current_location);
       futureMove.action = FORWARD;
     }
