@@ -1,0 +1,9 @@
+<launch>
+  <!-- Maze parameter -->
+  <arg name="maze" default="1"/>
+  
+  <!-- Launch the main ece642rtle node -->
+  <node pkg="ece642rtle" type="ece642rtle_student" name="ece642rtle_student" output="screen">
+    <param name="maze_file" value="$(find ece642rtle)/m$(arg maze).maze"/>
+  </node>
+</launch>
