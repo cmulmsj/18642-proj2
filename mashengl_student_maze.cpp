@@ -105,60 +105,14 @@ QPointF translatePos(QPointF pos_, turtleMove /* nextMove */, int compass_orient
   return pos_;
 }
 
-DIRECTION rotateClockwise(DIRECTION compass_orientation) {
-  DIRECTION result;
-  switch (compass_orientation) {
-    case NORTH:
-      result = EAST;
-      break;
-    case EAST:
-      result = SOUTH;
-      break;
-    case SOUTH:
-      result = WEST;
-      break;
-    case WEST:
-      result = NORTH;
-      break;
-    default:
-      ROS_ERROR("compass_orientation is in undetermined state");
-      result = NORTH;
-      break;
-  }
-  return result;
-}
-
-DIRECTION rotateCounterClockwise(DIRECTION compass_orientation) {
-  DIRECTION result;
-  switch (compass_orientation) {
-    case NORTH:
-      result = WEST;
-      break;
-    case EAST:
-      result = NORTH;
-      break;
-    case SOUTH:
-      result = EAST;
-      break;
-    case WEST:
-      result = SOUTH;
-      break;
-    default:
-      ROS_ERROR("compass_orientation is in undetermined state");
-      result = NORTH;
-      break;
-  }
-  return result;
-}
-
 int translateOrnt(int orientation, turtleMove nextMove) {
   int result;
   switch (nextMove.action) {
     case LEFT:
-      result = static_cast<int>(rotateCounterClockwise(static_cast<DIRECTION>(orientation)));
+      result = (orientation + 3) % 4;
       break;
     case RIGHT:
-      result = static_cast<int>(rotateClockwise(static_cast<DIRECTION>(orientation)));
+      result = (orientation + 1) % 4;
       break;
     default:
       ROS_ERROR("nextMove is Unknown");
