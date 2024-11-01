@@ -7,172 +7,181 @@
  * LAST UPDATE: 10/27/2024
  */
 
+#include "stdint.h"
 #include "student.h"
 
-enum DIRECTION { WEST = 0, NORTH = 1, EAST = 2, SOUTH = 3 };
+// Visit tracking matrix for maze navigation
+static uint8_t visits[30][30] = {{0}};
 
-bool bumpTest(QPointF &pos_, DIRECTION compass_orientation) {
-  coordinate bumptest1, bumptest2;
-  // Use static_cast to handle float to int conversion explicitly
-  bumptest1.x = static_cast<uint8_t>(pos_.x());
-  bumptest2.x = static_cast<uint8_t>(pos_.x());
-  bumptest1.y = static_cast<uint8_t>(pos_.y());
-  bumptest2.y = static_cast<uint8_t>(pos_.y());
+// Robot navigation states
+enum FSM_STATES { FORWARD_STATE = 0, CHECK_UNVISITED_STATE = 1, CHECK_UNBUMPED_STATE = 2};
 
-  // Handle incrementing uint8_t values safely
-  switch (compass_orientation) {
-    case WEST: {
-      bumptest2.y = static_cast<uint8_t>(bumptest2.y + 1U);
+// Local directional system
+enum LOCAL_DIRECTION { LOCAL_WEST = 0, LOCAL_NORTH = 1, LOCAL_EAST = 2, LOCAL_SOUTH = 3 };
+
+/* Get visit count for a cell */
+uint8_t getVisit(coordinate local_coord) { 
+  return visits[local_coord.x][local_coord.y]; 
+}
+
+/* Update visit count for a cell */
+void setVisit(coordinate local_coord, uint8_t setVal) {
+  visits[local_coord.x][local_coord.y] = setVal;
+  return;
+}
+
+/* Calculate next grid position based on current position and direction */
+coordinate updateLocalTurtlePosition(coordinate current_location, LOCAL_DIRECTION local_orientation) {
+  switch (local_orientation) {
+    case LOCAL_NORTH: {
+      current_location.y -= 1U;
       break;
     }
-    case NORTH: {
-      bumptest2.x = static_cast<uint8_t>(bumptest2.x + 1U);
+    case LOCAL_EAST: {
+      current_location.x += 1U;
       break;
     }
-    case EAST: {
-      bumptest2.x = static_cast<uint8_t>(bumptest2.x + 1U);
-      bumptest2.y = static_cast<uint8_t>(bumptest2.y + 1U);
-      bumptest1.x = static_cast<uint8_t>(bumptest1.x + 1U);
+    case LOCAL_SOUTH: {
+      current_location.y += 1U;
       break;
     }
-    case SOUTH: {
-      bumptest2.x = static_cast<uint8_t>(bumptest2.x + 1U);
-      bumptest2.y = static_cast<uint8_t>(bumptest2.y + 1U);
-      bumptest1.y = static_cast<uint8_t>(bumptest1.y + 1U);
+    case LOCAL_WEST: {
+      current_location.x -= 1U;
       break;
     }
     default: {
-      ROS_ERROR("compass_orientation is in undetermined state");
+      ROS_ERROR("local compass_orientation is in undetermined state");
       break;
     }
   }
-  return bumped(bumptest1.x, bumptest1.y, bumptest2.x, bumptest2.y);
+  return current_location;
 }
 
-bool moveTurtle(QPointF& pos_, int& compass_orientation) {
-  bool bumped = bumpTest(pos_, (DIRECTION)compass_orientation);
-  // Use static_cast for float to int conversion
-  bool at_end = atend(static_cast<int>(pos_.x()), static_cast<int>(pos_.y()));
-  turtleMove nextMove = studentTurtleStep(bumped, at_end);
-  if(nextMove.validAction) {
-    translatePosAndOrientation(nextMove, pos_, compass_orientation);
-  }
-  return nextMove.validAction;
-}
+/* Navigation algorithm implementation */
+turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
+  static coordinate current_location = {x: 14, y: 14};
+  static LOCAL_DIRECTION current_local_direction = LOCAL_NORTH;
+  static uint8_t directionsChecked = 0;
+  turtleMove futureMove;
+  static FSM_STATES current_state = FORWARD_STATE;
+  static bool bumpedMap[4] = {false};
 
-void translatePosAndOrientation(turtleMove nextMove, QPointF& pos_, int& compass_orientation) {
-  switch (nextMove.action) {
-    case FORWARD: {
-      pos_ = translatePos(pos_, nextMove, compass_orientation);
-      displayVisits(nextMove.visitCount);
-      break;
-    }
-    case LEFT: {
-      compass_orientation = translateOrnt(compass_orientation, nextMove);
-      break;
-    }
-    case RIGHT: {
-      compass_orientation = translateOrnt(compass_orientation, nextMove);
-      break;
-    }
-    default: {
-      ROS_ERROR("nextMove.action is invalid action");
-      break;
-    }
-  }
-}
+  const uint8_t TIMEOUT = 5;
+  static uint8_t timeout_counter;
 
-QPointF translatePos(QPointF pos_, turtleMove nextMove, int compass_orientation) {
-  (void)nextMove; // Explicitly mark parameter as unused
-  
-  switch (compass_orientation) {
-    case NORTH: {
-      pos_.setY(pos_.y() - 1.0);
-      break;
-    }
-    case EAST: {
-      pos_.setX(pos_.x() + 1.0);
-      break;
-    }
-    case SOUTH: {
-      pos_.setY(pos_.y() + 1.0);
-      break;
-    }
-    case WEST: {
-      pos_.setX(pos_.x() - 1.0);
-      break;
-    }
-    default: {
-      ROS_ERROR("compass_orientation is in undetermined state");
-      break;
-    }
+  if (at_end) {
+    futureMove.validAction = false;
+    return futureMove;
   }
-  return pos_;
-}
 
-DIRECTION rotateClockwise(DIRECTION compass_orientation) {
-  switch (compass_orientation) {
-    case NORTH: {
-      compass_orientation = EAST;
-      break;
+  if (timeout_counter == 0) {
+    coordinate check_location = current_location;
+    switch (current_local_direction) {
+      case LOCAL_NORTH: {
+        check_location.y -= 1U;
+        break;
+      }
+      case LOCAL_EAST: {
+        check_location.x += 1U;
+        break;
+      }
+      case LOCAL_SOUTH: {
+        check_location.y += 1U;
+        break;
+      }
+      case LOCAL_WEST: {
+        check_location.x -= 1U;
+        break;
+      }
+      default: {
+        ROS_ERROR("local compass_orientation is in undetermined state");
+        break;
+      }
     }
-    case EAST: {
-      compass_orientation = SOUTH;
-      break;
-    }
-    case SOUTH: {
-      compass_orientation = WEST;
-      break;
-    }
-    case WEST: {
-      compass_orientation = NORTH;
-      break;
-    }
-    default: {
-      ROS_ERROR("compass_orientation is in undetermined state");
-      break;
-    }
-  }
-  return compass_orientation;
-}
 
-DIRECTION rotateCounterClockwise(DIRECTION compass_orientation) {
-  switch (compass_orientation) {
-    case NORTH: {
-      compass_orientation = WEST;
-      break;
-    }
-    case EAST: {
-      compass_orientation = NORTH;
-      break;
-    }
-    case SOUTH: {
-      compass_orientation = EAST;
-      break;
-    }
-    case WEST: {
-      compass_orientation = SOUTH;
-      break;
-    }
-    default: {
-      ROS_ERROR("compass_orientation is in undetermined state");
-      break;
-    }
-  }
-  return compass_orientation;
-}
+    uint8_t visitCount = getVisit(check_location);
+    bool canMoveForward = !bumpedIntoWall && (visitCount == 0);
 
-int translateOrnt(int orientation, turtleMove nextMove) {
-  switch (nextMove.action) {
-    case LEFT: {
-      return rotateCounterClockwise((DIRECTION)orientation);
+    switch (current_state) {
+      case FORWARD_STATE: {
+        if(canMoveForward) {
+          current_state = FORWARD_STATE;
+        } else {
+          current_state = CHECK_UNVISITED_STATE;
+          bumpedMap[static_cast<int>(current_local_direction)] = bumpedIntoWall;
+          current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
+          futureMove.action = RIGHT;
+          directionsChecked++;
+        }
+        break;
+      }
+      case CHECK_UNVISITED_STATE: {
+        if(canMoveForward) {
+          current_state = FORWARD_STATE;
+          directionsChecked = 0;
+          for(int i = 0; i < 4; i++) {
+            bumpedMap[i] = false;
+          }
+        } else if(directionsChecked < 4) {
+          bumpedMap[static_cast<int>(current_local_direction)] = bumpedIntoWall;
+          current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
+          futureMove.action = RIGHT;
+          directionsChecked++;
+        } else {
+          current_state = CHECK_UNBUMPED_STATE;
+          bumpedMap[static_cast<int>(current_local_direction)] = bumpedIntoWall;
+          current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
+          futureMove.action = RIGHT;
+          directionsChecked = 0;
+        }
+        break;
+      }
+      case CHECK_UNBUMPED_STATE: {
+        uint8_t minVisits = UINT8_MAX;
+        LOCAL_DIRECTION minDirection = current_local_direction;
+        
+        for(int i = 0; i < 4; i++) {
+          coordinate temp_location = current_location;
+          switch (i) {
+            case LOCAL_NORTH: temp_location.y -= 1U; break;
+            case LOCAL_EAST:  temp_location.x += 1U; break;
+            case LOCAL_SOUTH: temp_location.y += 1U; break;
+            case LOCAL_WEST:  temp_location.x -= 1U; break;
+          }
+          uint8_t visits = getVisit(temp_location);
+          if(!bumpedMap[i] && visits < minVisits) {
+            minVisits = visits;
+            minDirection = static_cast<LOCAL_DIRECTION>(i);
+          }
+        }
+        
+        if(current_local_direction != minDirection) {
+          current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
+          futureMove.action = RIGHT;
+        } else {
+          current_state = FORWARD_STATE;
+          directionsChecked = 0;
+          for(int i = 0; i < 4; i++) {
+            bumpedMap[i] = false;
+          }
+        }
+        break;
+      }
     }
-    case RIGHT: {
-      return rotateClockwise((DIRECTION)orientation);
+
+    if (current_state == FORWARD_STATE) {
+      current_location = updateLocalTurtlePosition(current_location, current_local_direction);
+      setVisit(current_location, getVisit(current_location) + 1U);
+      futureMove.visitCount = getVisit(current_location);
+      futureMove.action = FORWARD;
     }
-    default: {
-      ROS_ERROR("nextMove is Unknown");
-      return orientation; // Add return for default case
-    }
+
+    timeout_counter = TIMEOUT;
+    futureMove.validAction = true;
+    return futureMove;
   }
+
+  timeout_counter--;
+  futureMove.validAction = false;
+  return futureMove;
 }
