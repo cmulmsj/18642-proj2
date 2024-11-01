@@ -2,9 +2,9 @@
  * Originally by Philip Koopman (koopman@cmu.edu)
  * and Milda Zizyte (milda@cmu.edu)
  *
- * STUDENT NAME: GL Ma
+ * STUDENT NAME: Mashengjun Li
  * ANDREW ID: mashengl
- * LAST UPDATE: 10/27/2024
+ * LAST UPDATE: 11/01/2024
  */
 
 #include "stdint.h"
@@ -14,199 +14,283 @@
 static uint8_t visits[30][30] = {{0}};
 
 // Robot navigation states
-enum FSM_STATES { FORWARD_STATE = 0, CHECK_UNVISITED_STATE = 1, CHECK_UNBUMPED_STATE = 2};
+enum FSM_STATES { 
+    FORWARD_STATE = 0,           // Moving forward exploring new territory
+    CHECK_UNVISITED_STATE = 1,   // Looking for unvisited paths
+    CHECK_UNBUMPED_STATE = 2     // Finding optimal path when stuck
+};
 
 // Local directional system
-enum LOCAL_DIRECTION { LOCAL_WEST = 0, LOCAL_NORTH = 1, LOCAL_EAST = 2, LOCAL_SOUTH = 3 };
+enum LOCAL_DIRECTION { 
+    LOCAL_WEST = 0, 
+    LOCAL_NORTH = 1, 
+    LOCAL_EAST = 2, 
+    LOCAL_SOUTH = 3 
+};
 
-/* Get visit count for a cell */
+/**
+ * @brief Get number of visits for a cell
+ * @param local_coord Grid position to check
+ * @return Visit count for the specified cell
+ */
 uint8_t getVisit(coordinate local_coord) { 
-  return visits[local_coord.x][local_coord.y]; 
+    uint8_t visit_count = visits[local_coord.x][local_coord.y];
+    ROS_INFO("TURTLE: Getting visit count at (%d,%d): %d", 
+             local_coord.x, local_coord.y, visit_count);
+    return visit_count;
 }
 
-/* Update visit count for a cell */
+/**
+ * @brief Update visit count for a cell
+ * @param local_coord Grid position to update
+ * @param setVal New visit count
+ */
 void setVisit(coordinate local_coord, uint8_t setVal) {
-  visits[local_coord.x][local_coord.y] = setVal;
-  return;
+    ROS_INFO("TURTLE: Updating visit count at (%d,%d): %d -> %d", 
+             local_coord.x, local_coord.y, visits[local_coord.x][local_coord.y], setVal);
+    visits[local_coord.x][local_coord.y] = setVal;
 }
 
-/* Calculate next grid position based on current position and direction */
+/**
+ * @brief Calculate next grid position based on current position and direction
+ * @param current_location Current position
+ * @param local_orientation Current direction
+ * @return New position after movement
+ */
 coordinate updateLocalTurtlePosition(coordinate current_location, LOCAL_DIRECTION local_orientation) {
-  switch (local_orientation) {
-    case LOCAL_NORTH: {
-      current_location.y = static_cast<uint8_t>(current_location.y - static_cast<uint8_t>(1));
-      break;
+    coordinate new_location = current_location;
+    ROS_INFO("TURTLE: Current position (%d,%d), Direction: %d", 
+             current_location.x, current_location.y, local_orientation);
+
+    switch (local_orientation) {
+        case LOCAL_NORTH: {
+            new_location.y = static_cast<uint8_t>(new_location.y - static_cast<uint8_t>(1));
+            ROS_INFO("TURTLE: Moving NORTH");
+            break;
+        }
+        case LOCAL_EAST: {
+            new_location.x = static_cast<uint8_t>(new_location.x + static_cast<uint8_t>(1));
+            ROS_INFO("TURTLE: Moving EAST");
+            break;
+        }
+        case LOCAL_SOUTH: {
+            new_location.y = static_cast<uint8_t>(new_location.y + static_cast<uint8_t>(1));
+            ROS_INFO("TURTLE: Moving SOUTH");
+            break;
+        }
+        case LOCAL_WEST: {
+            new_location.x = static_cast<uint8_t>(new_location.x - static_cast<uint8_t>(1));
+            ROS_INFO("TURTLE: Moving WEST");
+            break;
+        }
+        default: {
+            ROS_ERROR("TURTLE: Invalid direction in updateLocalTurtlePosition: %d", local_orientation);
+            break;
+        }
     }
-    case LOCAL_EAST: {
-      current_location.x = static_cast<uint8_t>(current_location.x + static_cast<uint8_t>(1));
-      break;
-    }
-    case LOCAL_SOUTH: {
-      current_location.y = static_cast<uint8_t>(current_location.y + static_cast<uint8_t>(1));
-      break;
-    }
-    case LOCAL_WEST: {
-      current_location.x = static_cast<uint8_t>(current_location.x - static_cast<uint8_t>(1));
-      break;
-    }
-    default: {
-      ROS_ERROR("local compass_orientation is in undetermined state");
-      break;
-    }
-  }
-  return current_location;
+    
+    ROS_INFO("TURTLE: New position: (%d,%d)", new_location.x, new_location.y);
+    return new_location;
 }
 
-/* Navigation algorithm implementation */
+/**
+ * @brief Main navigation algorithm implementation
+ * 
+ * Implements a finite state machine with three states:
+ * 1. FORWARD_STATE: Moving through unvisited cells
+ * 2. CHECK_UNVISITED_STATE: Looking for unvisited paths when stuck
+ * 3. CHECK_UNBUMPED_STATE: Finding optimal path when surrounded by visited cells
+ * 
+ * @param bumpedIntoWall True if wall detected ahead
+ * @param at_end True if goal reached
+ * @return Next movement command
+ */
 turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
-  // Initialize static variables without designated initializers
-  static coordinate current_location;
-  static LOCAL_DIRECTION current_local_direction = LOCAL_NORTH;
-  static uint8_t directionsChecked = 0;
-  static FSM_STATES current_state = FORWARD_STATE;
-  static bool bumpedMap[4] = {false};
-  static bool first_run = true;
+    // Initialize static variables
+    static coordinate current_location;
+    static LOCAL_DIRECTION current_local_direction = LOCAL_NORTH;
+    static uint8_t directionsChecked = 0;
+    static FSM_STATES current_state = FORWARD_STATE;
+    static bool bumpedMap[4] = {false};
+    static bool first_run = true;
 
-  // Initialize current_location on first run
-  if (first_run) {
-    current_location.x = 14;
-    current_location.y = 14;
-    first_run = false;
-  }
+    // Initialize current_location on first run
+    if (first_run) {
+        current_location.x = 14;
+        current_location.y = 14;
+        first_run = false;
+        ROS_INFO("TURTLE: Initialized starting position to (14,14)");
+    }
 
-  turtleMove futureMove;
-  const uint8_t TIMEOUT = 5;
-  static uint8_t timeout_counter;
+    turtleMove futureMove;
+    const uint8_t TIMEOUT = 5;
+    static uint8_t timeout_counter;
 
-  if (at_end) {
+    ROS_INFO("\nTURTLE: === New Navigation Step ===");
+    ROS_INFO("TURTLE: Wall detected: %s, At goal: %s", 
+             bumpedIntoWall ? "YES" : "NO", at_end ? "YES" : "NO");
+    ROS_INFO("TURTLE: Current State: %d, Directions Checked: %d", 
+             current_state, directionsChecked);
+
+    if (at_end) {
+        ROS_INFO("TURTLE: Goal reached! Stopping navigation.");
+        futureMove.validAction = false;
+        return futureMove;
+    }
+
+    if (timeout_counter == 0) {
+        coordinate check_location = current_location;
+        
+        // Calculate next position for forward movement
+        switch (current_local_direction) {
+            case LOCAL_NORTH: {
+                check_location.y = static_cast<uint8_t>(check_location.y - static_cast<uint8_t>(1));
+                break;
+            }
+            case LOCAL_EAST: {
+                check_location.x = static_cast<uint8_t>(check_location.x + static_cast<uint8_t>(1));
+                break;
+            }
+            case LOCAL_SOUTH: {
+                check_location.y = static_cast<uint8_t>(check_location.y + static_cast<uint8_t>(1));
+                break;
+            }
+            case LOCAL_WEST: {
+                check_location.x = static_cast<uint8_t>(check_location.x - static_cast<uint8_t>(1));
+                break;
+            }
+            default: {
+                ROS_ERROR("TURTLE: Invalid direction in check_location calculation");
+                break;
+            }
+        }
+
+        uint8_t visitCount = getVisit(check_location);
+        bool canMoveForward = !bumpedIntoWall && (visitCount == 0);
+        ROS_INFO("TURTLE: Forward check - Can move: %s (Wall: %s, Visits: %d)", 
+                 canMoveForward ? "YES" : "NO", bumpedIntoWall ? "YES" : "NO", visitCount);
+
+        // Main FSM logic
+        switch (current_state) {
+            case FORWARD_STATE: {
+                ROS_INFO("TURTLE: In FORWARD state");
+                if(canMoveForward) {
+                    ROS_INFO("TURTLE: Continuing forward");
+                    current_state = FORWARD_STATE;
+                } else {
+                    ROS_INFO("TURTLE: Blocked - switching to CHECK_UNVISITED");
+                    current_state = CHECK_UNVISITED_STATE;
+                    bumpedMap[static_cast<int>(current_local_direction)] = bumpedIntoWall;
+                    current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
+                    futureMove.action = RIGHT;
+                    directionsChecked++;
+                }
+                break;
+            }
+            case CHECK_UNVISITED_STATE: {
+                ROS_INFO("TURTLE: In CHECK_UNVISITED state");
+                if(canMoveForward) {
+                    ROS_INFO("TURTLE: Found unvisited path - returning to FORWARD");
+                    current_state = FORWARD_STATE;
+                    directionsChecked = 0;
+                    for(int i = 0; i < 4; i++) {
+                        bumpedMap[i] = false;
+                    }
+                } else if(directionsChecked < 4) {
+                    ROS_INFO("TURTLE: No path found - continuing to check directions");
+                    bumpedMap[static_cast<int>(current_local_direction)] = bumpedIntoWall;
+                    current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
+                    futureMove.action = RIGHT;
+                    directionsChecked++;
+                } else {
+                    ROS_INFO("TURTLE: All directions checked - switching to CHECK_UNBUMPED");
+                    current_state = CHECK_UNBUMPED_STATE;
+                    bumpedMap[static_cast<int>(current_local_direction)] = bumpedIntoWall;
+                    current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
+                    futureMove.action = RIGHT;
+                    directionsChecked = 0;
+                }
+                break;
+            }
+            case CHECK_UNBUMPED_STATE: {
+                ROS_INFO("TURTLE: In CHECK_UNBUMPED state");
+                uint8_t minVisits = UINT8_MAX;
+                LOCAL_DIRECTION minDirection = current_local_direction;
+                
+                // Find direction with least visited accessible cell
+                for(int i = 0; i < 4; i++) {
+                    coordinate temp_location = current_location;
+                    switch (static_cast<LOCAL_DIRECTION>(i)) {
+                        case LOCAL_NORTH:
+                            temp_location.y = static_cast<uint8_t>(temp_location.y - static_cast<uint8_t>(1));
+                            break;
+                        case LOCAL_EAST:
+                            temp_location.x = static_cast<uint8_t>(temp_location.x + static_cast<uint8_t>(1));
+                            break;
+                        case LOCAL_SOUTH:
+                            temp_location.y = static_cast<uint8_t>(temp_location.y + static_cast<uint8_t>(1));
+                            break;
+                        case LOCAL_WEST:
+                            temp_location.x = static_cast<uint8_t>(temp_location.x - static_cast<uint8_t>(1));
+                            break;
+                        default:
+                            ROS_ERROR("TURTLE: Invalid direction in direction check");
+                            break;
+                    }
+                    uint8_t visits = getVisit(temp_location);
+                    ROS_INFO("TURTLE: Checking direction %d - Visits: %d, Wall: %s", 
+                             i, visits, bumpedMap[i] ? "YES" : "NO");
+                    if(!bumpedMap[i] && visits < minVisits) {
+                        minVisits = visits;
+                        minDirection = static_cast<LOCAL_DIRECTION>(i);
+                        ROS_INFO("TURTLE: New best direction: %d with %d visits", i, visits);
+                    }
+                }
+                
+                if(current_local_direction != minDirection) {
+                    ROS_INFO("TURTLE: Rotating to direction %d", minDirection);
+                    current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
+                    futureMove.action = RIGHT;
+                } else {
+                    ROS_INFO("TURTLE: Reached desired direction - returning to FORWARD");
+                    current_state = FORWARD_STATE;
+                    directionsChecked = 0;
+                    for(int i = 0; i < 4; i++) {
+                        bumpedMap[i] = false;
+                    }
+                }
+                break;
+            }
+            default: {
+                ROS_ERROR("TURTLE: Invalid state in FSM");
+                break;
+            }
+        }
+
+        // Execute forward movement if in FORWARD state
+        if (current_state == FORWARD_STATE) {
+            ROS_INFO("TURTLE: Executing forward movement");
+            current_location = updateLocalTurtlePosition(current_location, current_local_direction);
+            uint8_t newVisitCount = static_cast<uint8_t>(getVisit(current_location) + static_cast<uint8_t>(1));
+            setVisit(current_location, newVisitCount);
+            futureMove.visitCount = getVisit(current_location);
+            futureMove.action = FORWARD;
+        }
+
+        timeout_counter = TIMEOUT;
+        futureMove.validAction = true;
+        
+        ROS_INFO("TURTLE: Next move - Action: %s, Valid: %s, Visits: %d",
+                 futureMove.action == FORWARD ? "FORWARD" : 
+                 futureMove.action == LEFT ? "LEFT" : "RIGHT",
+                 futureMove.validAction ? "YES" : "NO",
+                 futureMove.visitCount);
+                 
+        return futureMove;
+    }
+
+    timeout_counter--;
     futureMove.validAction = false;
+    ROS_INFO("TURTLE: Timeout counter: %d", timeout_counter);
     return futureMove;
-  }
-
-  if (timeout_counter == 0) {
-    coordinate check_location = current_location;
-    switch (current_local_direction) {
-      case LOCAL_NORTH: {
-        check_location.y = static_cast<uint8_t>(check_location.y - static_cast<uint8_t>(1));
-        break;
-      }
-      case LOCAL_EAST: {
-        check_location.x = static_cast<uint8_t>(check_location.x + static_cast<uint8_t>(1));
-        break;
-      }
-      case LOCAL_SOUTH: {
-        check_location.y = static_cast<uint8_t>(check_location.y + static_cast<uint8_t>(1));
-        break;
-      }
-      case LOCAL_WEST: {
-        check_location.x = static_cast<uint8_t>(check_location.x - static_cast<uint8_t>(1));
-        break;
-      }
-      default: {
-        ROS_ERROR("local compass_orientation is in undetermined state");
-        break;
-      }
-    }
-
-    uint8_t visitCount = getVisit(check_location);
-    bool canMoveForward = !bumpedIntoWall && (visitCount == 0);
-
-    switch (current_state) {
-      case FORWARD_STATE: {
-        if(canMoveForward) {
-          current_state = FORWARD_STATE;
-        } else {
-          current_state = CHECK_UNVISITED_STATE;
-          bumpedMap[static_cast<int>(current_local_direction)] = bumpedIntoWall;
-          current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
-          futureMove.action = RIGHT;
-          directionsChecked++;
-        }
-        break;
-      }
-      case CHECK_UNVISITED_STATE: {
-        if(canMoveForward) {
-          current_state = FORWARD_STATE;
-          directionsChecked = 0;
-          for(int i = 0; i < 4; i++) {
-            bumpedMap[i] = false;
-          }
-        } else if(directionsChecked < 4) {
-          bumpedMap[static_cast<int>(current_local_direction)] = bumpedIntoWall;
-          current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
-          futureMove.action = RIGHT;
-          directionsChecked++;
-        } else {
-          current_state = CHECK_UNBUMPED_STATE;
-          bumpedMap[static_cast<int>(current_local_direction)] = bumpedIntoWall;
-          current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
-          futureMove.action = RIGHT;
-          directionsChecked = 0;
-        }
-        break;
-      }
-      case CHECK_UNBUMPED_STATE: {
-        uint8_t minVisits = UINT8_MAX;
-        LOCAL_DIRECTION minDirection = current_local_direction;
-        
-        for(int i = 0; i < 4; i++) {
-          coordinate temp_location = current_location;
-          switch (static_cast<LOCAL_DIRECTION>(i)) {
-            case LOCAL_NORTH:
-              temp_location.y = static_cast<uint8_t>(temp_location.y - static_cast<uint8_t>(1));
-              break;
-            case LOCAL_EAST:
-              temp_location.x = static_cast<uint8_t>(temp_location.x + static_cast<uint8_t>(1));
-              break;
-            case LOCAL_SOUTH:
-              temp_location.y = static_cast<uint8_t>(temp_location.y + static_cast<uint8_t>(1));
-              break;
-            case LOCAL_WEST:
-              temp_location.x = static_cast<uint8_t>(temp_location.x - static_cast<uint8_t>(1));
-              break;
-            default:
-              ROS_ERROR("Invalid direction in switch");
-              break;
-          }
-          uint8_t visits = getVisit(temp_location);
-          if(!bumpedMap[i] && visits < minVisits) {
-            minVisits = visits;
-            minDirection = static_cast<LOCAL_DIRECTION>(i);
-          }
-        }
-        
-        if(current_local_direction != minDirection) {
-          current_local_direction = static_cast<LOCAL_DIRECTION>((static_cast<int>(current_local_direction) + 1) % 4);
-          futureMove.action = RIGHT;
-        } else {
-          current_state = FORWARD_STATE;
-          directionsChecked = 0;
-          for(int i = 0; i < 4; i++) {
-            bumpedMap[i] = false;
-          }
-        }
-        break;
-      }
-      default: {
-        ROS_ERROR("Invalid state in FSM");
-        break;
-      }
-    }
-
-    if (current_state == FORWARD_STATE) {
-      current_location = updateLocalTurtlePosition(current_location, current_local_direction);
-      uint8_t newVisitCount = static_cast<uint8_t>(getVisit(current_location) + static_cast<uint8_t>(1));
-      setVisit(current_location, newVisitCount);
-      futureMove.visitCount = getVisit(current_location);
-      futureMove.action = FORWARD;
-    }
-
-    timeout_counter = TIMEOUT;
-    futureMove.validAction = true;
-    return futureMove;
-  }
-
-  timeout_counter--;
-  futureMove.validAction = false;
-  return futureMove;
 }
