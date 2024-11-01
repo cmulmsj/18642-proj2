@@ -26,7 +26,11 @@ sleep 3
 
 # Launch the maze with specified number
 echo "Launching maze $MAZE_NUM..."
-roslaunch ece642rtle proj8.launch maze:=$MAZE_NUM
+rosrun ece642rtle ece642rtle_student _maze_file:=$(rospack find ece642rtle)/m${MAZE_NUM}.maze
+
+# Wait for Ctrl+C
+echo "Press Ctrl+C to exit..."
+wait
 
 # Cleanup after ctrl+c
 echo "Cleaning up..."
