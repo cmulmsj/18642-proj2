@@ -1,7 +1,17 @@
 #!/bin/bash
 
-# Exit on any error
-set -e
+# Function to kill all processes
+kill_processes() {
+    for p in "$@"; do
+        if [[ -z $(ps -p $p > /dev/null) ]]; then
+            echo "Killing process $p"
+            kill $p
+            sleep 1
+        fi
+    done
+    echo "killed all processes, exiting"
+    exit 0
+}
 
 # Check if maze number is provided
 if [ $# -ne 1 ]; then
@@ -10,33 +20,68 @@ if [ $# -ne 1 ]; then
 fi
 
 MAZE_NUM=$1
+maze_file="m${MAZE_NUM}.maze"
 
 # Source the workspace setup
 source ~/catkin_ws/devel/setup.bash
 
-# Kill any existing ROS nodes and clean up
-echo "Cleaning up any existing ROS processes..."
-killall -9 roscore rosmaster rosout ece642rtle_student 2>/dev/null || true
-sleep 2
+# Locate the ece642rtle directory
+turtledir=`rospack find ece642rtle`
+if [ -z "$turtledir" ]; then
+    echo "Cannot locate package ece642rtle."
+    exit 1
+fi
 
-# Start roscore in the background
-echo "Starting ROS core..."
-roscore &
-sleep 3
+# Check that maze file exists
+if [ ! -s "$turtledir/$maze_file" ]; then
+    echo "Maze file $maze_file does not exist."
+    exit 1
+fi
 
-# Launch the maze with specified number
-echo "Launching maze $MAZE_NUM..."
-rosrun ece642rtle ece642rtle_student _maze_file:=$(rospack find ece642rtle)/m${MAZE_NUM}.maze
+# Run roscore if it is not already running
+ROSCORE_PID=""
+if [[ -z $(pgrep roscore) ]]; then
+    roscore&
+    ROSCORE_PID=$!
+    sleep 1
+    if [[ -z $(pgrep roscore) ]]; then
+        echo "Error launching roscore. Make sure no other ros processes are running and try again."
+        exit 1
+    fi
+fi
+
+# Have to kill BG process if user exits
+trap 'kill_processes $ROSCORE_PID' SIGINT
+sleep 5
+
+# Set maze file parameter
+rosparam set /maze_file "$maze_file"
+
+# Node that displays the maze and runs the turtle
+rosrun ece642rtle ece642rtle_node&
+TURTLE_PID=$!
+sleep 1
+if [[ -z $(pgrep ece642rtle_node) ]]; then
+    echo "Error launching ece642rtle_node"
+    kill_processes $ROSCORE_PID
+    exit 1
+fi
+
+# Have to kill BG processes if user exits
+trap 'kill_processes $TURTLE_PID $ROSCORE_PID' SIGINT
+sleep 9
+
+# Student node
+rosrun ece642rtle ece642rtle_student&
+STUDENT_PID=$!
+
+# Have to kill BG processes if user exits
+trap 'kill_processes $STUDENT_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 
 # Wait for Ctrl+C
-echo "Press Ctrl+C to exit..."
-wait
-
-# Cleanup after ctrl+c
-echo "Cleaning up..."
-killall -9 roscore rosmaster rosout ece642rtle_student 2>/dev/null || true
+while [ 1 -eq 1 ]; do
+    sleep 30
+done
 
 # Return to home directory
 cd ~
-
-echo "Run completed!"
