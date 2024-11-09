@@ -10,18 +10,18 @@
 
 // State machine variables
 RobotState robot_state = STARTUP;
-static int visit_grid[GRID_SIZE][GRID_SIZE] = {0};
+static int visit_grid[GRID_SIZE][GRID_SIZE] = {{0}};
 
 // Visit tracking functions
 void updateVisitMap(coordinate pos) {
-    if (pos.x < 30 && pos.y < 30) {
+    if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
         visit_grid[pos.x][pos.y]++;
         ROS_INFO("Updated visit count at (%d,%d) to %d", pos.x, pos.y, visit_grid[pos.x][pos.y]);
     }
 }
 
 int getVisitCount(coordinate loc) {
-    if (loc.x < 30 && loc.y < 30) {
+    if (loc.x < GRID_SIZE && loc.y < GRID_SIZE) {
         return visit_grid[loc.x][loc.y];
     }
     return INT_MAX;
@@ -55,7 +55,7 @@ int findOptimalDirection(coordinate current_pos, int current_dir, bool wall_ahea
 }
 
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
-    static coordinate current_pos = {14, 14};
+    static coordinate current_pos = {START_POS, START_POS};
     static int facing_direction = 1; // Start facing NORTH
     turtleMove next_move = {FORWARD, true, 0};
 
