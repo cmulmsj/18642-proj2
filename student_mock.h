@@ -52,6 +52,7 @@ void initialize_test(void);
 void cleanup_test(void);
 void set_test_state(TurtleTestState state);
 TurtleTestState get_test_state(void);
+turtleMove studentTurtleStep(bool bumped, bool at_end);
 
 // Mock state access
 FSM_STATES getCurrentState(void);
