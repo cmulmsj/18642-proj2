@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#ifdef testing
+
 // ROS mock definitions
 #define ROS_INFO(format, ...) printf(format "\n", ##__VA_ARGS__)
 #define ROS_ERROR(format, ...) printf("ERROR: " format "\n", ##__VA_ARGS__)
@@ -47,7 +49,9 @@ typedef struct {
     uint8_t visit_count_map[30][30];
 } TurtleTestState;
 
-#ifdef testing
+// External variables
+extern uint8_t visit_count_map[30][30];
+
 // Test control functions
 void initialize_test(void);
 void cleanup_test(void);
@@ -68,11 +72,10 @@ void setMockBump(bool bump);
 void setMockAtEnd(bool at_end);
 uint8_t getMockVisitCount(void);
 bool getError(void);
-#endif
 
-// Function that exists in both test and non-test
+// Turtle functions
 turtleMove studentTurtleStep(bool bumped, bool at_end);
 
-#endif
+#endif // testing
 
-#endif
+#endif // STUDENT_MOCK_H
