@@ -4,55 +4,26 @@
  *
  * STUDENT NAME: Mashengjun Li
  * ANDREW ID: mashengl
- * LAST UPDATE: 11/08/2024
+ * LAST UPDATE: 11/01/2024
  */
 
-#ifdef testing
-#include "student_mock.h"
-#else
+#include "stdint.h"
 #include "student.h"
-#include "ros/ros.h"
-#endif
 
-// Remove these function definitions from student_turtle.cpp since they'll be in mock_functions.cpp
-#ifndef testing
-static FSM_STATES current_state = STATE_FORWARD;
-static LOCAL_DIRECTION current_local_direction = L_NORTH;
-static coordinate current_location = {14, 14};
 static uint8_t visit_count_map[30][30] = {{0}};
 
-FSM_STATES getCurrentState() {
-    return current_state;
-}
+enum FSM_STATES { 
+    STATE_FORWARD = 0,           
+    STATE_UNVISITED = 1,   
+    STATE_UNBUMPED = 2  
+};
 
-void setCurrentState(FSM_STATES state) {
-    current_state = state;
-}
-
-LOCAL_DIRECTION getCurrentDirection() {
-    return current_local_direction;
-}
-
-void setCurrentDirection(LOCAL_DIRECTION dir) {
-    current_local_direction = dir;
-}
-
-coordinate getCurrentLocation() {
-    return current_location;
-}
-
-void setCurrentLocation(coordinate loc) {
-    current_location = loc;
-}
-
-void resetVisitMap() {
-    for(int i = 0; i < 30; i++) {
-        for(int j = 0; j < 30; j++) {
-            visit_count_map[i][j] = 0;
-        }
-    }
-}
-#endif
+enum LOCAL_DIRECTION { 
+    L_WEST = 0, 
+    L_NORTH = 1, 
+    L_EAST = 2, 
+    L_SOUTH = 3 
+};
 
 /**
  * @brief Get number of visits for a cell
@@ -65,7 +36,6 @@ uint8_t getVisit(coordinate local_coord) {
              local_coord.x, local_coord.y, visit_count);
     return visit_count;
 }
-
 
 /**
  * @brief Update visit count for a cell
@@ -316,88 +286,3 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
     ROS_INFO("TURTLE: Timeout counter: %d", timeout_counter);
     return futureMove;
 }
-
-
-// // #ifdef testing
-// // #include "new_student_mock.h"
-// // #else
-// #include "student.h"
-// // #endif
-
-// RobotState robot_state = STARTUP;
-// static bool completing_reverse = false;
-
-// // Main state machine function
-// RobotAction nextRobotStep(bool maze_complete, int best_direction, bool obstacle_ahead, int facing_direction) {
-//     RobotAction next_action = HALT;
-
-//     // Check terminal conditions first
-//     if (maze_complete || best_direction == -1) {
-//         robot_state = MAZE_COMPLETE;
-//         return HALT;
-//     }
-
-//     // Calculate direction difference
-//     int direction_diff = (best_direction - facing_direction + 4) % 4;
-
-//     switch (robot_state) {
-//         case STARTUP:
-//             next_action = ADVANCE;
-//             robot_state = PLAN_NEXT;
-//             break;
-
-//         case PLAN_NEXT:
-//             if (completing_reverse) {
-//                 next_action = ROTATE_CCW;
-//                 completing_reverse = false;
-//             } else {
-//                 switch (direction_diff) {
-//                     case 0:  // Facing optimal direction
-//                         if (obstacle_ahead) {
-//                             next_action = HALT;
-//                             robot_state = MAZE_COMPLETE;
-//                         } else {
-//                             next_action = ADVANCE;
-//                         }
-//                         break;
-//                     case 1:  // Need clockwise rotation
-//                         next_action = ROTATE_CW;
-//                         robot_state = ROTATE_RIGHT;
-//                         break;
-//                     case 2:  // Need 180 degree turn
-//                         next_action = ROTATE_CCW;
-//                         completing_reverse = true;
-//                         robot_state = FULL_REVERSE;
-//                         break;
-//                     case 3:  // Need counter-clockwise rotation
-//                         next_action = ROTATE_CCW;
-//                         robot_state = ROTATE_LEFT;
-//                         break;
-//                 }
-//             }
-//             break;
-
-//         case ROTATE_LEFT:
-//         case ROTATE_RIGHT:
-//             next_action = HALT;
-//             robot_state = PLAN_NEXT;
-//             break;
-
-//         case FULL_REVERSE:
-//             if (completing_reverse) {
-//                 next_action = ROTATE_CCW;
-//                 completing_reverse = false;
-//             } else {
-//                 next_action = HALT;
-//                 robot_state = PLAN_NEXT;
-//             }
-//             break;
-
-//         case MAZE_COMPLETE:
-//         default:
-//             next_action = HALT;
-//             break;
-//     }
-
-//     return next_action;
-// }
