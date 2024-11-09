@@ -72,10 +72,6 @@ void test_t2(void) {
 void test_t3(void) {
     initialize_test();
     
-    // First, let's print our state values to verify them
-    printf("States: FORWARD=%d, UNVISITED=%d, UNBUMPED=%d\n", 
-           STATE_FORWARD, STATE_UNVISITED, STATE_UNBUMPED);
-    
     TurtleTestState state;
     state.current_state = STATE_FORWARD;
     state.current_direction = L_NORTH;
@@ -85,21 +81,27 @@ void test_t3(void) {
     state.is_at_end = false;
     state.timeout_counter = 0;
     state.directions_checked = 0;
-    set_test_state(state);
     
-    // Get initial state for debugging
-    printf("Initial state: %d\n", getCurrentState());
+    // Print what's being set
+    printf("Setting initial state to: %d\n", state.current_state);
+    set_test_state(state);
+    printf("State after setting: %d\n", getCurrentState());
     
     // Wait for timeout
     turtleMove result;
     for(int i = 0; i < 5; i++) {
         result = studentTurtleStep(true, false);
-        printf("During timeout %d: state=%d\n", i, getCurrentState());
+        printf("During timeout %d: state=%d, valid=%d\n", 
+               i, getCurrentState(), result.validAction);
     }
     
     // Get transition move
     result = studentTurtleStep(true, false);
-    printf("After move: state=%d, action=%d\n", getCurrentState(), result.action);
+    
+    // Print full state after move
+    printf("Final state: %d, action=%d, valid=%d, directions_checked=%d\n",
+           getCurrentState(), result.action, result.validAction, 
+           get_test_state().directions_checked);
     
     CU_ASSERT_EQUAL(result.action, RIGHT);
     CU_ASSERT_EQUAL(result.validAction, true);
