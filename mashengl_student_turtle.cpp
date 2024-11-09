@@ -24,19 +24,19 @@
 // static uint8_t min_visits = UINT8_MAX;
 // static int best_direction = -1;
 
-void updateVisitMap(coordinate pos) {
-    if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
-        visit_grid[pos.x][pos.y]++;
-        ROS_INFO("Updated visit count at (%d,%d) to %d", pos.x, pos.y, visit_grid[pos.x][pos.y]);
-    }
-}
+// void updateVisitMap(coordinate pos) {
+//     if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
+//         visit_grid[pos.x][pos.y]++;
+//         ROS_INFO("Updated visit count at (%d,%d) to %d", pos.x, pos.y, visit_grid[pos.x][pos.y]);
+//     }
+// }
 
-int getVisitCount(coordinate pos) {
-    if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
-        return visit_grid[pos.x][pos.y];
-    }
-    return INT_MAX;
-}
+// int getVisitCount(coordinate pos) {
+//     if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
+//         return visit_grid[pos.x][pos.y];
+//     }
+//     return INT_MAX;
+// }
 
 coordinate getNextPosition(coordinate pos, int direction) {
     coordinate next = pos;
