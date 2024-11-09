@@ -19,9 +19,8 @@ fi
 echo "Setting up project files..."
 cp -r project_files/ece642rtle ~/catkin_ws/src/
 
-# Make all scripts executable
+# Make test scripts executable
 echo "Setting execute permissions..."
-chmod +x ~/catkin_ws/src/ece642rtle/build_run_turtle.sh
 chmod +x ~/catkin_ws/src/ece642rtle/turtle_tests/mashengl_build_run_tests.sh
 
 # Initialize catkin workspace and build main project
