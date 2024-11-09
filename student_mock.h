@@ -40,6 +40,9 @@ struct turtleMove {
     int visitCount;
 };
 
+// Main function that we're testing (implemented in student_turtle.cpp)
+turtleMove studentTurtleStep(bool bumped, bool at_end);
+
 // Test control functions (defined in mock_functions.cpp)
 void mock_set_wall(bool has_wall);
 void mock_set_visit_count(int count);
@@ -47,5 +50,15 @@ void mock_reset_state();
 
 // Original functions that need mocking (defined in mock_functions.cpp)
 bool checkObstacle(QPointF pos, int direction);
+int getVisitCount(coordinate pos);
 void ROS_INFO(const char* format, ...);
+
+// State variables (defined in mock_functions.cpp)
+extern RobotState robot_state;
+extern bool first_run;
+extern coordinate current_pos;
+extern int facing_direction;
+extern int rotations_checked;
+extern int best_direction;
+
 #endif // STUDENT_MOCK_H
