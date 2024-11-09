@@ -17,6 +17,16 @@
 #endif
 
 #ifdef testing
+FSM_STATES current_state = STATE_FORWARD;
+LOCAL_DIRECTION current_local_direction = L_NORTH;
+coordinate current_location = {14, 14};
+uint8_t visit_count_map[30][30] = {{0}};
+#else
+static FSM_STATES current_state = STATE_FORWARD;
+static LOCAL_DIRECTION current_local_direction = L_NORTH;
+static coordinate current_location = {14, 14};
+static uint8_t visit_count_map[30][30] = {{0}};
+
 FSM_STATES getCurrentState() {
     return current_state;
 }
