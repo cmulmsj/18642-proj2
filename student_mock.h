@@ -46,6 +46,7 @@ turtleMove studentTurtleStep(bool bumped, bool at_end);
 
 // Test control functions
 void mock_set_wall(bool has_wall);
+bool mock_get_wall();  // Add this getter
 void mock_set_visit_count(int count);
 void mock_reset_state();
 void updateVisitMap(coordinate pos);
