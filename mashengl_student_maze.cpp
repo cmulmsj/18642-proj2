@@ -236,7 +236,7 @@ int updateDirection(int current_dir, RobotAction next_action) {
     }
 }
 
-bool checkObstacle(QPointF pos, int direction) {
+bool moveTurtle(QPointF pos, int direction) {
     int x = static_cast<int>(pos.x());
     int y = static_cast<int>(pos.y());
     int check_x1 = x, check_y1 = y;
