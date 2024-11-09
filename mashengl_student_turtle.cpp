@@ -11,7 +11,6 @@
 #include "student_mock.h"
 #else
 #include "student.h"
-#include "ros/ros.h"
 
 // These are only needed in normal operation mode
 RobotState robot_state = STARTUP;
@@ -38,6 +37,7 @@ int getVisitCount(coordinate pos) {
 }
 #endif
 
+// Common code for both modes
 coordinate getNextPosition(coordinate pos, int direction) {
     coordinate next = pos;
     switch (direction) {
@@ -45,6 +45,9 @@ coordinate getNextPosition(coordinate pos, int direction) {
         case 1: next.y--; break; // NORTH
         case 2: next.x++; break; // EAST
         case 3: next.y++; break; // SOUTH
+        default:
+            ROS_ERROR("Invalid direction in getNextPosition");
+            break;
     }
     return next;
 }
@@ -61,7 +64,10 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     // Initialize on first run
     if (first_run) {
         updateVisitMap(current_pos);
-        next_move.visitCount = getVisitCount(current_pos);
+        // Safe conversion using min to avoid overflow
+        next_move.visitCount = static_cast<uint8_t>(
+            std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
+        );
         first_run = false;
         robot_state = PLAN_NEXT;
         rotations_checked = 0;
@@ -90,7 +96,10 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
             // Check current facing direction
             if (!bumped_wall) {
                 coordinate next_pos = getNextPosition(current_pos, facing_direction);
-                uint8_t current_visits = getVisitCount(next_pos);
+                // Safe conversion using min
+                uint8_t current_visits = static_cast<uint8_t>(
+                    std::min(getVisitCount(next_pos), static_cast<int>(UINT8_MAX))
+                );
                 if (current_visits < min_visits) {
                     min_visits = current_visits;
                     best_direction = facing_direction;
@@ -120,7 +129,10 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
                     current_pos = next_pos;
                     updateVisitMap(current_pos);
                     next_move.action = FORWARD;
-                    next_move.visitCount = getVisitCount(current_pos);
+                    // Safe conversion using min
+                    next_move.visitCount = static_cast<uint8_t>(
+                        std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
+                    );
                     // Reset for next scan
                     rotations_checked = 0;
                     min_visits = UINT8_MAX;
@@ -132,6 +144,12 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
 
         case MOVING: {
             robot_state = PLAN_NEXT;
+            next_move.validAction = false;
+            break;
+        }
+
+        default: {
+            ROS_ERROR("Invalid robot state");
             next_move.validAction = false;
             break;
         }
