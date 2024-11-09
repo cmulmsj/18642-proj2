@@ -236,7 +236,7 @@ int updateDirection(int current_dir, RobotAction next_action) {
     }
 }
 
-bool moveTurtle(QPointF& pos, int& direction) {
+bool moveTurtle(QPointF& pos, int& orientation) {
     // int x = static_cast<int>(pos.x());
     // int y = static_cast<int>(pos.y());
     // int check_x1 = x, check_y1 = y;
@@ -261,7 +261,7 @@ bool moveTurtle(QPointF& pos, int& direction) {
     //         break;
     // }
     // return bumped(check_x1, check_y1, check_x2, check_y2);
-      int x = static_cast<int>(pos.x());
+    int x = static_cast<int>(pos.x());
     int y = static_cast<int>(pos.y());
     int check_x1 = x, check_y1 = y;
     int check_x2 = x, check_y2 = y;
