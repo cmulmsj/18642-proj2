@@ -158,6 +158,8 @@
 //   return result;
 // }
 
+#include "student.h"
+
 bool moveTurtle(QPointF& pos, int& orientation) {
     // Check for wall in current direction
     int x = static_cast<int>(std::floor(pos.x()));
