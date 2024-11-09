@@ -1,16 +1,16 @@
 #!/bin/bash
 
-echo "Building and running turtle navigation unit tests..."
+# Build and run unit tests for turtle implementation
+# Student: Mashengjun Li (mashengl)
 
-g++ -Dtesting -Wall -std=c++11 -o student_tests \
+g++ -Dtesting -o student_tests \
     mashengl_student_test.cpp \
     mashengl_student_turtle.cpp \
     mock_functions.cpp \
-    -lcunit \
-    -I.
+    -lcunit
 
 if [ $? -eq 0 ]; then
-    echo "Build successful. Running tests..."
+    echo "Build successful, running tests..."
     ./student_tests
 else
     echo "Build failed!"
