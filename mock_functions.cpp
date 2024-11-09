@@ -6,6 +6,7 @@
 #include "student_mock.h"
 #include <iostream>
 #include <cstdarg>
+#include <cstring> // for memset
 
 // State variables
 RobotState robot_state = STARTUP;
@@ -14,6 +15,8 @@ coordinate current_pos = {START_POS, START_POS};
 int facing_direction = 1;
 int rotations_checked = 0;
 int best_direction = -1;
+int min_visits = UINT8_MAX;
+int visit_grid[GRID_SIZE][GRID_SIZE] = {{0}};
 
 // Mock state variables
 static bool mock_wall = false;
@@ -28,6 +31,12 @@ void mock_set_visit_count(int count) {
     mock_visit_count = count;
 }
 
+void updateVisitMap(coordinate pos) {
+    if (pos.x >= 0 && pos.x < GRID_SIZE && pos.y >= 0 && pos.y < GRID_SIZE) {
+        visit_grid[pos.x][pos.y]++;
+    }
+}
+
 void mock_reset_state() {
     mock_wall = false;
     mock_visit_count = 0;
@@ -37,6 +46,8 @@ void mock_reset_state() {
     facing_direction = 1;
     rotations_checked = 0;
     best_direction = -1;
+    min_visits = UINT8_MAX;
+    memset(visit_grid, 0, sizeof(visit_grid));
 }
 
 // Mock implementations
@@ -45,7 +56,10 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 int getVisitCount(coordinate pos) {
-    return mock_visit_count;
+    if (pos.x >= 0 && pos.x < GRID_SIZE && pos.y >= 0 && pos.y < GRID_SIZE) {
+        return visit_grid[pos.x][pos.y];
+    }
+    return INT_MAX;
 }
 
 void ROS_INFO(const char* format, ...) {
