@@ -287,6 +287,7 @@
 //     return futureMove;
 // }
 
+
 #include "student.h"
 
 // Visit tracking grid
@@ -301,28 +302,41 @@ enum TurtleState {
 
 static TurtleState current_state = PLANNING;
 static coordinate current_pos = {14, 14}; // Starting position
+static bool first_move = true;
 
 uint8_t getVisitCount(coordinate pos) {
-    return visit_grid[pos.x][pos.y];
+    if (pos.x < 30 && pos.y < 30) {
+        return visit_grid[pos.x][pos.y];
+    }
+    return UINT8_MAX;  // Return max for out-of-bounds
 }
 
 void incrementVisit(coordinate pos) {
-    visit_grid[pos.x][pos.y]++;
+    if (pos.x < 30 && pos.y < 30) {
+        visit_grid[pos.x][pos.y]++;
+        ROS_INFO("Visit count at (%d,%d) increased to %d", 
+                 pos.x, pos.y, visit_grid[pos.x][pos.y]);
+    }
 }
 
-// Find direction with least visits
-int findBestDirection(coordinate pos) {
+// Returns direction with minimum visits that isn't blocked by a wall
+int findBestDirection(coordinate pos, bool wall_ahead, int current_dir) {
     uint8_t min_visits = UINT8_MAX;
     int best_dir = -1;
-
-    // Check each adjacent cell
-    coordinate next_pos = pos;
+    
+    // Check all four directions
     for (int dir = 0; dir < 4; dir++) {
+        // Skip current direction if wall detected
+        if (dir == current_dir && wall_ahead) {
+            continue;
+        }
+        
+        coordinate next_pos = pos;
         switch (dir) {
-            case 0: next_pos = pos; next_pos.x--; break; // WEST
-            case 1: next_pos = pos; next_pos.y--; break; // NORTH
-            case 2: next_pos = pos; next_pos.x++; break; // EAST
-            case 3: next_pos = pos; next_pos.y++; break; // SOUTH
+            case 0: next_pos.x--; break; // WEST
+            case 1: next_pos.y--; break; // NORTH
+            case 2: next_pos.x++; break; // EAST
+            case 3: next_pos.y++; break; // SOUTH
         }
         
         uint8_t visits = getVisitCount(next_pos);
@@ -331,12 +345,19 @@ int findBestDirection(coordinate pos) {
             best_dir = dir;
         }
     }
+    
     return best_dir;
 }
 
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     static int facing_direction = 1; // Start facing NORTH
     turtleMove next_move = {FORWARD, true, 0};
+    
+    // Initialize first position visit count
+    if (first_move) {
+        incrementVisit(current_pos);
+        first_move = false;
+    }
     
     // Check if maze is complete
     if (at_goal) {
@@ -346,38 +367,61 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
 
     switch (current_state) {
         case PLANNING: {
-            if (bumped_wall) {
-                // Hit a wall, need to rotate
-                next_move.action = RIGHT;
-                facing_direction = (facing_direction + 1) % 4;
-                current_state = ROTATING;
-            } else {
-                // Path is clear, move forward
+            // Find best direction considering walls and visit counts
+            int best_dir = findBestDirection(current_pos, bumped_wall, facing_direction);
+            
+            if (best_dir == -1) {
+                // No valid direction found
+                next_move.validAction = false;
+                return next_move;
+            }
+            
+            // Calculate needed rotation
+            int dir_diff = (best_dir - facing_direction + 4) % 4;
+            
+            if (dir_diff == 0 && !bumped_wall) {
+                // Can move forward
                 current_state = MOVING;
                 next_move.action = FORWARD;
+            } else if (dir_diff == 1) {
+                // Need to turn right
+                current_state = ROTATING;
+                next_move.action = RIGHT;
+                facing_direction = (facing_direction + 1) % 4;
+            } else if (dir_diff == 3) {
+                // Need to turn left
+                current_state = ROTATING;
+                next_move.action = LEFT;
+                facing_direction = (facing_direction + 3) % 4;
+            } else {
+                // Turn right (for 180 degree turn)
+                current_state = ROTATING;
+                next_move.action = RIGHT;
+                facing_direction = (facing_direction + 1) % 4;
             }
             break;
         }
             
         case ROTATING: {
-            // After rotation, go back to planning
             current_state = PLANNING;
             next_move.validAction = false;
             break;
         }
             
         case MOVING: {
-            // Update position and visit count after successful move
+            // Update position after successful move
+            coordinate next_pos = current_pos;
             switch (facing_direction) {
-                case 0: current_pos.x--; break; // WEST
-                case 1: current_pos.y--; break; // NORTH
-                case 2: current_pos.x++; break; // EAST
-                case 3: current_pos.y++; break; // SOUTH
+                case 0: next_pos.x--; break; // WEST
+                case 1: next_pos.y--; break; // NORTH
+                case 2: next_pos.x++; break; // EAST
+                case 3: next_pos.y++; break; // SOUTH
             }
+            
+            current_pos = next_pos;
             incrementVisit(current_pos);
             next_move.visitCount = getVisitCount(current_pos);
             current_state = PLANNING;
-            next_move.validAction = false;
             break;
         }
     }
