@@ -32,6 +32,9 @@ bool checkObstacle(QPointF pos, int direction) {
             y1 = y + 1;
             y2 = y + 1;
             break;
+        default:
+            ROS_ERROR("Invalid direction in checkObstacle");
+            return true; // Treat invalid direction as obstacle
     }
     return bumped(x1, y1, x2, y2);
 }
@@ -58,6 +61,9 @@ bool moveTurtle(QPointF& pos, int& orientation) {
                     case 1: pos.setY(pos.y() - 1.0); break;
                     case 2: pos.setX(pos.x() + 1.0); break;
                     case 3: pos.setY(pos.y() + 1.0); break;
+                    default:
+                        ROS_ERROR("Invalid orientation in moveTurtle");
+                        return false;
                 }
                 displayVisits(next_move.visitCount);
             }
@@ -70,6 +76,10 @@ bool moveTurtle(QPointF& pos, int& orientation) {
         case LEFT:
             orientation = (orientation + 3) % 4;
             break;
+            
+        default:
+            ROS_ERROR("Invalid action in moveTurtle");
+            return false;
     }
     
     return true;
