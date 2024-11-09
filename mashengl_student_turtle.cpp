@@ -291,15 +291,16 @@
 #include "student.h"
 
 // Visit tracking grid
-static uint8_t visit_grid[30][30] = {{0}};
+static uint16_t visit_grid[30][30] = {{0}};
 static bool first_move = true;
 
-uint8_t getVisitCount(coordinate pos) {
-    if (pos.x >= 30 || pos.y >= 30) return UINT8_MAX;
+// Helper functions
+static uint16_t getVisitCount(coordinate pos) {
+    if (pos.x >= 30 || pos.y >= 30) return UINT16_MAX;
     return visit_grid[pos.x][pos.y];
 }
 
-void incrementVisit(coordinate pos) {
+static void incrementVisit(coordinate pos) {
     if (pos.x < 30 && pos.y < 30) {
         visit_grid[pos.x][pos.y]++;
     }
@@ -308,13 +309,14 @@ void incrementVisit(coordinate pos) {
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     static coordinate current_pos = {14, 14}; // Starting position
     static int facing_direction = 1;          // Start facing NORTH
-    
     turtleMove next_move = {FORWARD, true, 0};
     
     // Initialize first position
     if (first_move) {
         incrementVisit(current_pos);
         first_move = false;
+        next_move.visitCount = getVisitCount(current_pos);
+        return next_move;
     }
 
     // Stop if we reached the goal
@@ -323,53 +325,60 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         return next_move;
     }
 
-    // Get adjacent cells
+    // Get adjacent cells and their visit counts
     coordinate adjacent[4];
+    uint16_t visit_counts[4];
+    
+    // Populate adjacent cells
     adjacent[0] = current_pos; adjacent[0].x--; // WEST
     adjacent[1] = current_pos; adjacent[1].y--; // NORTH
     adjacent[2] = current_pos; adjacent[2].x++; // EAST
     adjacent[3] = current_pos; adjacent[3].y++; // SOUTH
 
-    // Get visit counts
-    uint8_t visit_counts[4];
-    uint8_t min_visits = UINT8_MAX;
-    int best_direction = facing_direction; // Default to current direction
-
-    // Check all directions, including where we're facing
+    // Get visit counts for all directions
     for (int dir = 0; dir < 4; dir++) {
         visit_counts[dir] = getVisitCount(adjacent[dir]);
-        
-        // If this is our current direction and there's a wall, mark it as invalid
-        if (dir == facing_direction && bumped_wall) {
-            visit_counts[dir] = UINT8_MAX;
-        }
-        
-        // Update best direction if we found a less visited cell
+    }
+
+    // Current direction is blocked
+    if (bumped_wall) {
+        visit_counts[facing_direction] = UINT16_MAX;
+    }
+
+    // Find direction with minimum visits
+    uint16_t min_visits = UINT16_MAX;
+    int best_direction = -1;
+
+    for (int dir = 0; dir < 4; dir++) {
         if (visit_counts[dir] < min_visits) {
             min_visits = visit_counts[dir];
             best_direction = dir;
         }
     }
 
-    // Check if current direction is still best option
-    if (best_direction != facing_direction) {
-        // Need to turn toward better path
-        int rotation = (best_direction - facing_direction + 4) % 4;
-        if (rotation == 1) {
-            // Turn right (90 degrees clockwise)
-            facing_direction = (facing_direction + 1) % 4;
-            next_move.action = RIGHT;
-        } else {
-            // Turn left (90 degrees counter-clockwise)
-            facing_direction = (facing_direction + 3) % 4;
-            next_move.action = LEFT;
-        }
-    } else if (!bumped_wall) {
-        // Current direction is best and no wall, move forward
+    // If no valid direction found
+    if (best_direction == -1) {
+        next_move.validAction = false;
+        return next_move;
+    }
+
+    // Decide action based on best direction
+    if (best_direction == facing_direction && !bumped_wall) {
+        // Move forward if best direction is current direction and no wall
         current_pos = adjacent[facing_direction];
         incrementVisit(current_pos);
         next_move.action = FORWARD;
         next_move.visitCount = getVisitCount(current_pos);
+    } else {
+        // Need to rotate - determine shortest rotation
+        int rotation = (best_direction - facing_direction + 4) % 4;
+        if (rotation == 1) {
+            facing_direction = (facing_direction + 1) % 4;
+            next_move.action = RIGHT;
+        } else {
+            facing_direction = (facing_direction + 3) % 4;
+            next_move.action = LEFT;
+        }
     }
 
     return next_move;
