@@ -6,6 +6,7 @@
  * ANDREW ID: mashengl
  * LAST UPDATE: 11/01/2024
  */
+
 #include "student.h"
 
 // State machine variables
@@ -14,8 +15,7 @@ static int visit_grid[GRID_SIZE][GRID_SIZE] = {{0}};
 static bool first_run = true;
 static coordinate current_pos = {START_POS, START_POS};
 static int facing_direction = 1; // Start facing NORTH
-static int rotations_checked = 0; // Track complete rotations
-static bool scanning = false;
+static int rotations_checked = 0;
 static uint8_t min_visits = UINT8_MAX;
 static int best_direction = -1;
 
@@ -58,19 +58,16 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         updateVisitMap(current_pos);
         next_move.visitCount = getVisitCount(current_pos);
         first_run = false;
+        robot_state = PLAN_NEXT;
+        rotations_checked = 0;
+        min_visits = UINT8_MAX;
+        best_direction = -1;
         return next_move;
-    }
-
-    // Get all adjacent positions
-    coordinate adjacent[4];
-    for (int dir = 0; dir < 4; dir++) {
-        adjacent[dir] = getNextPosition(current_pos, dir);
     }
 
     switch (robot_state) {
         case STARTUP: {
             robot_state = PLAN_NEXT;
-            scanning = true;
             rotations_checked = 0;
             min_visits = UINT8_MAX;
             best_direction = -1;
@@ -79,58 +76,50 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         }
 
         case PLAN_NEXT: {
-            if (!scanning) {
-                if (bumped_wall) {
-                    // Start scanning when we hit a wall
-                    scanning = true;
-                    rotations_checked = 0;
-                    min_visits = UINT8_MAX;
-                    best_direction = -1;
-                } else {
-                    // Try moving forward if possible
+            // Check current direction first
+            if (rotations_checked == 0) {
+                min_visits = UINT8_MAX;
+                best_direction = -1;
+            }
+
+            // Check current facing direction
+            if (!bumped_wall) {
+                coordinate next_pos = getNextPosition(current_pos, facing_direction);
+                uint8_t current_visits = getVisitCount(next_pos);
+                if (current_visits < min_visits) {
+                    min_visits = current_visits;
+                    best_direction = facing_direction;
+                }
+            }
+
+            if (rotations_checked < 3) {
+                // Continue scanning all directions
+                rotations_checked++;
+                facing_direction = (facing_direction + 1) % 4;
+                next_move.action = RIGHT;
+            } else {
+                // We've checked all directions, move in best direction
+                if (best_direction != facing_direction) {
+                    // Turn toward best direction using shortest path
+                    int diff = (best_direction - facing_direction + 4) % 4;
+                    if (diff == 1) {
+                        facing_direction = (facing_direction + 1) % 4;
+                        next_move.action = RIGHT;
+                    } else {
+                        facing_direction = (facing_direction + 3) % 4;
+                        next_move.action = LEFT;
+                    }
+                } else if (!bumped_wall) {
+                    // Move forward in best direction
                     coordinate next_pos = getNextPosition(current_pos, facing_direction);
                     current_pos = next_pos;
                     updateVisitMap(current_pos);
                     next_move.action = FORWARD;
                     next_move.visitCount = getVisitCount(current_pos);
-                    return next_move;
-                }
-            }
-
-            // In scanning mode
-            if (scanning) {
-                // Check current direction
-                if (!bumped_wall) {
-                    uint8_t current_visits = getVisitCount(adjacent[facing_direction]);
-                    if (current_visits < min_visits) {
-                        min_visits = current_visits;
-                        best_direction = facing_direction;
-                    }
-                }
-
-                if (rotations_checked < 3) {
-                    // Continue checking all directions
-                    rotations_checked++;
-                    facing_direction = (facing_direction + 1) % 4;
-                    next_move.action = RIGHT;
-                } else {
-                    // We've checked all directions
-                    if (best_direction != -1) {
-                        if (best_direction != facing_direction) {
-                            // Turn toward best direction
-                            facing_direction = (facing_direction + 1) % 4;
-                            next_move.action = RIGHT;
-                        } else if (!bumped_wall) {
-                            // Move in best direction
-                            coordinate next_pos = getNextPosition(current_pos, facing_direction);
-                            current_pos = next_pos;
-                            updateVisitMap(current_pos);
-                            next_move.action = FORWARD;
-                            next_move.visitCount = getVisitCount(current_pos);
-                            scanning = false;
-                            rotations_checked = 0;
-                        }
-                    }
+                    // Reset for next scan
+                    rotations_checked = 0;
+                    min_visits = UINT8_MAX;
+                    best_direction = -1;
                 }
             }
             break;
@@ -143,9 +132,9 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         }
     }
 
-    ROS_INFO("Position: (%d,%d), Facing: %d, State: %d, Action: %d, Scanning: %d, Rotations: %d", 
+    ROS_INFO("Position: (%d,%d), Facing: %d, State: %d, Action: %d, Rotations: %d, Best Dir: %d", 
              current_pos.x, current_pos.y, facing_direction, robot_state, 
-             next_move.action, scanning, rotations_checked);
+             next_move.action, rotations_checked, best_direction);
 
     return next_move;
 }
