@@ -10,13 +10,18 @@
 #include <climits>
 #include <iostream>
 
-// Function declarations for mock logging
-void mock_ros_info(const char* format, ...);
-void mock_ros_error(const char* format, ...);
-
 // Constants
 #define GRID_SIZE 30
 #define START_POS 13
+#define UINT8_MAX 255
+
+// Mock function declarations
+void mock_reset_state();
+void mock_set_wall(bool has_wall);
+void mock_set_visit_count(int count);
+bool mock_get_wall();
+void mock_ros_info(const char* format, ...);
+void mock_ros_error(const char* format, ...);
 
 // Enums and types
 enum turtleAction {FORWARD, LEFT, RIGHT};
@@ -46,13 +51,15 @@ private:
     double xpos, ypos;
 };
 
-// External variables
+// External state variables
 extern RobotState robot_state;
 extern bool first_run;
 extern coordinate current_pos;
 extern int facing_direction;
 extern int rotations_checked;
 extern int best_direction;
+extern int min_visits;
+extern int visit_grid[GRID_SIZE][GRID_SIZE];
 
 // Function declarations
 bool checkObstacle(QPointF pos, int direction);
