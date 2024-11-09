@@ -161,13 +161,14 @@
 #include "student.h"
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // Check for wall in current direction
+    // Get current integer position
     int x = static_cast<int>(std::floor(pos.x()));
     int y = static_cast<int>(std::floor(pos.y()));
+    
+    // Check wall based on current orientation
     int x1 = x, y1 = y;
     int x2 = x, y2 = y;
     
-    // Set up collision check based on orientation
     switch (orientation) {
         case 0: // WEST
             y2 = y + 1;
@@ -187,7 +188,7 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             break;
     }
     
-    // Single wall check per tick
+    // One wall check per tick
     bool wall_detected = bumped(x1, y1, x2, y2);
     bool reached_goal = atend(x, y);
     
@@ -203,10 +204,10 @@ bool moveTurtle(QPointF& pos, int& orientation) {
         case FORWARD:
             if (!wall_detected) {
                 switch (orientation) {
-                    case 0: pos.setX(pos.x() - 1.0); break; // WEST
-                    case 1: pos.setY(pos.y() - 1.0); break; // NORTH
-                    case 2: pos.setX(pos.x() + 1.0); break; // EAST
-                    case 3: pos.setY(pos.y() + 1.0); break; // SOUTH
+                    case 0: pos.setX(pos.x() - 1.0); break;
+                    case 1: pos.setY(pos.y() - 1.0); break;
+                    case 2: pos.setX(pos.x() + 1.0); break;
+                    case 3: pos.setY(pos.y() + 1.0); break;
                 }
                 displayVisits(next_move.visitCount);
             }
@@ -223,4 +224,3 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     
     return true;
 }
-
