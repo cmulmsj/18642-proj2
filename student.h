@@ -106,7 +106,7 @@ RobotAction nextRobotStep(bool maze_complete, int best_direction, bool obstacle_
 int getVisitCount(GridPoint loc);
 int findOptimalDirection(QPointF current_pos);
 void updateVisitMap(QPointF pos);
-QPointF calculateNextPosition(QPointF pos, int direction);
+QPointF calculateNextPosition(QPointF& pos, int& direction);
 int updateDirection(int current_dir, RobotAction next_action);
 
 // External state variable
