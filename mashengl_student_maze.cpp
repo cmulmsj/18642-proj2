@@ -163,44 +163,46 @@
  * Simplified maze navigation implementation
  */
 
+/*
+ * Corrected maze navigation implementation
+ */
+
 #include "student.h"
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // Get current grid position
-    coordinate current_pos = {
-        static_cast<uint8_t>(std::floor(pos.x())),
-        static_cast<uint8_t>(std::floor(pos.y()))
-    };
+    // Current position
+    int x = static_cast<int>(std::floor(pos.x()));
+    int y = static_cast<int>(std::floor(pos.y()));
     
-    // Check for wall collision
-    int x1 = current_pos.x, y1 = current_pos.y;
-    int x2 = current_pos.x, y2 = current_pos.y;
+    // Check wall based on current orientation
+    int x1 = x, y1 = y;
+    int x2 = x, y2 = y;
     
-    // Set up collision check points based on orientation
     switch (orientation) {
         case 0: // WEST
-            y2++;
+            y2 = y + 1;
             break;
         case 1: // NORTH
-            x2++;
+            x2 = x + 1;
             break;
         case 2: // EAST
-            x1++;
-            x2++;
-            y2++;
+            x1 = x + 1;
+            x2 = x + 1;
+            y2 = y + 1;
             break;
         case 3: // SOUTH
-            x2++;
-            y1++;
-            y2++;
+            x2 = x + 1;
+            y1 = y + 1;
+            y2 = y + 1;
             break;
     }
     
-    bool wall_ahead = bumped(x1, y1, x2, y2);
-    bool reached_goal = atend(current_pos.x, current_pos.y);
+    // Single wall check per tick
+    bool wall_detected = bumped(x1, y1, x2, y2);
+    bool reached_goal = atend(x, y);
     
     // Get next move from turtle logic
-    turtleMove next_move = studentTurtleStep(wall_ahead, reached_goal);
+    turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
     
     if (!next_move.validAction) {
         return false;
@@ -209,13 +211,15 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     // Execute the move
     switch (next_move.action) {
         case FORWARD:
-            switch (orientation) {
-                case 0: pos.setX(pos.x() - 1.0); break; // WEST
-                case 1: pos.setY(pos.y() - 1.0); break; // NORTH
-                case 2: pos.setX(pos.x() + 1.0); break; // EAST
-                case 3: pos.setY(pos.y() + 1.0); break; // SOUTH
+            if (!wall_detected) {  // Only move if no wall
+                switch (orientation) {
+                    case 0: pos.setX(pos.x() - 1.0); break; // WEST
+                    case 1: pos.setY(pos.y() - 1.0); break; // NORTH
+                    case 2: pos.setX(pos.x() + 1.0); break; // EAST
+                    case 3: pos.setY(pos.y() + 1.0); break; // SOUTH
+                }
+                displayVisits(next_move.visitCount);
             }
-            displayVisits(next_move.visitCount);
             break;
             
         case LEFT:
