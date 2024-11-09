@@ -59,11 +59,19 @@ void resetVisitMap() {
  * @param local_coord Grid position to check
  * @return Visit count for the specified cell
  */
+// uint8_t getVisit(coordinate local_coord) { 
+//     uint8_t visit_count = visit_count_map[local_coord.x][local_coord.y];
+//     ROS_INFO("TURTLE: Getting visit count at (%d,%d): %d", 
+//              local_coord.x, local_coord.y, visit_count);
+//     return visit_count;
+// }
+
 uint8_t getVisit(coordinate local_coord) { 
-    uint8_t visit_count = visit_count_map[local_coord.x][local_coord.y];
-    ROS_INFO("TURTLE: Getting visit count at (%d,%d): %d", 
-             local_coord.x, local_coord.y, visit_count);
-    return visit_count;
+#ifdef testing
+    return get_test_state().visit_count_map[local_coord.x][local_coord.y];
+#else
+    return visit_count_map[local_coord.x][local_coord.y];
+#endif
 }
 
 /**
@@ -71,10 +79,22 @@ uint8_t getVisit(coordinate local_coord) {
  * @param local_coord Grid position to update
  * @param setVal New visit count
  */
+// void setVisit(coordinate local_coord, uint8_t setVal) {
+//     ROS_INFO("TURTLE: Updating visit count at (%d,%d): %d -> %d", 
+//              local_coord.x, local_coord.y, visit_count_map[local_coord.x][local_coord.y], setVal);
+//     visit_count_map[local_coord.x][local_coord.y] = setVal;
+// }
 void setVisit(coordinate local_coord, uint8_t setVal) {
-    ROS_INFO("TURTLE: Updating visit count at (%d,%d): %d -> %d", 
-             local_coord.x, local_coord.y, visit_count_map[local_coord.x][local_coord.y], setVal);
+#ifdef testing
+    TurtleTestState state = get_test_state();
+    state.visit_count_map[local_coord.x][local_coord.y] = setVal;
+    set_test_state(state);
+#else
     visit_count_map[local_coord.x][local_coord.y] = setVal;
+#endif
+    ROS_INFO("TURTLE: Updating visit count at (%d,%d): %d -> %d", 
+             local_coord.x, local_coord.y, 
+             getVisit(local_coord), setVal);
 }
 
 /**
