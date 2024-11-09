@@ -99,14 +99,14 @@ struct GridPoint {    // instead of Point
 bool bumped(int x1, int y1, int x2, int y2);
 bool atend(int x, int y);
 void displayVisits(int visits);
-bool moveTurtle(QPointF& pos_, int& nw_or);
+bool moveTurtle(QPointF& pos, int& orientation);
 
 // Function declarations
 RobotAction nextRobotStep(bool maze_complete, int best_direction, bool obstacle_ahead, int facing_direction);
 int getVisitCount(GridPoint loc);
 int findOptimalDirection(QPointF current_pos);
 void updateVisitMap(QPointF pos);
-QPointF calculateNextPosition(QPointF& pos, int& direction);
+QPointF calculateNextPosition(QPointF pos, int direction);
 int updateDirection(int current_dir, RobotAction next_action);
 
 // External state variable
