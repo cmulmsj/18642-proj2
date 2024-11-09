@@ -158,15 +158,6 @@
 //   return result;
 // }
 
-/*
- * STUDENT NAME: [your name]
- * Simplified maze navigation implementation
- */
-
-/*
- * Corrected maze navigation implementation
- */
-
 #include "student.h"
 
 bool moveTurtle(QPointF& pos, int& orientation) {
@@ -211,14 +202,16 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     // Execute the move
     switch (next_move.action) {
         case FORWARD:
-            if (!wall_detected) {  // Only move if no wall
+            if (!wall_detected) {
                 switch (orientation) {
-                    case 0: pos.setX(pos.x() - 1.0); break; // WEST
-                    case 1: pos.setY(pos.y() - 1.0); break; // NORTH
-                    case 2: pos.setX(pos.x() + 1.0); break; // EAST
-                    case 3: pos.setY(pos.y() + 1.0); break; // SOUTH
+                    case 0: pos.setX(pos.x() - 1.0); break;
+                    case 1: pos.setY(pos.y() - 1.0); break;
+                    case 2: pos.setX(pos.x() + 1.0); break;
+                    case 3: pos.setY(pos.y() + 1.0); break;
                 }
-                displayVisits(next_move.visitCount);
+                if (next_move.visitCount > 0) {
+                    displayVisits(next_move.visitCount);
+                }
             }
             break;
             
