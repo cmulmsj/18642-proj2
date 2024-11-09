@@ -7,7 +7,13 @@
  * LAST UPDATE: 11/08/2024
  */
 
+#ifdef testing
+#include "student_mock.h"
+#endif
+#ifndef testing
 #include "student.h"
+#include "ros/ros.h"
+#endif
 
 RobotState robot_state = STARTUP;
 static int visit_grid[GRID_SIZE][GRID_SIZE] = {{0}};
