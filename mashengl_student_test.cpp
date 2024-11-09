@@ -1,294 +1,78 @@
-#include <CUnit/CUnit.h>
-#include <CUnit/Basic.h>
+/*
+ * Student Name: Mashengjun Li
+ * Andrew ID: mashengl
+ */
+
 #include "student_mock.h"
+#include <CUnit/Basic.h>
 
-// Test cases following state chart transitions
-void test_t1(void) {
-    initialize_test();
+// Test transition from STARTUP to PLAN_NEXT (T1)
+void test_t1() {
+    // Initialize state
+    robot_state = STARTUP;
+    first_run = true;
+    mock_set_visit_count(0);
     
-    // Setup test state
-    TurtleTestState state;
-    state.current_state = STATE_FORWARD;
-    state.current_direction = L_NORTH;
-    state.current_location.x = 14;
-    state.current_location.y = 14;
-    state.is_bumped = false;
-    state.is_at_end = false;
-    state.timeout_counter = 0;
-    state.directions_checked = 0;
-    set_test_state(state);
-    
-    // Get initial move
+    // Execute transition
     turtleMove result = studentTurtleStep(false, false);
     
-    // Verify initial forward movement
+    // Verify state transition and outputs
+    CU_ASSERT_EQUAL(robot_state, PLAN_NEXT);
     CU_ASSERT_EQUAL(result.action, FORWARD);
-    CU_ASSERT_EQUAL(result.validAction, true);
-    CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
-    
-    // Verify timeout behavior
-    for(int i = 0; i < 5; i++) {
-        result = studentTurtleStep(false, false);
-        CU_ASSERT_EQUAL(result.validAction, false);
-    }
-    
-    cleanup_test();
+    CU_ASSERT_TRUE(result.validAction);
 }
 
-void test_t2(void) {
-    initialize_test();
+// Test transition from PLAN_NEXT to turning state (T2)
+void test_t2() {
+    // Initialize state
+    robot_state = PLAN_NEXT;
+    rotations_checked = 0;
+    mock_set_visit_count(5);  // Set a relatively high visit count
+    mock_set_wall(true);      // Set wall detection
     
-    // Setup for continuous forward movement
-    TurtleTestState state;
-    state.current_state = STATE_FORWARD;
-    state.current_direction = L_NORTH;
-    state.current_location.x = 14;
-    state.current_location.y = 14;
-    state.is_bumped = false;
-    state.is_at_end = false;
-    state.timeout_counter = 0;
-    state.directions_checked = 0;
-    set_test_state(state);
+    // Execute transition
+    turtleMove result = studentTurtleStep(true, false);
     
-    // First move
-    turtleMove result = studentTurtleStep(false, false);
-    CU_ASSERT_EQUAL(result.action, FORWARD);
-    CU_ASSERT_EQUAL(result.validAction, true);
-    
-    // Wait for timeout
-    for(int i = 0; i < 5; i++) {
-        result = studentTurtleStep(false, false);
-        CU_ASSERT_EQUAL(result.validAction, false);
-    }
-    
-    // Second forward move
-    result = studentTurtleStep(false, false);
-    CU_ASSERT_EQUAL(result.action, FORWARD);
-    CU_ASSERT_EQUAL(result.validAction, true);
-    CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
-    
-    cleanup_test();
-}
-void test_t3(void) {
-    initialize_test();
-    
-    TurtleTestState state;
-    state.current_state = STATE_FORWARD;
-    state.current_direction = L_NORTH;
-    state.current_location.x = 14;
-    state.current_location.y = 14;
-    state.is_bumped = true;
-    state.is_at_end = false;
-    state.timeout_counter = 0;
-    state.directions_checked = 0;
-    
-    // Print what's being set
-    printf("Setting initial state to: %d\n", state.current_state);
-    set_test_state(state);
-    printf("State after setting: %d\n", getCurrentState());
-    
-    // Wait for timeout
-    turtleMove result;
-    for(int i = 0; i < 5; i++) {
-        result = studentTurtleStep(true, false);
-        printf("During timeout %d: state=%d, valid=%d\n", 
-               i, getCurrentState(), result.validAction);
-    }
-    
-    // Get transition move
-    result = studentTurtleStep(true, false);
-    
-    // Print full state after move
-    printf("Final state: %d, action=%d, valid=%d, directions_checked=%d\n",
-           getCurrentState(), result.action, result.validAction, 
-           get_test_state().directions_checked);
-    
+    // Verify state transition and outputs
     CU_ASSERT_EQUAL(result.action, RIGHT);
-    CU_ASSERT_EQUAL(result.validAction, true);
-    CU_ASSERT_EQUAL(getCurrentState(), STATE_UNVISITED);
-}
-// void test_t4(void) {
-//     initialize_test();
-    
-//     TurtleTestState state;
-//     state.current_state = STATE_UNVISITED;
-//     state.current_direction = L_EAST;
-//     state.current_location.x = 14;
-//     state.current_location.y = 14;
-//     state.is_bumped = false;
-//     state.is_at_end = false;
-//     state.timeout_counter = 0;
-//     state.directions_checked = 1;
-    
-//     // Set all visit counts high except for in front
-//     for(int i = 0; i < 30; i++) {
-//         for(int j = 0; j < 30; j++) {
-//             state.visit_count_map[i][j] = 1;
-//         }
-//     }
-//     // Clear the cell we want to move to
-//     state.visit_count_map[15][14] = 0;  // East is unvisited
-    
-//     set_test_state(state);
-    
-//     // Wait for timeout
-//     turtleMove result;
-//     for(int i = 0; i < 5; i++) {
-//         result = studentTurtleStep(false, false);
-//         CU_ASSERT_EQUAL(result.validAction, false);
-//     }
-    
-//     // Get transition move
-//     result = studentTurtleStep(false, false);
-    
-//     // Verify transition to forward when unvisited path found
-//     CU_ASSERT_EQUAL(result.action, FORWARD);
-//     CU_ASSERT_EQUAL(result.validAction, true);
-//     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
-// }
-
-// void test_t5(void) {
-//     initialize_test();
-    
-//     TurtleTestState state;
-//     state.current_state = STATE_UNVISITED;
-//     state.current_direction = L_NORTH;
-//     state.current_location.x = 14;
-//     state.current_location.y = 14;
-//     state.is_bumped = true;
-//     state.is_at_end = false;
-//     state.timeout_counter = 0;
-//     state.directions_checked = 1;  // Start with one direction checked
-//     set_test_state(state);
-    
-//     // Wait for timeout
-//     turtleMove result;
-//     for(int i = 0; i < 5; i++) {
-//         result = studentTurtleStep(true, false);
-//         CU_ASSERT_EQUAL(result.validAction, false);
-//     }
-    
-//     // Get rotation move
-//     result = studentTurtleStep(true, false);
-    
-//     // Verify direction checking continues
-//     CU_ASSERT_EQUAL(result.action, RIGHT);
-//     CU_ASSERT_EQUAL(result.validAction, true);
-//     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNVISITED);
-//     CU_ASSERT_EQUAL(get_test_state().directions_checked, 2);  // Should increment by 1
-// }
-// void test_t6(void) {
-//     initialize_test();
-    
-//     TurtleTestState state;
-//     state.current_state = STATE_UNVISITED;
-//     state.current_direction = L_WEST;
-//     state.current_location.x = 14;
-//     state.current_location.y = 14;
-//     state.is_bumped = true;
-//     state.is_at_end = false;
-//     state.timeout_counter = 0;
-//     state.directions_checked = 4;  // All directions checked
-//     set_test_state(state);
-    
-//     // Wait for timeout
-//     turtleMove result;
-//     for(int i = 0; i < 5; i++) {
-//         result = studentTurtleStep(true, false);
-//         CU_ASSERT_EQUAL(result.validAction, false);
-//     }
-    
-//     // Get transition move
-//     result = studentTurtleStep(true, false);
-    
-//     // Verify transition to UNBUMPED
-//     CU_ASSERT_EQUAL(result.action, RIGHT);
-//     CU_ASSERT_EQUAL(result.validAction, true);
-//     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNBUMPED);
-// }
-
-// // T7: Find_Least_Visited to Forward (optimal direction found)
-// void test_t7(void) {
-//     initialize_test();
-    
-//     TurtleTestState state;
-//     state.current_state = STATE_UNBUMPED;
-//     state.current_direction = L_EAST;
-//     state.current_location.x = 14;
-//     state.current_location.y = 14;
-//     state.is_bumped = false;
-//     state.is_at_end = false;
-//     state.timeout_counter = 0;
-//     state.directions_checked = 0;
-    
-//     // Set all visit counts high
-//     for(int i = 0; i < 30; i++) {
-//         for(int j = 0; j < 30; j++) {
-//             state.visit_count_map[i][j] = 2;
-//         }
-//     }
-//     // Set the east direction as minimum visits
-//     state.visit_count_map[15][14] = 0;
-    
-//     set_test_state(state);
-    
-//     // Wait for timeout
-//     turtleMove result;
-//     for(int i = 0; i < 5; i++) {
-//         result = studentTurtleStep(false, false);
-//         CU_ASSERT_EQUAL(result.validAction, false);
-//     }
-    
-//     // Get transition move
-//     result = studentTurtleStep(false, false);
-    
-//     // Verify transition to FORWARD with optimal direction
-//     CU_ASSERT_EQUAL(result.action, FORWARD);
-//     CU_ASSERT_EQUAL(result.validAction, true);
-//     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
-// }
-// Test goal condition
-void test_goal_transition(void) {
-    initialize_test();
-    
-    TurtleTestState state;
-    state.current_state = STATE_FORWARD;
-    state.current_direction = L_NORTH;
-    state.current_location.x = 14;
-    state.current_location.y = 14;
-    state.is_bumped = false;
-    state.is_at_end = true;  // Set goal condition
-    state.timeout_counter = 0;
-    state.directions_checked = 0;
-    set_test_state(state);
-    
-    turtleMove result = studentTurtleStep(false, true);
-    
-    // Verify goal handling
-    CU_ASSERT_EQUAL(result.validAction, false);
-    
-    cleanup_test();
+    CU_ASSERT_TRUE(result.validAction);
+    CU_ASSERT_EQUAL(rotations_checked, 1);
 }
 
-int init_suite(void) { return 0; }
-int clean_suite(void) { return 0; }
+int init() {
+    return 0;
+}
 
+int cleanup() {
+    return 0;
+}
+
+/* Skeleton code from http://cunit.sourceforge.net/example.html */
 int main() {
-    CU_initialize_registry();
-    CU_pSuite suite = CU_add_suite("Student Turtle Test Suite", init_suite, clean_suite);
-    
- // Add all tests
-    CU_add_test(suite, "Test T1: Init to Forward", test_t1);
-    CU_add_test(suite, "Test T2: Forward to Forward", test_t2);
-    CU_add_test(suite, "Test T3: Forward to Check_Unvisited", test_t3);
-    // CU_add_test(suite, "Test T4: Check_Unvisited to Forward", test_t4);
-    // CU_add_test(suite, "Test T5: Check_Unvisited to Check_Unvisited", test_t5);
-    // CU_add_test(suite, "Test T6: Check_Unvisited to Find_Least_Visited", test_t6);
-    // CU_add_test(suite, "Test T7: Find_Least_Visited to Forward", test_t7);
-    CU_add_test(suite, "Test Goal Transition", test_goal_transition);
-    
+    CU_pSuite pSuite = NULL;
+
+    /* initialize the CUnit test registry */
+    if (CUE_SUCCESS != CU_initialize_registry())
+        return CU_get_error();
+
+    /* add a suite to the registry */
+    pSuite = CU_add_suite("Suite_1", init, cleanup);
+    if (NULL == pSuite) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+
+    /* add the tests to the suite */
+    if ((NULL == CU_add_test(pSuite, "test of transition T1", test_t1)) ||
+        (NULL == CU_add_test(pSuite, "test of transition T2", test_t2)))
+    {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+
+    /* Run all tests using the CUnit Basic interface */
+    CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
     CU_cleanup_registry();
-    
-    return 0;
+    return CU_get_error();
 }
