@@ -310,6 +310,11 @@ void incrementVisit(coordinate pos) {
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     static coordinate current_pos = {14, 14}; // Starting position
     static int facing_direction = 1;          // Start facing NORTH
+    static int rotations_checked = 0;         // Track how many rotations we've made
+    static bool scanning = false;             // Are we in scanning mode?
+    static uint8_t min_visits = UINT8_MAX;    // Minimum visits found during scan
+    static int best_direction = -1;           // Best direction found during scan
+    
     turtleMove next_move = {FORWARD, true, 0};
     
     // Initialize first position
@@ -324,56 +329,61 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         return next_move;
     }
 
-    // Get visit counts for all adjacent cells
+    // Get adjacent cells
     coordinate adjacent[4];
-    uint8_t visit_counts[4] = {UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX};
-    
-    // Check all adjacent cells
     adjacent[0] = current_pos; adjacent[0].x--; // WEST
     adjacent[1] = current_pos; adjacent[1].y--; // NORTH
     adjacent[2] = current_pos; adjacent[2].x++; // EAST
     adjacent[3] = current_pos; adjacent[3].y++; // SOUTH
 
-    // Find minimum visited count among accessible cells
-    uint8_t min_visits = UINT8_MAX;
-    int best_direction = -1;
-
-    // If we're not blocked, check the cell we're facing first
-    if (!bumped_wall) {
-        visit_counts[facing_direction] = getVisitCount(adjacent[facing_direction]);
-        min_visits = visit_counts[facing_direction];
-        best_direction = facing_direction;
-    }
-
-    // Then consider other directions
-    for (int dir = 0; dir < 4; dir++) {
-        if (dir != facing_direction) {  // Skip current direction as we already checked it
-            visit_counts[dir] = getVisitCount(adjacent[dir]);
-            if (visit_counts[dir] < min_visits) {
-                min_visits = visit_counts[dir];
-                best_direction = dir;
-            }
+    if (!scanning) {
+        // Start scanning if we hit a wall or haven't moved in a while
+        if (bumped_wall) {
+            scanning = true;
+            rotations_checked = 0;
+            min_visits = UINT8_MAX;
+            best_direction = -1;
+        } else {
+            // Try moving forward
+            uint8_t forward_visits = getVisitCount(adjacent[facing_direction]);
+            current_pos = adjacent[facing_direction];
+            incrementVisit(current_pos);
+            next_move.action = FORWARD;
+            next_move.visitCount = getVisitCount(current_pos);
+            return next_move;
         }
     }
 
-    // Decide next action based on best direction
-    if (best_direction == facing_direction && !bumped_wall) {
-        // Already facing least visited accessible direction - move forward
-        current_pos = adjacent[facing_direction];
-        incrementVisit(current_pos);
-        next_move.action = FORWARD;
-        next_move.visitCount = getVisitCount(current_pos);
-    } else if (best_direction != -1) {
-        // Need to rotate toward least visited direction
-        int rotation = (best_direction - facing_direction + 4) % 4;
-        if (rotation == 1) {
-            // Turn right
+    // In scanning mode: check each direction systematically
+    if (scanning) {
+        // Check current direction
+        uint8_t current_visits = getVisitCount(adjacent[facing_direction]);
+        if (!bumped_wall && current_visits < min_visits) {
+            min_visits = current_visits;
+            best_direction = facing_direction;
+        }
+
+        if (rotations_checked < 3) {
+            // Keep rotating to check all directions
+            rotations_checked++;
             facing_direction = (facing_direction + 1) % 4;
             next_move.action = RIGHT;
         } else {
-            // Turn left
-            facing_direction = (facing_direction + 3) % 4;
-            next_move.action = LEFT;
+            // We've checked all directions, move in best direction if found
+            if (best_direction != -1) {
+                // If we're not facing the best direction, rotate towards it
+                if (best_direction != facing_direction) {
+                    facing_direction = (facing_direction + 1) % 4;
+                    next_move.action = RIGHT;
+                } else if (!bumped_wall) {
+                    // We're facing the best direction and no wall, move forward
+                    current_pos = adjacent[facing_direction];
+                    incrementVisit(current_pos);
+                    next_move.action = FORWARD;
+                    next_move.visitCount = getVisitCount(current_pos);
+                    scanning = false;  // Exit scanning mode
+                }
+            }
         }
     }
 
