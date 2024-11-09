@@ -9,9 +9,11 @@
 
 #ifdef testing
 #include "student_mock.h"
-#include <ros/ros.h>
+#define ROS_INFO mock_ros_info
+#define ROS_ERROR mock_ros_error
 #else
 #include "student.h"
+#include "ros/ros.h"
 
 // These are only needed in normal operation mode
 RobotState robot_state = STARTUP;
