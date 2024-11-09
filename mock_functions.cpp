@@ -27,6 +27,10 @@ void mock_set_wall(bool has_wall) {
     mock_wall = has_wall;
 }
 
+bool mock_get_wall() {
+    return mock_wall;
+}
+
 void mock_set_visit_count(int count) {
     mock_visit_count = count;
 }
