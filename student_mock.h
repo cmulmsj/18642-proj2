@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <stdio.h>
 
-// Redefine ROS macros for testing
+// ROS mock definitions
 #define ROS_INFO(format, ...) printf(format "\n", ##__VA_ARGS__)
 #define ROS_ERROR(format, ...) printf("ERROR: " format "\n", ##__VA_ARGS__)
 
-// Define all enums and types here
+// Enums and types
 enum FSM_STATES { 
     STATE_FORWARD = 0,           
     STATE_UNVISITED = 1,   
@@ -35,29 +35,37 @@ typedef struct {
     uint8_t visitCount;
 } turtleMove;
 
-// External variables that need to be accessible for testing
-extern FSM_STATES current_state;
-extern LOCAL_DIRECTION current_local_direction;
-extern coordinate current_location;
-extern uint8_t visit_count_map[30][30];
-
-// Mock functions declarations
-bool bumped(int x1, int y1, int x2, int y2);
-bool atend(int x, int y);
-void displayVisits(int visits);
+// Test state structure
+typedef struct {
+    FSM_STATES current_state;
+    LOCAL_DIRECTION current_direction;
+    coordinate current_location;
+    bool is_bumped;
+    bool is_at_end;
+    uint8_t timeout_counter;
+    uint8_t directions_checked;
+    uint8_t visit_count_map[30][30];
+} TurtleTestState;
 
 // Test control functions
-void setMockBump(bool will_bump);
-void setMockAtEnd(bool at_end);
-int getMockVisits();
+void initialize_test(void);
+void cleanup_test(void);
+void set_test_state(TurtleTestState state);
+TurtleTestState get_test_state(void);
 
-// Test access functions
-FSM_STATES getCurrentState();
+// Mock state access
+FSM_STATES getCurrentState(void);
 void setCurrentState(FSM_STATES state);
-LOCAL_DIRECTION getCurrentDirection();
+LOCAL_DIRECTION getCurrentDirection(void);
 void setCurrentDirection(LOCAL_DIRECTION dir);
-coordinate getCurrentLocation();
+coordinate getCurrentLocation(void);
 void setCurrentLocation(coordinate loc);
-void resetVisitMap();
+void resetVisitMap(void);
+
+// Mock control functions
+void setMockBump(bool bump);
+void setMockAtEnd(bool at_end);
+uint8_t getMockVisitCount(void);
+bool getError(void);
 
 #endif
