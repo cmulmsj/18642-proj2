@@ -15,7 +15,6 @@ void initialize_test(void) {
     test_state.timeout_counter = 0;
     test_state.directions_checked = 0;
     
-    // Initialize visit map
     for(int i = 0; i < 30; i++) {
         for(int j = 0; j < 30; j++) {
             test_state.visit_count_map[i][j] = 0;
