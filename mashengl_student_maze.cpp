@@ -8,112 +8,67 @@
  */
 #include "student.h"
 
-bool bumpTest(QPointF &pos_, int compass_orientation) {
-    coordinate bumptest1, bumptest2;
-    bumptest1.x = static_cast<uint8_t>(std::floor(pos_.x()));
-    bumptest2.x = static_cast<uint8_t>(std::floor(pos_.x()));
-    bumptest1.y = static_cast<uint8_t>(std::floor(pos_.y()));
-    bumptest2.y = static_cast<uint8_t>(std::floor(pos_.y()));
+bool checkObstacle(QPointF pos, int direction) {
+    int x = static_cast<int>(std::floor(pos.x()));
+    int y = static_cast<int>(std::floor(pos.y()));
+    int x1 = x, y1 = y;
+    int x2 = x, y2 = y;
 
-    ROS_INFO("MAZE: Testing collision from position (%.2f, %.2f)", pos_.x(), pos_.y());
-
-    switch (compass_orientation) {
-        case 0: { // WEST
-            bumptest2.y = static_cast<uint8_t>(bumptest2.y + 1U);
-            ROS_INFO("MAZE: Testing WEST wall at (%d,%d)->(%d,%d)", 
-                     bumptest1.x, bumptest1.y, bumptest2.x, bumptest2.y);
+    switch (direction) {
+        case 0: // WEST
+            y2 = y + 1;
             break;
-        }
-        case 1: { // NORTH
-            bumptest2.x = static_cast<uint8_t>(bumptest2.x + 1U);
-            ROS_INFO("MAZE: Testing NORTH wall at (%d,%d)->(%d,%d)", 
-                     bumptest1.x, bumptest1.y, bumptest2.x, bumptest2.y);
+        case 1: // NORTH
+            x2 = x + 1;
             break;
-        }
-        case 2: { // EAST
-            bumptest2.x = static_cast<uint8_t>(bumptest2.x + 1U);
-            bumptest2.y = static_cast<uint8_t>(bumptest2.y + 1U);
-            bumptest1.x = static_cast<uint8_t>(bumptest1.x + 1U);
-            ROS_INFO("MAZE: Testing EAST wall at (%d,%d)->(%d,%d)", 
-                     bumptest1.x, bumptest1.y, bumptest2.x, bumptest2.y);
+        case 2: // EAST
+            x1 = x + 1;
+            x2 = x + 1;
+            y2 = y + 1;
             break;
-        }
-        case 3: { // SOUTH
-            bumptest2.x = static_cast<uint8_t>(bumptest2.x + 1U);
-            bumptest2.y = static_cast<uint8_t>(bumptest2.y + 1U);
-            bumptest1.y = static_cast<uint8_t>(bumptest1.y + 1U);
-            ROS_INFO("MAZE: Testing SOUTH wall at (%d,%d)->(%d,%d)", 
-                     bumptest1.x, bumptest1.y, bumptest2.x, bumptest2.y);
+        case 3: // SOUTH
+            x2 = x + 1;
+            y1 = y + 1;
+            y2 = y + 1;
             break;
-        }
-        default: {
-            ROS_ERROR("MAZE: Invalid compass orientation in bumpTest: %d", compass_orientation);
-            break;
-        }
     }
-    bool hit_wall = bumped(bumptest1.x, bumptest1.y, bumptest2.x, bumptest2.y);
-    ROS_INFO("MAZE: Wall detection result: %s", hit_wall ? "HIT" : "CLEAR");
-    return hit_wall;
+    return bumped(x1, y1, x2, y2);
 }
 
-bool moveTurtle(QPointF& pos_, int& compass_orientation) {
-    // Test for collision before any movement
-    bool wall_detected = bumpTest(pos_, compass_orientation);
-    bool reached_goal = atend(static_cast<int>(std::floor(pos_.x())), 
-                             static_cast<int>(std::floor(pos_.y())));
+bool moveTurtle(QPointF& pos, int& orientation) {
+    // Check for wall and goal
+    bool wall_detected = checkObstacle(pos, orientation);
+    bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
+                             static_cast<int>(std::floor(pos.y())));
     
-    ROS_INFO("MAZE: Current position: (%.2f, %.2f), Orientation: %d", 
-             pos_.x(), pos_.y(), compass_orientation);
-    ROS_INFO("MAZE: Status - Wall: %s, Goal: %s", 
-             wall_detected ? "YES" : "NO", reached_goal ? "REACHED" : "NOT REACHED");
-
-    // Get next move from turtle logic
+    // Get next move
     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
     
     if (!next_move.validAction) {
-        ROS_INFO("MAZE: No valid move available");
         return false;
     }
     
-    // Execute the move
-    ROS_INFO("MAZE: Executing move: %s", 
-             next_move.action == FORWARD ? "FORWARD" : 
-             next_move.action == LEFT ? "LEFT" : "RIGHT");
-
+    // Execute move
     switch (next_move.action) {
-        case FORWARD: {
+        case FORWARD:
             if (!wall_detected) {
-                QPointF old_pos = pos_;
-                switch (compass_orientation) {
-                    case 0: pos_.setX(pos_.x() - 1.0); break; // WEST
-                    case 1: pos_.setY(pos_.y() - 1.0); break; // NORTH
-                    case 2: pos_.setX(pos_.x() + 1.0); break; // EAST
-                    case 3: pos_.setY(pos_.y() + 1.0); break; // SOUTH
+                switch (orientation) {
+                    case 0: pos.setX(pos.x() - 1.0); break;
+                    case 1: pos.setY(pos.y() - 1.0); break;
+                    case 2: pos.setX(pos.x() + 1.0); break;
+                    case 3: pos.setY(pos.y() + 1.0); break;
                 }
                 displayVisits(next_move.visitCount);
-                ROS_INFO("MAZE: Moved from (%.2f, %.2f) to (%.2f, %.2f)", 
-                         old_pos.x(), old_pos.y(), pos_.x(), pos_.y());
             }
             break;
-        }
-        case LEFT: {
-            int old_orientation = compass_orientation;
-            compass_orientation = (compass_orientation + 3) % 4;
-            ROS_INFO("MAZE: Rotated LEFT from %d to %d", 
-                     old_orientation, compass_orientation);
+            
+        case RIGHT:
+            orientation = (orientation + 1) % 4;
             break;
-        }
-        case RIGHT: {
-            int old_orientation = compass_orientation;
-            compass_orientation = (compass_orientation + 1) % 4;
-            ROS_INFO("MAZE: Rotated RIGHT from %d to %d", 
-                     old_orientation, compass_orientation);
+            
+        case LEFT:
+            orientation = (orientation + 3) % 4;
             break;
-        }
-        default: {
-            ROS_ERROR("MAZE: Invalid movement command: %d", next_move.action);
-            break;
-        }
     }
     
     return true;
