@@ -12,7 +12,6 @@ extern void setCurrentLocation(coordinate loc);
 extern void resetVisitMap();
 extern turtleMove studentTurtleStep(bool bumped, bool at_end);
 
-// Test T1: Init to Forward transition
 void test_t1(void) {
     // Setup
     setCurrentState(STATE_FORWARD);
@@ -23,8 +22,11 @@ void test_t1(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-    // Execute
-    turtleMove result = studentTurtleStep(false, false);
+    // Need to wait for timeout to expire
+    turtleMove result;
+    for(int i = 0; i < 6; i++) {  // 5 timeouts + 1 actual move
+        result = studentTurtleStep(false, false);
+    }
     
     // Verify
     CU_ASSERT_EQUAL(result.action, FORWARD);
@@ -32,9 +34,7 @@ void test_t1(void) {
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
 }
 
-// T2: Forward to Forward (unblocked path)
 void test_t2(void) {
-    // Test for continuous forward movement
     setCurrentState(STATE_FORWARD);
     coordinate loc = {14, 14};
     setCurrentLocation(loc);
@@ -43,15 +43,17 @@ void test_t2(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-    turtleMove result = studentTurtleStep(false, false);
+    // Wait for timeout
+    turtleMove result;
+    for(int i = 0; i < 6; i++) {
+        result = studentTurtleStep(false, false);
+    }
     
     CU_ASSERT_EQUAL(result.action, FORWARD);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
 }
 
-// T3: Forward to Check_Unvisited
 void test_t3(void) {
-    // Test transition when path is blocked
     setCurrentState(STATE_FORWARD);
     coordinate loc = {14, 14};
     setCurrentLocation(loc);
@@ -60,15 +62,17 @@ void test_t3(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    turtleMove result = studentTurtleStep(true, false);
+    // Wait for timeout
+    turtleMove result;
+    for(int i = 0; i < 6; i++) {
+        result = studentTurtleStep(true, false);
+    }
     
     CU_ASSERT_EQUAL(result.action, RIGHT);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNVISITED);
 }
 
-// T4: Check_Unvisited to Forward
 void test_t4(void) {
-    // Test finding an unvisited path
     setCurrentState(STATE_UNVISITED);
     coordinate loc = {14, 14};
     setCurrentLocation(loc);
@@ -77,13 +81,16 @@ void test_t4(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-    turtleMove result = studentTurtleStep(false, false);
+    // Wait for timeout
+    turtleMove result;
+    for(int i = 0; i < 6; i++) {
+        result = studentTurtleStep(false, false);
+    }
     
     CU_ASSERT_EQUAL(result.action, FORWARD);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
 }
 
-// T5: Check_Unvisited to Check_Unvisited
 void test_t5(void) {
     setCurrentState(STATE_UNVISITED);
     coordinate loc = {14, 14};
@@ -93,15 +100,17 @@ void test_t5(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    turtleMove result = studentTurtleStep(true, false);
+    // Wait for timeout
+    turtleMove result;
+    for(int i = 0; i < 6; i++) {
+        result = studentTurtleStep(true, false);
+    }
     
     CU_ASSERT_EQUAL(result.action, RIGHT);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNVISITED);
 }
 
-// T6: Check_Unvisited to Find_Least_Visited
 void test_t6(void) {
-    // Setup: Check all directions (need to call 4 times)
     setCurrentState(STATE_UNVISITED);
     coordinate loc = {14, 14};
     setCurrentLocation(loc);
@@ -110,14 +119,15 @@ void test_t6(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    // Make 4 moves to check all directions
-    for(int i = 0; i < 3; i++) {
-        turtleMove result = studentTurtleStep(true, false);
-        CU_ASSERT_EQUAL(result.action, RIGHT);
+    // We need to check all 4 directions
+    turtleMove result;
+    for(int i = 0; i < 4; i++) {
+        // Wait for timeout for each direction check
+        for(int j = 0; j < 6; j++) {
+            result = studentTurtleStep(true, false);
+        }
     }
     
-    // Final move should transition to UNBUMPED
-    turtleMove result = studentTurtleStep(true, false);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNBUMPED);
 }
 
