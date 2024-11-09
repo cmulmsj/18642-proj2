@@ -4,11 +4,52 @@
  *
  * STUDENT NAME: Mashengjun Li
  * ANDREW ID: mashengl
- * LAST UPDATE: 11/01/2024
+ * LAST UPDATE: 11/08/2024
  */
 
 #include "stdint.h"
+#ifdef testing
+#include "student_mock.h"
+#endif
+#ifndef testing
 #include "student.h"
+#include "ros/ros.h"
+#endif
+
+#ifdef testing
+FSM_STATES getCurrentState() {
+    return current_state;
+}
+
+void setCurrentState(FSM_STATES state) {
+    current_state = state;
+}
+
+LOCAL_DIRECTION getCurrentDirection() {
+    return current_local_direction;
+}
+
+void setCurrentDirection(LOCAL_DIRECTION dir) {
+    current_local_direction = dir;
+}
+
+coordinate getCurrentLocation() {
+    return current_location;
+}
+
+void setCurrentLocation(coordinate loc) {
+    current_location = loc;
+}
+
+void resetVisitMap() {
+    for(int i = 0; i < 30; i++) {
+        for(int j = 0; j < 30; j++) {
+            visit_count_map[i][j] = 0;
+        }
+    }
+}
+#endif
+
 
 static uint8_t visit_count_map[30][30] = {{0}};
 
