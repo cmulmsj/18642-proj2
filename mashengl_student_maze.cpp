@@ -200,7 +200,7 @@ int findOptimalDirection(QPointF pos) {
     };
 
     for (int dir = 0; dir < 4; dir++) {
-        has_obstacle[dir] = checkObstacle(pos, dir);
+        has_obstacle[dir] = moveTurtle(pos, dir);
         visit_counts[dir] = getVisitCount(adjacent_cells[dir]);
     }
 
