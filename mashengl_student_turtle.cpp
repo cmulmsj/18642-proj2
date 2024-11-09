@@ -6,6 +6,100 @@
  * ANDREW ID: mashengl
  * LAST UPDATE: 11/01/2024
  */
+#include "student.h"
+
+// Visit tracking grid
+static uint8_t visit_grid[30][30] = {{0}};
+
+// Helper function to get visit count for a position
+uint8_t getVisitCount(int x, int y) {
+    if (x >= 0 && x < 30 && y >= 0 && y < 30) {
+        return visit_grid[x][y];
+    }
+    return UINT8_MAX;  // Return max for invalid positions
+}
+
+turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
+    static coordinate current_pos = {14, 14}; // Starting position
+    static int facing_direction = 1;          // Start facing NORTH
+    static bool first_move = true;
+    
+    turtleMove next_move;
+    next_move.validAction = true;
+    next_move.action = FORWARD;
+
+    // Initialize first position
+    if (first_move) {
+        visit_grid[current_pos.x][current_pos.y]++;
+        first_move = false;
+        next_move.visitCount = visit_grid[current_pos.x][current_pos.y];
+        return next_move;
+    }
+
+    // Stop at goal
+    if (at_goal) {
+        next_move.validAction = false;
+        return next_move;
+    }
+
+    // Get visit counts for all adjacent cells
+    uint8_t visit_counts[4];  // WEST, NORTH, EAST, SOUTH
+    visit_counts[0] = getVisitCount(current_pos.x - 1, current_pos.y);     // WEST
+    visit_counts[1] = getVisitCount(current_pos.x, current_pos.y - 1);     // NORTH
+    visit_counts[2] = getVisitCount(current_pos.x + 1, current_pos.y);     // EAST
+    visit_counts[3] = getVisitCount(current_pos.x, current_pos.y + 1);     // SOUTH
+
+    // If current direction is blocked, mark it as maximum
+    if (bumped_wall) {
+        visit_counts[facing_direction] = UINT8_MAX;
+    }
+
+    // Find direction with minimum visits
+    uint8_t min_visits = UINT8_MAX;
+    int best_direction = -1;
+
+    for (int dir = 0; dir < 4; dir++) {
+        if (visit_counts[dir] < min_visits) {
+            min_visits = visit_counts[dir];
+            best_direction = dir;
+        }
+    }
+
+    // If we can't find a valid direction
+    if (best_direction == -1) {
+        next_move.validAction = false;
+        return next_move;
+    }
+
+    // If we're not facing the best direction, turn towards it
+    if (best_direction != facing_direction) {
+        // Calculate shortest turning direction
+        int diff = (best_direction - facing_direction + 4) % 4;
+        if (diff == 1) {
+            next_move.action = RIGHT;
+            facing_direction = (facing_direction + 1) % 4;
+        } else {
+            next_move.action = LEFT;
+            facing_direction = (facing_direction + 3) % 4;
+        }
+    } 
+    // If we're facing the best direction and no wall, move forward
+    else if (!bumped_wall) {
+        switch (facing_direction) {
+            case 0: current_pos.x--; break; // WEST
+            case 1: current_pos.y--; break; // NORTH
+            case 2: current_pos.x++; break; // EAST
+            case 3: current_pos.y++; break; // SOUTH
+        }
+        visit_grid[current_pos.x][current_pos.y]++;
+        next_move.action = FORWARD;
+        next_move.visitCount = visit_grid[current_pos.x][current_pos.y];
+    }
+
+    return next_move;
+}
+
+
 
 // #include "stdint.h"
 // #include "student.h"
@@ -286,48 +380,3 @@
 //     ROS_INFO("TURTLE: Timeout counter: %d", timeout_counter);
 //     return futureMove;
 // }
-
-
-#include "student.h"
-
-// Visit tracking grid
-static uint8_t visit_grid[30][30] = {{0}};
-
-turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
-    static coordinate current_pos = {14, 14}; // Starting position
-    static int facing_direction = 1;          // Start facing NORTH
-    
-    // Initialize move structure
-    turtleMove next_move;
-    next_move.validAction = true;
-
-    // Stop at goal
-    if (at_goal) {
-        next_move.validAction = false;
-        return next_move;
-    }
-
-    // If not blocked and moving forward
-    if (!bumped_wall) {
-        // Update current position based on facing direction
-        coordinate next_pos = current_pos;
-        switch (facing_direction) {
-            case 0: next_pos.x--; break; // WEST
-            case 1: next_pos.y--; break; // NORTH
-            case 2: next_pos.x++; break; // EAST
-            case 3: next_pos.y++; break; // SOUTH
-        }
-        
-        // Move forward and update visit count
-        current_pos = next_pos;
-        visit_grid[current_pos.x][current_pos.y]++;
-        next_move.action = FORWARD;
-        next_move.visitCount = visit_grid[current_pos.x][current_pos.y];
-    } else {
-        // Turn right when blocked
-        facing_direction = (facing_direction + 1) % 4;
-        next_move.action = RIGHT;
-    }
-
-    return next_move;
-}
