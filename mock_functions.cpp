@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstdarg>
 #include <cstring> // for memset
+#include <cstdio>
 
 // State variables
 RobotState robot_state = STARTUP;
