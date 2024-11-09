@@ -49,7 +49,6 @@
 
 #ifndef STUDENT_H
 #define STUDENT_H
-[keep existing includes]
 
 enum RobotAction {
     ADVANCE = 0,   // instead of MOVE
