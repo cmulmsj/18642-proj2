@@ -14,7 +14,7 @@
 
 // Constants
 const int GRID_SIZE = 30;
-const int START_POS = 14;  // Starting position (middle of grid)
+const int START_POS = 13;  // Starting position (middle of grid)
 
 // External functions
 bool bumped(int x1, int y1, int x2, int y2);
