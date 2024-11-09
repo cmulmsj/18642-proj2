@@ -9,6 +9,7 @@
 
 #ifdef testing
 #include "student_mock.h"
+#include <ros/ros.h>
 #else
 #include "student.h"
 
