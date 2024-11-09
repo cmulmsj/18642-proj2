@@ -8,11 +8,15 @@
 
 #include <cstdint>
 #include <climits>
+#include <iostream>
 
 // Constants
 #define GRID_SIZE 30
 #define START_POS 13
 
+// Mock ROS logging macros
+#define ROS_INFO(...) mock_ros_info(__VA_ARGS__)
+#define ROS_ERROR(...) mock_ros_error(__VA_ARGS__)
 
 // Mock QPointF
 class QPointF {
@@ -55,6 +59,10 @@ void updateVisitMap(coordinate pos);
 bool checkObstacle(QPointF pos, int direction);
 int getVisitCount(coordinate pos);
 void ROS_INFO(const char* format, ...);
+
+// Add function declarations for mock logging
+void mock_ros_info(const char* format, ...);
+void mock_ros_error(const char* format, ...);
 
 // State variables
 extern RobotState robot_state;
