@@ -47,12 +47,12 @@ typedef struct {
     uint8_t visit_count_map[30][30];
 } TurtleTestState;
 
+#ifdef testing
 // Test control functions
 void initialize_test(void);
 void cleanup_test(void);
 void set_test_state(TurtleTestState state);
 TurtleTestState get_test_state(void);
-turtleMove studentTurtleStep(bool bumped, bool at_end);
 
 // Mock state access
 FSM_STATES getCurrentState(void);
@@ -68,5 +68,11 @@ void setMockBump(bool bump);
 void setMockAtEnd(bool at_end);
 uint8_t getMockVisitCount(void);
 bool getError(void);
+#endif
+
+// Function that exists in both test and non-test
+turtleMove studentTurtleStep(bool bumped, bool at_end);
+
+#endif
 
 #endif
