@@ -95,12 +95,17 @@ struct GridPoint {    // instead of Point
     int y;
 };
 
+// Functions to interface with ROS. Don't change these lines!
+bool bumped(int x1, int y1, int x2, int y2);
+bool atend(int x, int y);
+void displayVisits(int visits);
+bool moveTurtle(QPointF& pos_, int& nw_or);
+
 // Function declarations
 RobotAction nextRobotStep(bool maze_complete, int best_direction, bool obstacle_ahead, int facing_direction);
 int getVisitCount(GridPoint loc);
 int findOptimalDirection(QPointF current_pos);
 void updateVisitMap(QPointF pos);
-bool moveTurtle(QPointF pos, int direction);
 QPointF calculateNextPosition(QPointF pos, int direction);
 int updateDirection(int current_dir, RobotAction next_action);
 
