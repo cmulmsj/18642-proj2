@@ -1,10 +1,10 @@
 #!/bin/bash
+# Build and run tests for turtle implementation
+# Student Name: Mashengjun Li
+# Andrew ID: mashengl
 
-# Build and run unit tests for turtle implementation
-# Student: Mashengjun Li (mashengl)
-
+# Compile with testing flag and C++11 support
 g++ -std=c++11 -Dtesting \
-    -I/opt/ros/kinetic/include \
     -o mashengl_student_tests \
     mashengl_student_test.cpp \
     mashengl_student_turtle.cpp \
