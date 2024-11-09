@@ -2,7 +2,7 @@
 
 echo "Building and running turtle navigation unit tests..."
 
-g++ -Dtesting -Wall -o student_tests \
+g++ -Dtesting -Wall -std=c++11 -o student_tests \
     mashengl_student_test.cpp \
     mashengl_student_turtle.cpp \
     mock_functions.cpp \
