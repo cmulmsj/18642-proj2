@@ -237,30 +237,6 @@ int updateDirection(int current_dir, RobotAction next_action) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // int x = static_cast<int>(pos.x());
-    // int y = static_cast<int>(pos.y());
-    // int check_x1 = x, check_y1 = y;
-    // int check_x2 = x, check_y2 = y;
-
-    // switch (direction) {
-    //     case WEST:
-    //         check_y2 = y + 1;
-    //         break;
-    //     case NORTH:
-    //         check_x2 = x + 1;
-    //         break;
-    //     case EAST:
-    //         check_x1 = x + 1;
-    //         check_x2 = x + 1;
-    //         check_y2 = y + 1;
-    //         break;
-    //     case SOUTH:
-    //         check_x2 = x + 1;
-    //         check_y1 = y + 1;
-    //         check_y2 = y + 1;
-    //         break;
-    // }
-    // return bumped(check_x1, check_y1, check_x2, check_y2);
     int x = static_cast<int>(pos.x());
     int y = static_cast<int>(pos.y());
     int check_x1 = x, check_y1 = y;
@@ -286,25 +262,7 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             break;
     }
 
-    // If no obstacle, update position
-    if (!bumped(check_x1, check_y1, check_x2, check_y2)) {
-        // Update position based on orientation
-        switch (orientation) {
-            case WEST:
-                pos.setX(pos.x() - 1);
-                break;
-            case NORTH:
-                pos.setY(pos.y() - 1);
-                break;
-            case EAST:
-                pos.setX(pos.x() + 1);
-                break;
-            case SOUTH:
-                pos.setY(pos.y() + 1);
-                break;
-        }
-        return true;
-    }
-    return false;
+    // Check if movement is possible
+    return !bumped(check_x1, check_y1, check_x2, check_y2);
 }
 
