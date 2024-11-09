@@ -12,6 +12,10 @@
 #include <ece642rtle/aendEcho.h>
 #include <QPointF>
 
+// Constants
+const int GRID_SIZE = 30;
+const int START_POS = 14;  // Starting position (middle of grid)
+
 // External functions
 bool bumped(int x1, int y1, int x2, int y2);
 bool atend(int x, int y);
