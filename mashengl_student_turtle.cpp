@@ -7,26 +7,36 @@
  * LAST UPDATE: 11/08/2024
  */
 
-#include "stdint.h"
 #ifdef testing
 #include "student_mock.h"
-#endif
-#ifndef testing
+#else
 #include "student.h"
+#include "stdint.h"
 #include "ros/ros.h"
 #endif
 
+// Enum definitions (only once)
+enum FSM_STATES { 
+    STATE_FORWARD = 0,           
+    STATE_UNVISITED = 1,   
+    STATE_UNBUMPED = 2  
+};
+
+enum LOCAL_DIRECTION { 
+    L_WEST = 0, 
+    L_NORTH = 1, 
+    L_EAST = 2, 
+    L_SOUTH = 3 
+};
+
+// Global variables for testing, static for normal build
 #ifdef testing
 FSM_STATES current_state = STATE_FORWARD;
 LOCAL_DIRECTION current_local_direction = L_NORTH;
 coordinate current_location = {14, 14};
 uint8_t visit_count_map[30][30] = {{0}};
-#else
-static FSM_STATES current_state = STATE_FORWARD;
-static LOCAL_DIRECTION current_local_direction = L_NORTH;
-static coordinate current_location = {14, 14};
-static uint8_t visit_count_map[30][30] = {{0}};
 
+// Test access functions
 FSM_STATES getCurrentState() {
     return current_state;
 }
@@ -58,23 +68,13 @@ void resetVisitMap() {
         }
     }
 }
+#else
+static FSM_STATES current_state = STATE_FORWARD;
+static LOCAL_DIRECTION current_local_direction = L_NORTH;
+static coordinate current_location = {14, 14};
+static uint8_t visit_count_map[30][30] = {{0}};
 #endif
 
-
-static uint8_t visit_count_map[30][30] = {{0}};
-
-enum FSM_STATES { 
-    STATE_FORWARD = 0,           
-    STATE_UNVISITED = 1,   
-    STATE_UNBUMPED = 2  
-};
-
-enum LOCAL_DIRECTION { 
-    L_WEST = 0, 
-    L_NORTH = 1, 
-    L_EAST = 2, 
-    L_SOUTH = 3 
-};
 
 /**
  * @brief Get number of visits for a cell
