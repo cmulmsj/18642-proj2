@@ -22,20 +22,19 @@ void test_t1(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-  // First wait for timeout to expire (5 cycles)
-    turtleMove result;
-    for(int i = 0; i < 5; i++) {
-        result = studentTurtleStep(false, false);
-        CU_ASSERT_EQUAL(result.validAction, false);  // During timeout, validAction should be false
-    }
+    // Get initial move
+    turtleMove result = studentTurtleStep(false, false);
     
-    // Now get the actual move
-    result = studentTurtleStep(false, false);
-    
-    // Verify the actual move
+    // Verify first movement
     CU_ASSERT_EQUAL(result.action, FORWARD);
     CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
+    
+    // Verify timeout behavior
+    for(int i = 0; i < 5; i++) {
+        result = studentTurtleStep(false, false);
+        CU_ASSERT_EQUAL(result.validAction, false);
+    }
 }
 
 void test_t2(void) {
@@ -67,13 +66,14 @@ void test_t3(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    // First wait for timeout
+    // Wait out timeout
     turtleMove result;
     for(int i = 0; i < 5; i++) {
         result = studentTurtleStep(true, false);
+        CU_ASSERT_EQUAL(result.validAction, false);
     }
     
-    // Get the actual transition move
+    // Get transition move
     result = studentTurtleStep(true, false);
     
     CU_ASSERT_EQUAL(result.action, RIGHT);
@@ -91,13 +91,14 @@ void test_t4(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-    // First wait for timeout
+    // Wait out timeout
     turtleMove result;
     for(int i = 0; i < 5; i++) {
         result = studentTurtleStep(false, false);
+        CU_ASSERT_EQUAL(result.validAction, false);
     }
     
-    // Get the actual transition
+    // Get transition move
     result = studentTurtleStep(false, false);
     
     CU_ASSERT_EQUAL(result.action, FORWARD);
@@ -133,23 +134,23 @@ void test_t6(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    turtleMove result;
-    
-    // Need to check all 4 directions
+    // Need to do 4 direction checks
     for(int dir = 0; dir < 4; dir++) {
-        // Wait for timeout
+        // Wait for timeout each time
+        turtleMove result;
         for(int i = 0; i < 5; i++) {
             result = studentTurtleStep(true, false);
             CU_ASSERT_EQUAL(result.validAction, false);
         }
         
-        // Get direction check move
+        // Get the rotation move
         result = studentTurtleStep(true, false);
         CU_ASSERT_EQUAL(result.action, RIGHT);
         CU_ASSERT_EQUAL(result.validAction, true);
     }
     
-    // After 4 directions checked, should transition to UNBUMPED
+    // One more move to see state transition
+    turtleMove result = studentTurtleStep(true, false);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNBUMPED);
 }
 
