@@ -4,11 +4,24 @@
 #include <stdint.h>
 #include <stdio.h>
 
+// Redefine ROS macros for testing
 #define ROS_INFO(format, ...) printf(format "\n", ##__VA_ARGS__)
 #define ROS_ERROR(format, ...) printf("ERROR: " format "\n", ##__VA_ARGS__)
 
-enum FSM_STATES;
-enum LOCAL_DIRECTION;
+// Define all enums and types here
+enum FSM_STATES { 
+    STATE_FORWARD = 0,           
+    STATE_UNVISITED = 1,   
+    STATE_UNBUMPED = 2  
+};
+
+enum LOCAL_DIRECTION { 
+    L_WEST = 0, 
+    L_NORTH = 1, 
+    L_EAST = 2, 
+    L_SOUTH = 3 
+};
+
 enum turtleAction {FORWARD, LEFT, RIGHT};
 
 typedef struct {
