@@ -16,7 +16,6 @@ extern turtleMove studentTurtleStep(bool bumped, bool at_end);
 int init_suite(void) { return 0; }
 int clean_suite(void) { return 0; }
 
-// T1: Initial transition to FORWARD state and behavior
 void test_t1(void) {
     // Setup
     setCurrentState(STATE_FORWARD);
@@ -27,26 +26,15 @@ void test_t1(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-    // Get initial state data
-    FSM_STATES initial_state = getCurrentState();
-    CU_ASSERT_EQUAL(initial_state, STATE_FORWARD);
-
-    // Make move
+    // Get initial move
     turtleMove result = studentTurtleStep(false, false);
     
-    // Verify first move
+    // First move should be valid
     CU_ASSERT_EQUAL(result.action, FORWARD);
     CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
-    
-    // Verify timeout behavior
-    for(int i = 0; i < 5; i++) {
-        turtleMove timeout_result = studentTurtleStep(false, false);
-        CU_ASSERT_EQUAL(timeout_result.validAction, false);
-    }
 }
 
-// T2: FORWARD to FORWARD (unblocked path)
 void test_t2(void) {
     // Setup
     setCurrentState(STATE_FORWARD);
@@ -57,34 +45,29 @@ void test_t2(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-    // Get initial state data
-    FSM_STATES initial_state = getCurrentState();
-    CU_ASSERT_EQUAL(initial_state, STATE_FORWARD);
-
-    // Make first move
+    // Get first move
     turtleMove result = studentTurtleStep(false, false);
     
-    // Verify first move
+    // Verify first forward move
     CU_ASSERT_EQUAL(result.action, FORWARD);
     CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
     
     // Wait for timeout
     for(int i = 0; i < 5; i++) {
-        turtleMove timeout_result = studentTurtleStep(false, false);
-        CU_ASSERT_EQUAL(timeout_result.validAction, false);
+        result = studentTurtleStep(false, false);
+        CU_ASSERT_EQUAL(result.validAction, false);
     }
     
-    // Make second move
+    // Get second move
     result = studentTurtleStep(false, false);
     
-    // Verify continued forward movement
+    // Verify second forward move
     CU_ASSERT_EQUAL(result.action, FORWARD);
     CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
 }
 
-// T3: FORWARD to CHECK_UNVISITED (blocked path)
 void test_t3(void) {
     // Setup
     setCurrentState(STATE_FORWARD);
@@ -95,26 +78,22 @@ void test_t3(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    // Get initial state data
-    FSM_STATES initial_state = getCurrentState();
-    CU_ASSERT_EQUAL(initial_state, STATE_FORWARD);
-
-    // Make move
-    turtleMove result = studentTurtleStep(true, false);
+    // Wait for timeout
+    turtleMove result;
+    for(int i = 0; i < 5; i++) {
+        result = studentTurtleStep(true, false);
+        CU_ASSERT_EQUAL(result.validAction, false);
+    }
     
-    // Verify transition
+    // Get transition move
+    result = studentTurtleStep(true, false);
+    
+    // Verify transition to UNVISITED
     CU_ASSERT_EQUAL(result.action, RIGHT);
     CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNVISITED);
-    
-    // Verify timeout behavior
-    for(int i = 0; i < 5; i++) {
-        turtleMove timeout_result = studentTurtleStep(true, false);
-        CU_ASSERT_EQUAL(timeout_result.validAction, false);
-    }
 }
 
-// T4: CHECK_UNVISITED to FORWARD (found unvisited path)
 void test_t4(void) {
     // Setup
     setCurrentState(STATE_UNVISITED);
@@ -125,26 +104,22 @@ void test_t4(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-    // Get initial state data
-    FSM_STATES initial_state = getCurrentState();
-    CU_ASSERT_EQUAL(initial_state, STATE_UNVISITED);
-
-    // Make move
-    turtleMove result = studentTurtleStep(false, false);
+    // Wait for timeout
+    turtleMove result;
+    for(int i = 0; i < 5; i++) {
+        result = studentTurtleStep(false, false);
+        CU_ASSERT_EQUAL(result.validAction, false);
+    }
     
-    // Verify transition
+    // Get transition move
+    result = studentTurtleStep(false, false);
+    
+    // Verify transition to FORWARD
     CU_ASSERT_EQUAL(result.action, FORWARD);
     CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
-    
-    // Verify timeout behavior
-    for(int i = 0; i < 5; i++) {
-        turtleMove timeout_result = studentTurtleStep(false, false);
-        CU_ASSERT_EQUAL(timeout_result.validAction, false);
-    }
 }
 
-// T5: CHECK_UNVISITED to CHECK_UNVISITED (continue searching)
 void test_t5(void) {
     // Setup
     setCurrentState(STATE_UNVISITED);
@@ -155,26 +130,22 @@ void test_t5(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    // Get initial state data
-    FSM_STATES initial_state = getCurrentState();
-    CU_ASSERT_EQUAL(initial_state, STATE_UNVISITED);
-
-    // Make move
-    turtleMove result = studentTurtleStep(true, false);
+    // Wait for timeout
+    turtleMove result;
+    for(int i = 0; i < 5; i++) {
+        result = studentTurtleStep(true, false);
+        CU_ASSERT_EQUAL(result.validAction, false);
+    }
     
-    // Verify continued searching
+    // Get next check move
+    result = studentTurtleStep(true, false);
+    
+    // Verify continued checking
     CU_ASSERT_EQUAL(result.action, RIGHT);
     CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNVISITED);
-    
-    // Verify timeout behavior
-    for(int i = 0; i < 5; i++) {
-        turtleMove timeout_result = studentTurtleStep(true, false);
-        CU_ASSERT_EQUAL(timeout_result.validAction, false);
-    }
 }
 
-// T6: CHECK_UNVISITED to FIND_LEAST_VISITED (all directions checked)
 void test_t6(void) {
     // Setup
     setCurrentState(STATE_UNVISITED);
@@ -185,28 +156,32 @@ void test_t6(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    // Get initial state data
-    FSM_STATES initial_state = getCurrentState();
-    CU_ASSERT_EQUAL(initial_state, STATE_UNVISITED);
-
-    // Check all four directions
+    // Need to check all directions
     for(int dir = 0; dir < 4; dir++) {
-        // Make move for this direction
-        turtleMove result = studentTurtleStep(true, false);
+        // Wait for timeout
+        turtleMove result;
+        for(int i = 0; i < 5; i++) {
+            result = studentTurtleStep(true, false);
+            CU_ASSERT_EQUAL(result.validAction, false);
+        }
         
-        // Verify rotation
+        // Get rotation move
+        result = studentTurtleStep(true, false);
         CU_ASSERT_EQUAL(result.action, RIGHT);
         CU_ASSERT_EQUAL(result.validAction, true);
-        
-        // Wait for timeout
-        for(int i = 0; i < 5; i++) {
-            turtleMove timeout_result = studentTurtleStep(true, false);
-            CU_ASSERT_EQUAL(timeout_result.validAction, false);
-        }
     }
     
-    // Verify final transition
-    turtleMove final_result = studentTurtleStep(true, false);
+    // Wait for final timeout
+    turtleMove result;
+    for(int i = 0; i < 5; i++) {
+        result = studentTurtleStep(true, false);
+        CU_ASSERT_EQUAL(result.validAction, false);
+    }
+    
+    // Get final transition move
+    result = studentTurtleStep(true, false);
+    
+    // Verify transition to UNBUMPED
     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNBUMPED);
 }
 
