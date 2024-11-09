@@ -11,6 +11,9 @@
 // State machine variables
 RobotState robot_state = STARTUP;
 static int visit_grid[GRID_SIZE][GRID_SIZE] = {{0}};
+static bool first_run = true;
+static coordinate current_pos = {START_POS, START_POS};
+static int facing_direction = 1; // Start facing NORTH
 
 // Visit tracking functions
 void updateVisitMap(coordinate pos) {
@@ -20,43 +23,54 @@ void updateVisitMap(coordinate pos) {
     }
 }
 
-int getVisitCount(coordinate loc) {
-    if (loc.x < GRID_SIZE && loc.y < GRID_SIZE) {
-        return visit_grid[loc.x][loc.y];
+int getVisitCount(coordinate pos) {
+    if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
+        return visit_grid[pos.x][pos.y];
     }
     return INT_MAX;
 }
 
-// Find direction with least visits
-int findOptimalDirection(coordinate current_pos, int current_dir, bool wall_ahead) {
+coordinate getNextPosition(coordinate pos, int direction) {
+    coordinate next = pos;
+    switch (direction) {
+        case 0: next.x--; break; // WEST
+        case 1: next.y--; break; // NORTH
+        case 2: next.x++; break; // EAST
+        case 3: next.y++; break; // SOUTH
+    }
+    return next;
+}
+
+// Find direction with least visits among available directions
+int findBestDirection(coordinate pos, int current_dir, bool wall_ahead) {
     int min_visits = INT_MAX;
     int best_dir = -1;
+
+    // First check current direction if no wall
+    if (!wall_ahead) {
+        coordinate forward = getNextPosition(pos, current_dir);
+        int forward_visits = getVisitCount(forward);
+        min_visits = forward_visits;
+        best_dir = current_dir;
+    }
     
-    // Check each direction
+    // Then check other directions
     for (int dir = 0; dir < 4; dir++) {
-        // Skip current direction if wall ahead
-        if (dir == current_dir && wall_ahead) continue;
+        if (dir == current_dir) continue;  // Already checked
         
-        coordinate next_pos = current_pos;
-        switch (dir) {
-            case 0: next_pos.x--; break; // WEST
-            case 1: next_pos.y--; break; // NORTH
-            case 2: next_pos.x++; break; // EAST
-            case 3: next_pos.y++; break; // SOUTH
-        }
+        coordinate next = getNextPosition(pos, dir);
+        int visits = getVisitCount(next);
         
-        int visits = getVisitCount(next_pos);
         if (visits < min_visits) {
             min_visits = visits;
             best_dir = dir;
         }
     }
+    
     return best_dir;
 }
 
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
-    static coordinate current_pos = {START_POS, START_POS};
-    static int facing_direction = 1; // Start facing NORTH
     turtleMove next_move = {FORWARD, true, 0};
 
     // Stop if maze complete
@@ -65,57 +79,62 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         return next_move;
     }
 
+    // Initialize on first run
+    if (first_run) {
+        updateVisitMap(current_pos);
+        next_move.visitCount = getVisitCount(current_pos);
+        first_run = false;
+        return next_move;
+    }
+
     switch (robot_state) {
         case STARTUP: {
-            updateVisitMap(current_pos);
-            next_move.visitCount = getVisitCount(current_pos);
             robot_state = PLAN_NEXT;
+            next_move.validAction = false;
             break;
         }
 
         case PLAN_NEXT: {
-            int best_dir = findOptimalDirection(current_pos, facing_direction, bumped_wall);
+            // Find best direction considering walls
+            int best_dir = findBestDirection(current_pos, facing_direction, bumped_wall);
             
             if (best_dir == -1) {
                 next_move.validAction = false;
-                return next_move;
+                break;
             }
 
+            // If best direction is current direction and no wall, move forward
             if (best_dir == facing_direction && !bumped_wall) {
-                // Move forward if facing best direction and no wall
-                coordinate next_pos = current_pos;
-                switch (facing_direction) {
-                    case 0: next_pos.x--; break;
-                    case 1: next_pos.y--; break;
-                    case 2: next_pos.x++; break;
-                    case 3: next_pos.y++; break;
-                }
+                coordinate next_pos = getNextPosition(current_pos, facing_direction);
                 current_pos = next_pos;
                 updateVisitMap(current_pos);
                 next_move.action = FORWARD;
                 next_move.visitCount = getVisitCount(current_pos);
-                robot_state = PLAN_NEXT;
             } else {
-                // Need to rotate
-                int rotation = (best_dir - facing_direction + 4) % 4;
-                if (rotation == 1) {
+                // Need to turn toward best direction
+                int diff = (best_dir - facing_direction + 4) % 4;
+                if (diff == 1) {
                     facing_direction = (facing_direction + 1) % 4;
                     next_move.action = RIGHT;
                 } else {
                     facing_direction = (facing_direction + 3) % 4;
                     next_move.action = LEFT;
                 }
-                robot_state = PLAN_NEXT;
+                robot_state = MOVING;
             }
             break;
         }
 
         case MOVING: {
+            // After completing a rotation, go back to planning
             robot_state = PLAN_NEXT;
             next_move.validAction = false;
             break;
         }
     }
+
+    ROS_INFO("Position: (%d,%d), Facing: %d, State: %d, Action: %d", 
+             current_pos.x, current_pos.y, facing_direction, robot_state, next_move.action);
 
     return next_move;
 }
