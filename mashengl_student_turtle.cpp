@@ -14,7 +14,7 @@
 #include "ros/ros.h"
 
 // These are only needed in normal operation mode
-static RobotState robot_state = STARTUP;
+RobotState robot_state = STARTUP;
 static int visit_grid[GRID_SIZE][GRID_SIZE] = {{0}};
 static bool first_run = true;
 static coordinate current_pos = {START_POS, START_POS};
