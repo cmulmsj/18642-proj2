@@ -296,12 +296,15 @@ static bool first_move = true;
 
 // Get visit count for a position
 uint8_t getVisitCount(coordinate pos) {
+    if (pos.x >= 30 || pos.y >= 30) return UINT8_MAX;
     return visit_grid[pos.x][pos.y];
 }
 
 // Increment visit count for a position
 void incrementVisit(coordinate pos) {
-    visit_grid[pos.x][pos.y]++;
+    if (pos.x < 30 && pos.y < 30) {
+        visit_grid[pos.x][pos.y]++;
+    }
 }
 
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
@@ -321,25 +324,57 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         return next_move;
     }
 
-    // If there's no wall ahead, move forward
+    // Get visit counts for all adjacent cells
+    coordinate adjacent[4];
+    uint8_t visit_counts[4] = {UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX};
+    
+    // Check all adjacent cells
+    adjacent[0] = current_pos; adjacent[0].x--; // WEST
+    adjacent[1] = current_pos; adjacent[1].y--; // NORTH
+    adjacent[2] = current_pos; adjacent[2].x++; // EAST
+    adjacent[3] = current_pos; adjacent[3].y++; // SOUTH
+
+    // Find minimum visited count among accessible cells
+    uint8_t min_visits = UINT8_MAX;
+    int best_direction = -1;
+
+    // If we're not blocked, check the cell we're facing first
     if (!bumped_wall) {
-        // Update position
-        coordinate next_pos = current_pos;
-        switch (facing_direction) {
-            case 0: next_pos.x--; break; // WEST
-            case 1: next_pos.y--; break; // NORTH
-            case 2: next_pos.x++; break; // EAST
-            case 3: next_pos.y++; break; // SOUTH
+        visit_counts[facing_direction] = getVisitCount(adjacent[facing_direction]);
+        min_visits = visit_counts[facing_direction];
+        best_direction = facing_direction;
+    }
+
+    // Then consider other directions
+    for (int dir = 0; dir < 4; dir++) {
+        if (dir != facing_direction) {  // Skip current direction as we already checked it
+            visit_counts[dir] = getVisitCount(adjacent[dir]);
+            if (visit_counts[dir] < min_visits) {
+                min_visits = visit_counts[dir];
+                best_direction = dir;
+            }
         }
-        
-        current_pos = next_pos;
+    }
+
+    // Decide next action based on best direction
+    if (best_direction == facing_direction && !bumped_wall) {
+        // Already facing least visited accessible direction - move forward
+        current_pos = adjacent[facing_direction];
         incrementVisit(current_pos);
         next_move.action = FORWARD;
         next_move.visitCount = getVisitCount(current_pos);
-    } else {
-        // Rotate right to try a new direction
-        facing_direction = (facing_direction + 1) % 4;
-        next_move.action = RIGHT;
+    } else if (best_direction != -1) {
+        // Need to rotate toward least visited direction
+        int rotation = (best_direction - facing_direction + 4) % 4;
+        if (rotation == 1) {
+            // Turn right
+            facing_direction = (facing_direction + 1) % 4;
+            next_move.action = RIGHT;
+        } else {
+            // Turn left
+            facing_direction = (facing_direction + 3) % 4;
+            next_move.action = LEFT;
+        }
     }
 
     return next_move;
