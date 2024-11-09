@@ -7,20 +7,26 @@
 #define STUDENT_MOCK_H
 
 #include <cstdint>
+#include <climits>
+#include <QtCore/QPointF>
+
+// Constants from original student.h
+#define GRID_SIZE 30
+#define START_POS 13
 
 enum turtleAction {FORWARD, LEFT, RIGHT};
 enum RobotState {STARTUP, PLAN_NEXT, MOVING};
 
-typedef struct {
-    uint8_t x;
-    uint8_t y;
-} coordinate;
+struct coordinate {
+    int x;
+    int y;
+};
 
-typedef struct {
+struct turtleMove {
     turtleAction action;
     bool validAction;
-    uint8_t visitCount;
-} turtleMove;
+    int visitCount;
+};
 
 // Core function to test
 turtleMove studentTurtleStep(bool bumped, bool at_end);
@@ -32,6 +38,10 @@ void mock_set_directional_visits(int north, int east, int south, int west);
 int getVisitCount(coordinate pos);
 int getExpectedX();
 int getExpectedY();
+bool checkObstacle(QPointF pos, int direction);
+
+// ROS mock
+void ROS_INFO(const char* format, ...);
 
 // External state variables that need to be accessible
 extern RobotState robot_state;
