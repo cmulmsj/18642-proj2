@@ -14,14 +14,13 @@
 #include "ros/ros.h"
 #endif
 
-// Global variables for testing, static for normal build
-#ifdef testing
-FSM_STATES current_state = STATE_FORWARD;
-LOCAL_DIRECTION current_local_direction = L_NORTH;
-coordinate current_location = {14, 14};
-uint8_t visit_count_map[30][30] = {{0}};
+// Remove these function definitions from student_turtle.cpp since they'll be in mock_functions.cpp
+#ifndef testing
+static FSM_STATES current_state = STATE_FORWARD;
+static LOCAL_DIRECTION current_local_direction = L_NORTH;
+static coordinate current_location = {14, 14};
+static uint8_t visit_count_map[30][30] = {{0}};
 
-// Test access functions
 FSM_STATES getCurrentState() {
     return current_state;
 }
@@ -53,11 +52,6 @@ void resetVisitMap() {
         }
     }
 }
-#else
-static FSM_STATES current_state = STATE_FORWARD;
-static LOCAL_DIRECTION current_local_direction = L_NORTH;
-static coordinate current_location = {14, 14};
-static uint8_t visit_count_map[30][30] = {{0}};
 #endif
 
 /**
