@@ -7,7 +7,7 @@ g++ -std=c++11 -Dtesting \
     -I/opt/ros/kinetic/include \
     -o mashengl_student_tests \
     mashengl_student_test.cpp \
-    student_turtle.cpp \
+    mashengl_student_turtle.cpp \
     mock_functions.cpp \
     -lcunit
 
