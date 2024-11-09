@@ -73,3 +73,21 @@ void ROS_INFO(const char* format, ...) {
     va_end(args);
     printf("\n");
 }
+
+// Mock implementations for ROS logging
+void mock_ros_info(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    printf("\n");
+    va_end(args);
+}
+
+void mock_ros_error(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    fprintf(stderr, "ERROR: ");
+    vfprintf(stderr, format, args);
+    fprintf(stderr, "\n");
+    va_end(args);
+}
