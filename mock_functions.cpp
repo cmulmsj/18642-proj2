@@ -1,3 +1,5 @@
+#ifdef testing
+
 #include "student_mock.h"
 
 static TurtleTestState test_state;
@@ -94,3 +96,4 @@ uint8_t getMockVisitCount(void) {
 bool getError(void) {
     return error_occurred;
 }
+#endif
