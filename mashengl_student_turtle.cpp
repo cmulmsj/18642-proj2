@@ -9,34 +9,34 @@
 
 #ifdef testing
 #include "student_mock.h"
-#endif
-#ifndef testing
+#else
 #include "student.h"
 #include "ros/ros.h"
+
+// These are only needed in normal operation mode
+static RobotState robot_state = STARTUP;
+static int visit_grid[GRID_SIZE][GRID_SIZE] = {{0}};
+static bool first_run = true;
+static coordinate current_pos = {START_POS, START_POS};
+static int facing_direction = 1; // Start facing NORTH
+static int rotations_checked = 0;
+static uint8_t min_visits = UINT8_MAX;
+static int best_direction = -1;
+
+void updateVisitMap(coordinate pos) {
+    if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
+        visit_grid[pos.x][pos.y]++;
+        ROS_INFO("Updated visit count at (%d,%d) to %d", pos.x, pos.y, visit_grid[pos.x][pos.y]);
+    }
+}
+
+int getVisitCount(coordinate pos) {
+    if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
+        return visit_grid[pos.x][pos.y];
+    }
+    return INT_MAX;
+}
 #endif
-
-// static RobotState robot_state = STARTUP;
-// static int visit_grid[GRID_SIZE][GRID_SIZE] = {{0}};
-// static bool first_run = true;
-// static coordinate current_pos = {START_POS, START_POS};
-// static int facing_direction = 1; // Start facing NORTH
-// static int rotations_checked = 0;
-// static uint8_t min_visits = UINT8_MAX;
-// static int best_direction = -1;
-
-// void updateVisitMap(coordinate pos) {
-//     if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
-//         visit_grid[pos.x][pos.y]++;
-//         ROS_INFO("Updated visit count at (%d,%d) to %d", pos.x, pos.y, visit_grid[pos.x][pos.y]);
-//     }
-// }
-
-// int getVisitCount(coordinate pos) {
-//     if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
-//         return visit_grid[pos.x][pos.y];
-//     }
-//     return INT_MAX;
-// }
 
 coordinate getNextPosition(coordinate pos, int direction) {
     coordinate next = pos;
