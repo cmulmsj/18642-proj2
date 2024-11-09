@@ -119,7 +119,7 @@ turtleMove studentTurtleStep(bool bumpedIntoWall, bool at_end) {
     }
 
     turtleMove futureMove;
-    const uint8_t TIMEOUT = 5;
+    const uint8_t TIMEOUT = 0.5;
     static uint8_t timeout_counter;
 
     ROS_INFO("\nTURTLE: === New Navigation Step ===");
