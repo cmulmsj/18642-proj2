@@ -7,15 +7,15 @@ void test_t1(void) {
     initialize_test();
     
     // Setup test state
-    TurtleTestState state = {
-        .current_state = STATE_FORWARD,
-        .current_direction = L_NORTH,
-        .current_location = {14, 14},
-        .is_bumped = false,
-        .is_at_end = false,
-        .timeout_counter = 0,
-        .directions_checked = 0
-    };
+    TurtleTestState state;
+    state.current_state = STATE_FORWARD;
+    state.current_direction = L_NORTH;
+    state.current_location.x = 14;
+    state.current_location.y = 14;
+    state.is_bumped = false;
+    state.is_at_end = false;
+    state.timeout_counter = 0;
+    state.directions_checked = 0;
     set_test_state(state);
     
     // Get initial move
@@ -35,20 +35,19 @@ void test_t1(void) {
     cleanup_test();
 }
 
-// Test Forward to Forward transition
 void test_t2(void) {
     initialize_test();
     
     // Setup for continuous forward movement
-    TurtleTestState state = {
-        .current_state = STATE_FORWARD,
-        .current_direction = L_NORTH,
-        .current_location = {14, 14},
-        .is_bumped = false,
-        .is_at_end = false,
-        .timeout_counter = 0,
-        .directions_checked = 0
-    };
+    TurtleTestState state;
+    state.current_state = STATE_FORWARD;
+    state.current_direction = L_NORTH;
+    state.current_location.x = 14;
+    state.current_location.y = 14;
+    state.is_bumped = false;
+    state.is_at_end = false;
+    state.timeout_counter = 0;
+    state.directions_checked = 0;
     set_test_state(state);
     
     // First move
@@ -70,7 +69,6 @@ void test_t2(void) {
     
     cleanup_test();
 }
-
 // Add more test cases...
 
 int init_suite(void) { return 0; }
