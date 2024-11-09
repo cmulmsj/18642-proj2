@@ -4,15 +4,14 @@ static TurtleTestState test_state;
 static bool error_occurred = false;
 
 void initialize_test(void) {
-    test_state = {
-        .current_state = STATE_FORWARD,
-        .current_direction = L_NORTH,
-        .current_location = {14, 14},
-        .is_bumped = false,
-        .is_at_end = false,
-        .timeout_counter = 0,
-        .directions_checked = 0
-    };
+    test_state.current_state = STATE_FORWARD;
+    test_state.current_direction = L_NORTH;
+    test_state.current_location.x = 14;
+    test_state.current_location.y = 14;
+    test_state.is_bumped = false;
+    test_state.is_at_end = false;
+    test_state.timeout_counter = 0;
+    test_state.directions_checked = 0;
     
     // Initialize visit map
     for(int i = 0; i < 30; i++) {
@@ -23,12 +22,24 @@ void initialize_test(void) {
     error_occurred = false;
 }
 
-void cleanup_test(void) {
-    initialize_test();
+void set_test_state(TurtleTestState state) {
+    test_state.current_state = state.current_state;
+    test_state.current_direction = state.current_direction;
+    test_state.current_location = state.current_location;
+    test_state.is_bumped = state.is_bumped;
+    test_state.is_at_end = state.is_at_end;
+    test_state.timeout_counter = state.timeout_counter;
+    test_state.directions_checked = state.directions_checked;
+    
+    for(int i = 0; i < 30; i++) {
+        for(int j = 0; j < 30; j++) {
+            test_state.visit_count_map[i][j] = state.visit_count_map[i][j];
+        }
+    }
 }
 
-void set_test_state(TurtleTestState state) {
-    test_state = state;
+void cleanup_test(void) {
+    initialize_test();
 }
 
 TurtleTestState get_test_state(void) {
