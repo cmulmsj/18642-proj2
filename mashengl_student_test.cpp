@@ -22,13 +22,17 @@ void test_t1(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-    // Need to wait for timeout to expire
+  // First wait for timeout to expire (5 cycles)
     turtleMove result;
-    for(int i = 0; i < 6; i++) {  // 5 timeouts + 1 actual move
+    for(int i = 0; i < 5; i++) {
         result = studentTurtleStep(false, false);
+        CU_ASSERT_EQUAL(result.validAction, false);  // During timeout, validAction should be false
     }
     
-    // Verify
+    // Now get the actual move
+    result = studentTurtleStep(false, false);
+    
+    // Verify the actual move
     CU_ASSERT_EQUAL(result.action, FORWARD);
     CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
@@ -54,6 +58,7 @@ void test_t2(void) {
 }
 
 void test_t3(void) {
+    // Setup
     setCurrentState(STATE_FORWARD);
     coordinate loc = {14, 14};
     setCurrentLocation(loc);
@@ -62,17 +67,22 @@ void test_t3(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    // Wait for timeout
+    // First wait for timeout
     turtleMove result;
-    for(int i = 0; i < 6; i++) {
+    for(int i = 0; i < 5; i++) {
         result = studentTurtleStep(true, false);
     }
     
+    // Get the actual transition move
+    result = studentTurtleStep(true, false);
+    
     CU_ASSERT_EQUAL(result.action, RIGHT);
+    CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNVISITED);
 }
 
 void test_t4(void) {
+    // Setup
     setCurrentState(STATE_UNVISITED);
     coordinate loc = {14, 14};
     setCurrentLocation(loc);
@@ -81,13 +91,17 @@ void test_t4(void) {
     setMockBump(false);
     setMockAtEnd(false);
     
-    // Wait for timeout
+    // First wait for timeout
     turtleMove result;
-    for(int i = 0; i < 6; i++) {
+    for(int i = 0; i < 5; i++) {
         result = studentTurtleStep(false, false);
     }
     
+    // Get the actual transition
+    result = studentTurtleStep(false, false);
+    
     CU_ASSERT_EQUAL(result.action, FORWARD);
+    CU_ASSERT_EQUAL(result.validAction, true);
     CU_ASSERT_EQUAL(getCurrentState(), STATE_FORWARD);
 }
 
@@ -119,15 +133,23 @@ void test_t6(void) {
     setMockBump(true);
     setMockAtEnd(false);
     
-    // We need to check all 4 directions
     turtleMove result;
-    for(int i = 0; i < 4; i++) {
-        // Wait for timeout for each direction check
-        for(int j = 0; j < 6; j++) {
+    
+    // Need to check all 4 directions
+    for(int dir = 0; dir < 4; dir++) {
+        // Wait for timeout
+        for(int i = 0; i < 5; i++) {
             result = studentTurtleStep(true, false);
+            CU_ASSERT_EQUAL(result.validAction, false);
         }
+        
+        // Get direction check move
+        result = studentTurtleStep(true, false);
+        CU_ASSERT_EQUAL(result.action, RIGHT);
+        CU_ASSERT_EQUAL(result.validAction, true);
     }
     
+    // After 4 directions checked, should transition to UNBUMPED
     CU_ASSERT_EQUAL(getCurrentState(), STATE_UNBUMPED);
 }
 
