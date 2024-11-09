@@ -2,26 +2,28 @@
  * Student Name: Mashengjun Li
  * Andrew ID: mashengl
  */
-
 #ifndef STUDENT_MOCK_H
 #define STUDENT_MOCK_H
 
 #include <cstdint>
 #include <climits>
-#include <ros/ros.h>
-#include <boost/bind.hpp>
-#include <ece642rtle/timeInt8.h>
-#include <std_msgs/Empty.h>
-#include <ece642rtle/RTIbump.h>
-#include <ece642rtle/RTIatend.h>
-#include <ece642rtle/PoseOrntBundle.h>
-#include <ece642rtle/bumpEcho.h>
-#include <ece642rtle/aendEcho.h>
-#include <QPointF>
 
 // Constants from original student.h
 #define GRID_SIZE 30
 #define START_POS 13
+
+// Mock QPointF for testing
+class QPointF {
+public:
+    QPointF() : xpos(0), ypos(0) {}
+    QPointF(double x, double y) : xpos(x), ypos(y) {}
+    double x() const { return xpos; }
+    double y() const { return ypos; }
+    void setX(double x) { xpos = x; }
+    void setY(double y) { ypos = y; }
+private:
+    double xpos, ypos;
+};
 
 enum turtleAction {FORWARD, LEFT, RIGHT};
 enum RobotState {STARTUP, PLAN_NEXT, MOVING};
