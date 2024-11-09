@@ -5,9 +5,17 @@
 
 #include "student_mock.h"
 #include <iostream>
+#include <cstdarg>
 
 static int mock_visit_count = 0;
 static bool mock_wall = false;
+
+RobotState robot_state = STARTUP;
+bool first_run = true;
+coordinate current_pos = {START_POS, START_POS};
+int facing_direction = 1;
+int rotations_checked = 0;
+int best_direction = -1;
 
 // Mock function for visit count
 int getVisitCount(coordinate pos) {
@@ -28,7 +36,19 @@ void mock_set_visit_count(int count) {
     mock_visit_count = count;
 }
 
-// Dummy ROS_INFO implementation for testing
+int getExpectedX() {
+    return current_pos.x;
+}
+
+int getExpectedY() {
+    return current_pos.y;
+}
+
+// Mock ROS_INFO implementation
 void ROS_INFO(const char* format, ...) {
-    // Do nothing in tests
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+    printf("\n");
 }
