@@ -94,7 +94,7 @@ void test_wall_rotation() {
                   << ", Action: " << result.action 
                   << ", RotationsChecked: " << rotations_checked 
                   << ", Best Dir: " << best_direction 
-                  << ", Wall: " << (mock_wall ? "true" : "false") << std::endl;
+                  << ", Wall: " << (mock_get_wall() ? "true" : "false") << std::endl;
         
         // Should be turning RIGHT to scan all directions
         CU_ASSERT_EQUAL(result.action, RIGHT);
@@ -110,8 +110,6 @@ void test_wall_rotation() {
     
     // The final action should be valid and should turn to or move in best direction
     CU_ASSERT_TRUE(final_result.validAction);
-    // Since we've scanned all directions, either move forward if not blocked
-    // or turn to a better direction if current direction is blocked
     CU_ASSERT(final_result.action == FORWARD || 
               final_result.action == LEFT || 
               final_result.action == RIGHT);
