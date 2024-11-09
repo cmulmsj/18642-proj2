@@ -82,26 +82,55 @@ void test_wall_rotation() {
     mock_reset_state();
     mock_set_wall(true);
     
-    // We only need to check 3 rotations as per your implementation
-    // After 3 rotations, it should make a decision based on best direction
+    // Initial setup - get into PLAN_NEXT state
+    turtleMove init = studentTurtleStep(false, false);
+    std::cout << "Initial state - Facing: " << facing_direction 
+              << ", State: " << robot_state << std::endl;
+    
+    // Now test the rotation sequence with wall detected
     for(int i = 0; i < 3; i++) {
         turtleMove result = studentTurtleStep(true, false);
         std::cout << "Rotation " << i << " - Facing: " << facing_direction 
                   << ", Action: " << result.action 
                   << ", RotationsChecked: " << rotations_checked 
-                  << ", Best Dir: " << best_direction << std::endl;
-        CU_ASSERT(result.action == RIGHT || result.action == LEFT);
+                  << ", Best Dir: " << best_direction 
+                  << ", Wall: " << (mock_wall ? "true" : "false") << std::endl;
+        
+        // Should be turning RIGHT to scan all directions
+        CU_ASSERT_EQUAL(result.action, RIGHT);
+        CU_ASSERT_TRUE(result.validAction);
     }
 
-    // The fourth step should be a movement decision, not necessarily a rotation
+    // After scanning all directions, should make a movement decision
     turtleMove final_result = studentTurtleStep(true, false);
-    std::cout << "Final step - Facing: " << facing_direction 
+    std::cout << "Final decision - Facing: " << facing_direction 
               << ", Action: " << final_result.action 
               << ", RotationsChecked: " << rotations_checked 
               << ", Best Dir: " << best_direction << std::endl;
     
-    // After rotations complete, should have made a movement decision
+    // The final action should be valid and should turn to or move in best direction
     CU_ASSERT_TRUE(final_result.validAction);
+    // Since we've scanned all directions, either move forward if not blocked
+    // or turn to a better direction if current direction is blocked
+    CU_ASSERT(final_result.action == FORWARD || 
+              final_result.action == LEFT || 
+              final_result.action == RIGHT);
+}
+
+// Let's also add a specific test for wall handling
+void test_wall_handling() {
+    mock_reset_state();
+    mock_set_wall(true);
+    robot_state = PLAN_NEXT;  // Start in planning state
+    
+    turtleMove result = studentTurtleStep(true, false);
+    std::cout << "Wall handling - Facing: " << facing_direction 
+              << ", Action: " << result.action 
+              << ", State: " << robot_state << std::endl;
+    
+    // When facing a wall in PLAN_NEXT state, should turn to explore
+    CU_ASSERT_EQUAL(result.action, RIGHT);
+    CU_ASSERT_TRUE(result.validAction);
 }
 
 void test_visit_count_decision() {
@@ -179,7 +208,8 @@ int main() {
         (NULL == CU_add_test(pSuite, "test all directions", test_all_directions)) ||
         (NULL == CU_add_test(pSuite, "test grid boundaries", test_grid_boundaries)) ||
         (NULL == CU_add_test(pSuite, "test invalid states", test_invalid_states)) ||
-        (NULL == CU_add_test(pSuite, "test equal visit counts", test_equal_visit_counts)))
+        (NULL == CU_add_test(pSuite, "test equal visit counts", test_equal_visit_counts)) ||
+        (NULL == CU_add_test(pSuite, "test wall handling", test_wall_handling)))
     {
         CU_cleanup_registry();
         return CU_get_error();
