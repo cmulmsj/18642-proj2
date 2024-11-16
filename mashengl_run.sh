@@ -2,14 +2,14 @@
 
 # Function to kill all processes
 kill_processes() {
-    # Get the monitor process
-    MONITOR_PROC="ece642rtle_turn_"
-    if [[ -n $(pgrep ${MONITOR_PROC}) ]]; then
+    # First send SIGINT to run_642_monitors.sh to generate VIOLATIONS.txt
+    if [[ -n $(pgrep -f "run_642_monitors") ]]; then
         echo "Stopping monitor..."
-        pkill -f ${MONITOR_PROC}
+        pkill -SIGINT -f "run_642_monitors"
+        sleep 3  # Give time for VIOLATIONS.txt generation
     fi
 
-    # Kill other processes
+    # Then kill other processes
     for p in "$@"; do
         if [[ -z $(ps -p $p > /dev/null) ]]; then
             echo "Killing process $p"
@@ -68,6 +68,8 @@ rosparam set /maze_file "$maze_file"
 # Start monitor first
 echo "Starting monitor..."
 cd "$turtledir/monitors"
+# Clean up any existing VIOLATIONS.txt
+rm -f VIOLATIONS.txt
 ./run_642_monitors.sh ece642rtle_turn_monitor &
 sleep 5  # Give monitor time to start
 
@@ -82,7 +84,6 @@ if [[ -z $(pgrep ece642rtle_node) ]]; then
     exit 1
 fi
 
-# Update trap to include monitor
 trap 'kill_processes $TURTLE_PID $ROSCORE_PID' SIGINT
 sleep 9
 
@@ -90,26 +91,21 @@ sleep 9
 rosrun ece642rtle ece642rtle_student&
 STUDENT_PID=$!
 
-# Have to kill BG processes if user exits
 trap 'kill_processes $STUDENT_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 
 echo "Running turtle. Will auto-terminate after reaching goal..."
 
-# Wait for goal state (monitor for 10 cycles at goal)
+# Monitor for goal state
 GOAL_COUNT=0
 while [ 1 -eq 1 ]; do
     if grep -q "At End Request.*resp = true" "$turtledir/monitors/ece642rtle_turn_monitor.output.tmp" 2>/dev/null; then
         GOAL_COUNT=$((GOAL_COUNT + 1))
         if [ $GOAL_COUNT -ge 10 ]; then
-            echo "Turtle maintained goal position for 10 cycles. Shutting down..."
+            echo "Goal reached. Initiating shutdown..."
             kill_processes $STUDENT_PID $TURTLE_PID $ROSCORE_PID
-            break
         fi
     else
         GOAL_COUNT=0
     fi
     sleep 1
 done
-
-# Return to home directory
-cd ~
