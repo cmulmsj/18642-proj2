@@ -93,9 +93,22 @@ STUDENT_PID=$!
 # Have to kill BG processes if user exits
 trap 'kill_processes $STUDENT_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 
-# Wait for Ctrl+C
+echo "Running turtle. Will auto-terminate after reaching goal..."
+
+# Wait for goal state (monitor for 10 cycles at goal)
+GOAL_COUNT=0
 while [ 1 -eq 1 ]; do
-    sleep 30
+    if grep -q "At End Request.*resp = true" "$turtledir/monitors/ece642rtle_turn_monitor.output.tmp" 2>/dev/null; then
+        GOAL_COUNT=$((GOAL_COUNT + 1))
+        if [ $GOAL_COUNT -ge 10 ]; then
+            echo "Turtle maintained goal position for 10 cycles. Shutting down..."
+            kill_processes $STUDENT_PID $TURTLE_PID $ROSCORE_PID
+            break
+        fi
+    else
+        GOAL_COUNT=0
+    fi
+    sleep 1
 done
 
 # Return to home directory
