@@ -1,7 +1,24 @@
 #!/bin/bash
 
-# Function to kill all processes
+# Function to kill all processes and check violations
 kill_processes() {
+    echo "Shutting down and checking for violations..."
+    
+    # Kill the monitor first and wait for VIOLATIONS.txt
+    if [[ -n "$MONITOR_PID" ]]; then
+        kill $MONITOR_PID
+        # Wait a moment for VIOLATIONS.txt to be generated
+        sleep 2
+        if [ -f "$turtledir/monitors/VIOLATIONS.txt" ]; then
+            echo "=================== VIOLATIONS FOUND ==================="
+            cat "$turtledir/monitors/VIOLATIONS.txt"
+            echo "===================================================="
+        else
+            echo "No violations detected"
+        fi
+    fi
+
+    # Kill other processes
     for p in "$@"; do
         if [[ -z $(ps -p $p > /dev/null) ]]; then
             echo "Killing process $p"
@@ -9,14 +26,7 @@ kill_processes() {
             sleep 1
         fi
     done
-    # Parse monitor violations if monitor was running
-    if [ -n "$MONITOR_PID" ]; then
-        if [ -f "VIOLATIONS.txt" ]; then
-            echo "Monitor violations found:"
-            cat VIOLATIONS.txt
-        fi
-    fi
-    echo "killed all processes, exiting"
+    echo "All processes terminated"
     exit 0
 }
 
@@ -57,7 +67,7 @@ if [[ -z $(pgrep roscore) ]]; then
     fi
 fi
 
-# Have to kill BG process if user exits
+# Start with just roscore in trap
 trap 'kill_processes $ROSCORE_PID' SIGINT
 sleep 5
 
@@ -71,17 +81,22 @@ cd $turtledir/monitors
 MONITOR_PID=$!
 sleep 2
 
+# Add monitor to trap
+trap 'kill_processes $MONITOR_PID $ROSCORE_PID' SIGINT
+
 # Node that displays the maze and runs the turtle
+cd $turtledir
 rosrun ece642rtle ece642rtle_node&
 TURTLE_PID=$!
 sleep 1
+
 if [[ -z $(pgrep ece642rtle_node) ]]; then
     echo "Error launching ece642rtle_node"
     kill_processes $MONITOR_PID $ROSCORE_PID
     exit 1
 fi
 
-# Have to kill BG processes if user exits
+# Update trap with turtle
 trap 'kill_processes $MONITOR_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 sleep 9
 
@@ -89,13 +104,12 @@ sleep 9
 rosrun ece642rtle ece642rtle_student&
 STUDENT_PID=$!
 
-# Have to kill BG processes if user exits
-trap 'kill_processes $STUDENT_PID $MONITOR_PID $TURTLE_PID $ROSCORE_PID' SIGINT
+# Final trap with all processes
+trap 'kill_processes $MONITOR_PID $STUDENT_PID $TURTLE_PID $ROSCORE_PID' SIGINT
+
+echo "All processes started. Monitor active. Press Ctrl+C to stop and view violations."
 
 # Wait for Ctrl+C
 while [ 1 -eq 1 ]; do
     sleep 30
 done
-
-# Return to home directory
-cd ~
