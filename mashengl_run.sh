@@ -9,6 +9,13 @@ kill_processes() {
             sleep 1
         fi
     done
+    # Parse monitor violations if monitor was running
+    if [ -n "$MONITOR_PID" ]; then
+        if [ -f "VIOLATIONS.txt" ]; then
+            echo "Monitor violations found:"
+            cat VIOLATIONS.txt
+        fi
+    fi
     echo "killed all processes, exiting"
     exit 0
 }
@@ -57,18 +64,25 @@ sleep 5
 # Set maze file parameter
 rosparam set /maze_file "$maze_file"
 
+# Start turn monitor
+echo "Starting turn monitor..."
+cd $turtledir/monitors
+./run_642_monitors.sh ece642rtle_turn_monitor &
+MONITOR_PID=$!
+sleep 2
+
 # Node that displays the maze and runs the turtle
 rosrun ece642rtle ece642rtle_node&
 TURTLE_PID=$!
 sleep 1
 if [[ -z $(pgrep ece642rtle_node) ]]; then
     echo "Error launching ece642rtle_node"
-    kill_processes $ROSCORE_PID
+    kill_processes $MONITOR_PID $ROSCORE_PID
     exit 1
 fi
 
 # Have to kill BG processes if user exits
-trap 'kill_processes $TURTLE_PID $ROSCORE_PID' SIGINT
+trap 'kill_processes $MONITOR_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 sleep 9
 
 # Student node
@@ -76,7 +90,7 @@ rosrun ece642rtle ece642rtle_student&
 STUDENT_PID=$!
 
 # Have to kill BG processes if user exits
-trap 'kill_processes $STUDENT_PID $TURTLE_PID $ROSCORE_PID' SIGINT
+trap 'kill_processes $STUDENT_PID $MONITOR_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 
 # Wait for Ctrl+C
 while [ 1 -eq 1 ]; do
