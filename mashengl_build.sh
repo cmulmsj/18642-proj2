@@ -28,11 +28,11 @@ chmod +x ~/catkin_ws/src/ece642rtle/monitors/run_642_monitors.sh
 echo "Building main project..."
 cd ~/catkin_ws
 
-# Build both student node and monitor with warnings as errors
-echo "Building student node..."
+# First build student node
 catkin_make ece642rtle_student -Wall -Werror
 
-echo "Building turn monitor..."
+# Then build the monitor
+echo "Building monitor..."
 catkin_make ece642rtle_turn_monitor
 
 # Run unit tests
@@ -44,6 +44,7 @@ TEST_RESULT=$?
 
 if [ $TEST_RESULT -ne 0 ]; then
     echo "Warning: Some unit tests failed! Check the output above for details."
+    echo "The build will continue, but please review test failures."
 else
     echo "All unit tests passed successfully!"
 fi
@@ -55,3 +56,4 @@ cd ~/catkin_ws
 source devel/setup.bash
 
 echo "Build completed!"
+echo "Note: Unit test results are shown above between the delimiter lines."
