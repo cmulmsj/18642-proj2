@@ -2,6 +2,14 @@
 
 # Function to kill all processes
 kill_processes() {
+    # Get the monitor process
+    MONITOR_PROC="ece642rtle_turn_"
+    if [[ -n $(pgrep ${MONITOR_PROC}) ]]; then
+        echo "Stopping monitor..."
+        pkill -f ${MONITOR_PROC}
+    fi
+
+    # Kill other processes
     for p in "$@"; do
         if [[ -z $(ps -p $p > /dev/null) ]]; then
             echo "Killing process $p"
@@ -57,17 +65,24 @@ sleep 5
 # Set maze file parameter
 rosparam set /maze_file "$maze_file"
 
+# Start monitor first
+echo "Starting monitor..."
+cd "$turtledir/monitors"
+./run_642_monitors.sh ece642rtle_turn_monitor &
+sleep 5  # Give monitor time to start
+
 # Node that displays the maze and runs the turtle
 rosrun ece642rtle ece642rtle_node&
 TURTLE_PID=$!
 sleep 1
+
 if [[ -z $(pgrep ece642rtle_node) ]]; then
     echo "Error launching ece642rtle_node"
     kill_processes $ROSCORE_PID
     exit 1
 fi
 
-# Have to kill BG processes if user exits
+# Update trap to include monitor
 trap 'kill_processes $TURTLE_PID $ROSCORE_PID' SIGINT
 sleep 9
 
