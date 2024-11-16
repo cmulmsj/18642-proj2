@@ -2,14 +2,26 @@
 
 # Function to kill all processes
 kill_processes() {
+    echo "Shutting down..."
+    
+    # First, send SIGINT to the monitor script to generate VIOLATIONS.txt
+    if [ -n "$MONITOR_PID" ]; then
+        echo "Stopping monitor and generating violations report..."
+        cd "$turtledir/monitors"
+        pkill -SIGINT -f "run_642_monitors"
+        sleep 2  # Give it time to process violations
+    fi
+
+    # Then kill other processes
     for p in "$@"; do
-        if [[ -z $(ps -p $p > /dev/null) ]]; then
+        if [[ -n $(ps -p $p) ]]; then
             echo "Killing process $p"
             kill $p
             sleep 1
         fi
     done
-    echo "killed all processes, exiting"
+    
+    echo "Run completed. Check VIOLATIONS.txt in monitors directory for results."
     exit 0
 }
 
@@ -50,7 +62,6 @@ if [[ -z $(pgrep roscore) ]]; then
     fi
 fi
 
-# Have to kill BG process if user exits
 trap 'kill_processes $ROSCORE_PID' SIGINT
 sleep 5
 
@@ -59,7 +70,7 @@ rosparam set /maze_file "$maze_file"
 
 # Start monitor
 echo "Starting turn monitor..."
-cd $turtledir/monitors
+cd "$turtledir/monitors"
 ./run_642_monitors.sh ece642rtle_turn_monitor &
 MONITOR_PID=$!
 sleep 2
@@ -75,7 +86,6 @@ if [[ -z $(pgrep ece642rtle_node) ]]; then
     exit 1
 fi
 
-# Update trap with all processes to kill
 trap 'kill_processes $MONITOR_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 sleep 9
 
@@ -83,10 +93,9 @@ sleep 9
 rosrun ece642rtle ece642rtle_student&
 STUDENT_PID=$!
 
-# Final trap with all processes
 trap 'kill_processes $STUDENT_PID $MONITOR_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 
-echo "All processes started. Use Ctrl+C to stop..."
+echo "All processes started. Press Ctrl+C to stop and generate violations report..."
 
 # Wait for Ctrl+C
 while [ 1 -eq 1 ]; do
