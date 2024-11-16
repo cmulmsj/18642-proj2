@@ -66,10 +66,6 @@ echo "cd ~/catkin_ws/src/ece642rtle/monitors"
 echo "./run_642_monitors.sh ece642rtle_turn_monitor"
 echo "========================================"
 
-# Clean up extracted files
-echo "Cleaning up..."
-cd ~
-rm -rf project_files
-
 echo "Build completed!"
 echo "Note: Unit test results and monitor status are shown above between the delimiter lines."
+echo "Project files and build artifacts preserved for monitoring."
