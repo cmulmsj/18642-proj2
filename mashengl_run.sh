@@ -2,11 +2,24 @@
 
 # Function to kill all processes
 kill_processes() {
-    # First send SIGINT to run_642_monitors.sh to generate VIOLATIONS.txt
-    if [[ -n $(pgrep -f "run_642_monitors") ]]; then
+    # First kill the monitor properly
+    MONITORS="ece642rtle_turn_monitor"
+    if [[ -n $(pgrep -f "${MONITORS:0:15}") ]]; then
         echo "Stopping monitor..."
-        pkill -SIGINT -f "run_642_monitors"
-        sleep 3  # Give time for VIOLATIONS.txt generation
+        kill $(pgrep -f "${MONITORS:0:15}")
+        sleep 2
+    fi
+
+    # Process violations
+    if [ -s "${MONITORS}.output.tmp" ]; then
+        echo "" >> VIOLATIONS.txt
+        echo "Monitor $MONITORS Violations:" >> VIOLATIONS.txt
+        echo "" >> VIOLATIONS.txt
+        grep -C 5 "[ WARN]" ${MONITORS}.output.tmp >> VIOLATIONS.txt
+        VIOL_COUNT=`grep "[ WARN]" ${MONITORS}.output.tmp | wc -l`
+        echo "TOTAL VIOLATIONS: $VIOL_COUNT"
+        rm ${MONITORS}.output.tmp
+        echo "" >> VIOLATIONS.txt
     fi
 
     # Then kill other processes
@@ -17,7 +30,8 @@ kill_processes() {
             sleep 1
         fi
     done
-    echo "killed all processes, exiting"
+
+    echo "All processes terminated. Check VIOLATIONS.txt for details."
     exit 0
 }
 
@@ -65,13 +79,14 @@ sleep 5
 # Set maze file parameter
 rosparam set /maze_file "$maze_file"
 
-# Start monitor first
+# Start monitor
 echo "Starting monitor..."
 cd "$turtledir/monitors"
-# Clean up any existing VIOLATIONS.txt
+# Clean up any existing files
 rm -f VIOLATIONS.txt
-./run_642_monitors.sh ece642rtle_turn_monitor &
-sleep 5  # Give monitor time to start
+rm -f ece642rtle_turn_monitor.output.tmp
+stdbuf -oL ./run_642_monitors.sh ece642rtle_turn_monitor &
+sleep 5
 
 # Node that displays the maze and runs the turtle
 rosrun ece642rtle ece642rtle_node&
