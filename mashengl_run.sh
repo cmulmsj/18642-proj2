@@ -1,25 +1,25 @@
 #!/bin/bash
 
+# Project directory
+PROJECT_DIR="/home/student/18642-proj2"
+
 # Function to kill all processes
 kill_processes() {
     # First kill the monitor properly
-    MONITORS="ece642rtle_turn_monitor"
-    if [[ -n $(pgrep -f "${MONITORS:0:15}") ]]; then
+    MONITOR_NAME="ece642rtle_turn_monitor"
+    if [[ -n $(pgrep -f "${MONITOR_NAME:0:15}") ]]; then
         echo "Stopping monitor..."
-        kill $(pgrep -f "${MONITORS:0:15}")
+        pkill -SIGINT -f "${MONITOR_NAME}"
         sleep 2
-    fi
-
-    # Process violations
-    if [ -s "${MONITORS}.output.tmp" ]; then
-        echo "" >> VIOLATIONS.txt
-        echo "Monitor $MONITORS Violations:" >> VIOLATIONS.txt
-        echo "" >> VIOLATIONS.txt
-        grep -C 5 "[ WARN]" ${MONITORS}.output.tmp >> VIOLATIONS.txt
-        VIOL_COUNT=`grep "[ WARN]" ${MONITORS}.output.tmp | wc -l`
-        echo "TOTAL VIOLATIONS: $VIOL_COUNT"
-        rm ${MONITORS}.output.tmp
-        echo "" >> VIOLATIONS.txt
+        
+        # Process monitor output after SIGINT
+        cd "$turtledir/monitors"
+        if [ -f "${MONITOR_NAME}.output.tmp" ]; then
+            grep -C 5 "[ WARN]" ${MONITOR_NAME}.output.tmp >> VIOLATIONS.txt
+            VIOL_COUNT=$(grep -c "[ WARN]" ${MONITOR_NAME}.output.tmp)
+            echo "TOTAL VIOLATIONS: $VIOL_COUNT"
+            rm ${MONITOR_NAME}.output.tmp
+        fi
     fi
 
     # Then kill other processes
@@ -30,8 +30,7 @@ kill_processes() {
             sleep 1
         fi
     done
-
-    echo "All processes terminated. Check VIOLATIONS.txt for details."
+    echo "killed all processes, exiting"
     exit 0
 }
 
@@ -72,7 +71,6 @@ if [[ -z $(pgrep roscore) ]]; then
     fi
 fi
 
-# Have to kill BG process if user exits
 trap 'kill_processes $ROSCORE_PID' SIGINT
 sleep 5
 
@@ -82,10 +80,8 @@ rosparam set /maze_file "$maze_file"
 # Start monitor
 echo "Starting monitor..."
 cd "$turtledir/monitors"
-# Clean up any existing files
 rm -f VIOLATIONS.txt
-rm -f ece642rtle_turn_monitor.output.tmp
-stdbuf -oL ./run_642_monitors.sh ece642rtle_turn_monitor &
+./run_642_monitors.sh ece642rtle_turn_monitor &
 sleep 5
 
 # Node that displays the maze and runs the turtle
@@ -108,19 +104,8 @@ STUDENT_PID=$!
 
 trap 'kill_processes $STUDENT_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 
-echo "Running turtle. Will auto-terminate after reaching goal..."
+echo "Running turtle. Press Ctrl+C to stop..."
 
-# Monitor for goal state
-GOAL_COUNT=0
 while [ 1 -eq 1 ]; do
-    if grep -q "At End Request.*resp = true" "$turtledir/monitors/ece642rtle_turn_monitor.output.tmp" 2>/dev/null; then
-        GOAL_COUNT=$((GOAL_COUNT + 1))
-        if [ $GOAL_COUNT -ge 10 ]; then
-            echo "Goal reached. Initiating shutdown..."
-            kill_processes $STUDENT_PID $TURTLE_PID $ROSCORE_PID
-        fi
-    else
-        GOAL_COUNT=0
-    fi
-    sleep 1
+    sleep 30
 done
