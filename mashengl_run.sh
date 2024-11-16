@@ -1,28 +1,15 @@
 #!/bin/bash
 
-# Project directory
-PROJECT_DIR="/home/student/18642-proj2"
-
 # Function to kill all processes
 kill_processes() {
-    # First kill the monitor properly
-    MONITOR_NAME="ece642rtle_turn_monitor"
-    if [[ -n $(pgrep -f "${MONITOR_NAME:0:15}") ]]; then
+    # Get the monitor process
+    MONITOR_PROC="ece642rtle_turn_"
+    if [[ -n $(pgrep ${MONITOR_PROC}) ]]; then
         echo "Stopping monitor..."
-        pkill -SIGINT -f "${MONITOR_NAME}"
-        sleep 2
-        
-        # Process monitor output after SIGINT
-        cd "$turtledir/monitors"
-        if [ -f "${MONITOR_NAME}.output.tmp" ]; then
-            grep -C 5 "[ WARN]" ${MONITOR_NAME}.output.tmp >> VIOLATIONS.txt
-            VIOL_COUNT=$(grep -c "[ WARN]" ${MONITOR_NAME}.output.tmp)
-            echo "TOTAL VIOLATIONS: $VIOL_COUNT"
-            rm ${MONITOR_NAME}.output.tmp
-        fi
+        pkill -f ${MONITOR_PROC}
     fi
 
-    # Then kill other processes
+    # Kill other processes
     for p in "$@"; do
         if [[ -z $(ps -p $p > /dev/null) ]]; then
             echo "Killing process $p"
@@ -71,18 +58,18 @@ if [[ -z $(pgrep roscore) ]]; then
     fi
 fi
 
+# Have to kill BG process if user exits
 trap 'kill_processes $ROSCORE_PID' SIGINT
 sleep 5
 
 # Set maze file parameter
 rosparam set /maze_file "$maze_file"
 
-# Start monitor
+# Start monitor first
 echo "Starting monitor..."
 cd "$turtledir/monitors"
-rm -f VIOLATIONS.txt
 ./run_642_monitors.sh ece642rtle_turn_monitor &
-sleep 5
+sleep 5  # Give monitor time to start
 
 # Node that displays the maze and runs the turtle
 rosrun ece642rtle ece642rtle_node&
@@ -95,6 +82,7 @@ if [[ -z $(pgrep ece642rtle_node) ]]; then
     exit 1
 fi
 
+# Update trap to include monitor
 trap 'kill_processes $TURTLE_PID $ROSCORE_PID' SIGINT
 sleep 9
 
@@ -102,10 +90,13 @@ sleep 9
 rosrun ece642rtle ece642rtle_student&
 STUDENT_PID=$!
 
+# Have to kill BG processes if user exits
 trap 'kill_processes $STUDENT_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 
-echo "Running turtle. Press Ctrl+C to stop..."
-
+# Wait for Ctrl+C
 while [ 1 -eq 1 ]; do
     sleep 30
 done
+
+# Return to home directory
+cd ~
