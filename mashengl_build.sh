@@ -27,9 +27,11 @@ chmod +x ~/catkin_ws/src/ece642rtle/monitors/run_642_monitors.sh
 # Initialize catkin workspace and build main project
 echo "Building main project..."
 cd ~/catkin_ws
+
+# Build both student node and monitor with warnings as errors
+echo "Building student node..."
 catkin_make ece642rtle_student -Wall -Werror
 
-# Build monitor
 echo "Building turn monitor..."
 catkin_make ece642rtle_turn_monitor
 
@@ -42,7 +44,6 @@ TEST_RESULT=$?
 
 if [ $TEST_RESULT -ne 0 ]; then
     echo "Warning: Some unit tests failed! Check the output above for details."
-    echo "The build will continue, but please review test failures."
 else
     echo "All unit tests passed successfully!"
 fi
@@ -53,19 +54,4 @@ echo "Sourcing setup file..."
 cd ~/catkin_ws
 source devel/setup.bash
 
-# Run monitor and print status
-echo "========================================"
-echo "Monitor status:"
-cd src/ece642rtle/monitors
-if [ -f "VIOLATIONS.txt" ]; then
-    echo "Previous VIOLATIONS.txt exists, removing..."
-    rm VIOLATIONS.txt
-fi
-echo "Monitor can be run using:"
-echo "cd ~/catkin_ws/src/ece642rtle/monitors"
-echo "./run_642_monitors.sh ece642rtle_turn_monitor"
-echo "========================================"
-
 echo "Build completed!"
-echo "Note: Unit test results and monitor status are shown above between the delimiter lines."
-echo "Project files and build artifacts preserved for monitoring."
