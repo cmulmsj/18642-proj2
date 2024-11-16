@@ -4,31 +4,51 @@
 kill_processes() {
     echo "Shutting down..."
     
-    # First loop: Kill all monitors
+    # First, stop the monitor gracefully
     if [[ -n $(pgrep -f "ece642rtle_turn_monitor") ]]; then
-        echo "Stopping monitors..."
-        pkill -f "ece642rtle_turn_monitor"
-        sleep 3  # Give monitors time to process final messages
+        echo "Stopping monitor..."
+        cd "$turtledir/monitors"
+        pkill -SIGINT -f "run_642_monitors"
+        sleep 3  # Give monitor time to process final messages
     fi
     
-    # Second loop: Process monitor outputs
+    # Stop ROS nodes gracefully
+    if [[ -n $(pgrep -f "ece642rtle_student") ]]; then
+        echo "Stopping student node..."
+        rosnode kill /ece642rtle_student >/dev/null 2>&1
+        sleep 1
+    fi
+    
+    if [[ -n $(pgrep -f "ece642rtle_node") ]]; then
+        echo "Stopping turtle node..."
+        rosnode kill /ece642rtle_node >/dev/null 2>&1
+        sleep 1
+    fi
+    
+    # Process monitor output
     cd "$turtledir/monitors"
     if [ -f "ece642rtle_turn_monitor.output.tmp" ]; then
         echo "Processing monitor output..."
-        grep -C 5 "[ WARN]" ece642rtle_turn_monitor.output.tmp >> VIOLATIONS.txt
-        VIOL_COUNT=$(grep "[ WARN]" ece642rtle_turn_monitor.output.tmp | wc -l)
+        touch VIOLATIONS.txt  # Ensure file exists
+        grep -C 5 "[ WARN]" ece642rtle_turn_monitor.output.tmp >> VIOLATIONS.txt 2>/dev/null
+        VIOL_COUNT=$(grep -c "[ WARN]" ece642rtle_turn_monitor.output.tmp 2>/dev/null || echo "0")
         echo "TOTAL VIOLATIONS: $VIOL_COUNT"
-        rm ece642rtle_turn_monitor.output.tmp
+        rm -f ece642rtle_turn_monitor.output.tmp
     fi
 
-    # Finally kill other processes
+    # Finally cleanup any remaining processes
     for p in "$@"; do
-        if [[ -n $(ps -p $p) ]]; then
-            echo "Killing process $p"
-            kill $p
-            sleep 1
+        if kill -0 $p 2>/dev/null; then
+            kill $p 2>/dev/null || true
         fi
     done
+    
+    # Shutdown roscore last
+    if [[ -n "$ROSCORE_PID" ]]; then
+        echo "Stopping roscore..."
+        kill $ROSCORE_PID 2>/dev/null || true
+        sleep 1
+    fi
     
     echo "All processes terminated"
     exit 0
