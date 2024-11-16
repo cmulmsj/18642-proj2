@@ -1,18 +1,27 @@
 #!/bin/bash
 
-# Function to kill all processes
+# Function to kill all processes and process monitor output
 kill_processes() {
     echo "Shutting down..."
     
-    # First, send SIGINT to the monitor script to generate VIOLATIONS.txt
-    if [ -n "$MONITOR_PID" ]; then
-        echo "Stopping monitor and generating violations report..."
-        cd "$turtledir/monitors"
-        pkill -SIGINT -f "run_642_monitors"
-        sleep 2  # Give it time to process violations
+    # First loop: Kill all monitors
+    if [[ -n $(pgrep -f "ece642rtle_turn_monitor") ]]; then
+        echo "Stopping monitors..."
+        pkill -f "ece642rtle_turn_monitor"
+        sleep 3  # Give monitors time to process final messages
+    fi
+    
+    # Second loop: Process monitor outputs
+    cd "$turtledir/monitors"
+    if [ -f "ece642rtle_turn_monitor.output.tmp" ]; then
+        echo "Processing monitor output..."
+        grep -C 5 "[ WARN]" ece642rtle_turn_monitor.output.tmp >> VIOLATIONS.txt
+        VIOL_COUNT=$(grep "[ WARN]" ece642rtle_turn_monitor.output.tmp | wc -l)
+        echo "TOTAL VIOLATIONS: $VIOL_COUNT"
+        rm ece642rtle_turn_monitor.output.tmp
     fi
 
-    # Then kill other processes
+    # Finally kill other processes
     for p in "$@"; do
         if [[ -n $(ps -p $p) ]]; then
             echo "Killing process $p"
@@ -21,8 +30,25 @@ kill_processes() {
         fi
     done
     
-    echo "Run completed. Check VIOLATIONS.txt in monitors directory for results."
+    echo "All processes terminated"
     exit 0
+}
+
+# Function to check if turtle is at goal
+check_goal_state() {
+    local goal_count=0
+    local max_goal_cycles=10
+
+    while true; do
+        if grep -q "At End Request.*resp = true" "$turtledir/monitors/ece642rtle_turn_monitor.output.tmp" 2>/dev/null; then
+            goal_count=$((goal_count + 1))
+            if [ $goal_count -ge $max_goal_cycles ]; then
+                echo "Turtle maintained goal position for $max_goal_cycles cycles. Shutting down..."
+                kill_processes $STUDENT_PID $MONITOR_PID $TURTLE_PID $ROSCORE_PID
+            fi
+        fi
+        sleep 1
+    done
 }
 
 # Check if maze number is provided
@@ -62,23 +88,30 @@ if [[ -z $(pgrep roscore) ]]; then
     fi
 fi
 
+# Have to kill BG process if user exits
 trap 'kill_processes $ROSCORE_PID' SIGINT
 sleep 5
 
 # Set maze file parameter
 rosparam set /maze_file "$maze_file"
 
-# Start monitor
+# Start monitor with longer sleep
 echo "Starting turn monitor..."
 cd "$turtledir/monitors"
+if [ -f "VIOLATIONS.txt" ]; then
+    rm VIOLATIONS.txt
+fi
 ./run_642_monitors.sh ece642rtle_turn_monitor &
 MONITOR_PID=$!
-sleep 2
+sleep 5  # Increased sleep time for monitor startup
+
+# Add monitor to trap
+trap 'kill_processes $MONITOR_PID $ROSCORE_PID' SIGINT
 
 # Node that displays the maze and runs the turtle
 rosrun ece642rtle ece642rtle_node&
 TURTLE_PID=$!
-sleep 1
+sleep 2  # Increased sleep time
 
 if [[ -z $(pgrep ece642rtle_node) ]]; then
     echo "Error launching ece642rtle_node"
@@ -86,18 +119,22 @@ if [[ -z $(pgrep ece642rtle_node) ]]; then
     exit 1
 fi
 
+# Update trap with turtle
 trap 'kill_processes $MONITOR_PID $TURTLE_PID $ROSCORE_PID' SIGINT
-sleep 9
+sleep 5  # Additional sleep before student node
 
 # Student node
 rosrun ece642rtle ece642rtle_student&
 STUDENT_PID=$!
 
+# Final trap with all processes
 trap 'kill_processes $STUDENT_PID $MONITOR_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 
-echo "All processes started. Press Ctrl+C to stop and generate violations report..."
+echo "All processes started. Will auto-terminate after goal is reached..."
 
-# Wait for Ctrl+C
-while [ 1 -eq 1 ]; do
-    sleep 30
-done
+# Start goal state checking in background
+check_goal_state &
+GOAL_CHECK_PID=$!
+
+# Wait for either goal achievement or Ctrl+C
+wait $GOAL_CHECK_PID
