@@ -19,14 +19,19 @@ fi
 echo "Setting up project files..."
 cp -r project_files/ece642rtle ~/catkin_ws/src/
 
-# Make test scripts executable
+# Make scripts executable
 echo "Setting execute permissions..."
 chmod +x ~/catkin_ws/src/ece642rtle/turtle_tests/mashengl_build_run_tests.sh
+chmod +x ~/catkin_ws/src/ece642rtle/monitors/run_642_monitors.sh
 
 # Initialize catkin workspace and build main project
 echo "Building main project..."
 cd ~/catkin_ws
 catkin_make ece642rtle_student -Wall -Werror
+
+# Build monitor
+echo "Building turn monitor..."
+catkin_make ece642rtle_turn_monitor
 
 # Run unit tests
 echo "========================================"
@@ -48,10 +53,23 @@ echo "Sourcing setup file..."
 cd ~/catkin_ws
 source devel/setup.bash
 
+# Run monitor and print status
+echo "========================================"
+echo "Monitor status:"
+cd src/ece642rtle/monitors
+if [ -f "VIOLATIONS.txt" ]; then
+    echo "Previous VIOLATIONS.txt exists, removing..."
+    rm VIOLATIONS.txt
+fi
+echo "Monitor can be run using:"
+echo "cd ~/catkin_ws/src/ece642rtle/monitors"
+echo "./run_642_monitors.sh ece642rtle_turn_monitor"
+echo "========================================"
+
 # Clean up extracted files
 echo "Cleaning up..."
 cd ~
 rm -rf project_files
 
 echo "Build completed!"
-echo "Note: Unit test results are shown above between the delimiter lines."
+echo "Note: Unit test results and monitor status are shown above between the delimiter lines."
