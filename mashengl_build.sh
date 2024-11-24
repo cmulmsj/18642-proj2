@@ -27,6 +27,7 @@ chmod +x ~/catkin_ws/src/ece642rtle/monitors/run_642_monitors.sh
 # Initialize catkin workspace and build main project
 echo "Building main project..."
 cd ~/catkin_ws
+catkin_make -DCATKIN_WHITELIST_PACKAGES="ece642rtle"
 catkin_make ece642rtle_student -Wall -Werror
 
 # Build monitor
