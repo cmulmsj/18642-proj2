@@ -2,9 +2,9 @@
 
 # Kill any existing monitor processes
 pkill -f "ece642rtle_.*_monitor"
-sleep 1
+sleep 2  # Increased sleep time
 
-# Array of monitor names
+# Start each monitor and redirect output
 MONITORS=(
     "ece642rtle_step_monitor"
     "ece642rtle_turn_monitor"
@@ -16,62 +16,30 @@ MONITORS=(
     "ece642rtle_atend_monitor"
 )
 
-# Start all monitors and record their output
-for monitor in "${MONITORS[@]}"; do
-    echo "Starting $monitor..."
-    rosrun ece642rtle "$monitor" > "${monitor}_output.tmp" 2>&1 &
+for m in "${MONITORS[@]}"; do
+    rosrun ece642rtle "$m" > "$m.output.tmp" 2>&1 &
+    sleep 1  # Give each monitor time to start properly
 done
 
-# Wait a moment for monitors to start
-sleep 2
-
-# When script is interrupted
+# Cleanup function
 cleanup() {
-    echo "Cleaning up..."
-    pkill -f "ece642rtle_.*_monitor"
+    echo "Processing monitor outputs..."
+    rm -f VIOLATIONS.txt
     
-    echo "Creating VIOLATIONS.txt..."
-    rm -f VIOLATIONS.txt  # Remove if exists
-    touch VIOLATIONS.txt  # Create new file
-    
-    # Process each monitor's output
-    for monitor in "${MONITORS[@]}"; do
-        echo "Checking ${monitor}_output.tmp..."
-        if [ -f "${monitor}_output.tmp" ]; then
-            echo "Found output file for $monitor"
-            echo "=== Violations from $monitor ===" >> VIOLATIONS.txt
-            # First, print the raw content to see what we're working with
-            echo "Raw content of ${monitor}_output.tmp:" >> VIOLATIONS.txt
-            cat "${monitor}_output.tmp" >> VIOLATIONS.txt
-            echo "----------------------------------------" >> VIOLATIONS.txt
-            
-            # Now try to extract violations
-            echo "Extracting violations..." >> VIOLATIONS.txt
-            grep -B 5 -A 5 "VIOLATION:" "${monitor}_output.tmp" >> VIOLATIONS.txt 2>/dev/null || echo "No violations found in $monitor"
-            echo "----------------------------------------" >> VIOLATIONS.txt
-        else
-            echo "Warning: ${monitor}_output.tmp not found!"
+    for m in "${MONITORS[@]}"; do
+        if [ -f "$m.output.tmp" ]; then
+            echo "Processing $m..."
+            grep -C 5 "\[ WARN\]" "$m.output.tmp" >> VIOLATIONS.txt
+            m_viol=$(grep "\[ WARN\]" "$m.output.tmp" | wc -l)
+            echo "$m: $m_viol violations"
         fi
     done
     
-    # Count total violations
-    if [ -f VIOLATIONS.txt ]; then
-        TOTAL=$(grep -c "VIOLATION:" VIOLATIONS.txt)
-        echo "Total violations found: $TOTAL"
-        echo "Check VIOLATIONS.txt for details"
-    else
-        echo "Error: VIOLATIONS.txt was not created!"
-    fi
-    
-    # Don't clean up temp files yet - leave them for inspection
-    echo "Temporary output files preserved for debugging"
-    
-    exit 0
+    # Keep output files for inspection
+    echo "Monitor outputs preserved in *.output.tmp files"
 }
 
 trap cleanup SIGINT SIGTERM
-
-echo "Monitors started. Press Ctrl+C to stop and generate violation report."
 
 # Keep script running
 while true; do
