@@ -175,26 +175,12 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         return next_move;
     }
 
-    // Static variables for function state tracking
-    static bool first_run = true;
+    // Initialize variables for decision-making
     static coordinate current_pos = {START_POS, START_POS};
     static int facing_direction = 1;  // Start facing NORTH
     static int rotations_checked = 0;
     static uint8_t min_visits = UINT8_MAX;
     static int best_direction = -1;
-
-    // Initialization logic for the first run
-    if (first_run) {
-        updateVisitMap(current_pos);
-        next_move.visitCount = static_cast<uint8_t>(
-            std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
-        );
-        first_run = false;
-        rotations_checked = 0;
-        min_visits = UINT8_MAX;
-        best_direction = -1;
-        return next_move;
-    }
 
     // Plan the next move
     if (rotations_checked < 4) {
@@ -224,6 +210,9 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
             next_move.action = FORWARD;
             current_pos = getNextPosition(current_pos, facing_direction);
             updateVisitMap(current_pos);
+            next_move.visitCount = static_cast<uint8_t>(
+                std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
+            );
         } else {
             next_move.validAction = false;  // No valid action
         }
@@ -234,6 +223,7 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
 
     return next_move;
 }
+
 
 // turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
 //     turtleMove next_move = {FORWARD, true, 0};
