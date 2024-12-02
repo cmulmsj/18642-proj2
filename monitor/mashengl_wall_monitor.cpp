@@ -55,10 +55,10 @@ static Endpoints wallBetween(const Pose& p1, const Pose& p2) {
 static bool bumpedInMemory(const Endpoints& wall) {
     std::queue<std::pair<Endpoints, bool>> temp = bump_memory;
     while (!temp.empty()) {
-        auto [stored_wall, was_bumped] = temp.front();
+        std::pair<Endpoints, bool> current = temp.front();
         temp.pop();
-        if (wallsEqual(stored_wall, wall)) {
-            return was_bumped;
+        if (wallsEqual(current.first, wall)) {
+            return current.second;
         }
     }
     return true;  // If wall not found in memory, assume blocked for safety
@@ -99,7 +99,7 @@ void visitInterrupt(ros::Time t, int visits) {}
 void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
     Endpoints wall = canonicalizeWall(x1, y1, x2, y2);
     
-    bump_memory.push({wall, bumped});
+    bump_memory.push(std::make_pair(wall, bumped));
     if (bump_memory.size() > MAX_BUMP_MEMORY) {
         bump_memory.pop();
     }
