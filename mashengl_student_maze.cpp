@@ -105,21 +105,10 @@ bool moveTurtle(QPointF& pos, int& orientation) {
         return false;
     }
 
-    // Never allow both movement and rotation in same tick
-    static bool rotated_last_tick = false;
-    static bool moved_last_tick = false;
-    
-    bool can_move = !rotated_last_tick;
-    bool can_rotate = !moved_last_tick;
-
-    // Reset state trackers
-    rotated_last_tick = false;
-    moved_last_tick = false;
-
     // Execute move
     switch (next_move.action) {
         case FORWARD:
-            if (!wall_detected && !reached_goal && can_move) {
+            if (!wall_detected && !reached_goal) {
                 switch (orientation) {
                     case 0: pos.setX(pos.x() - 1.0); break;  // WEST
                     case 1: pos.setY(pos.y() - 1.0); break;  // NORTH
@@ -130,16 +119,12 @@ bool moveTurtle(QPointF& pos, int& orientation) {
                         return false;
                 }
                 displayVisits(next_move.visitCount);
-                moved_last_tick = true;
             }
             break;
             
         case RIGHT:
         case LEFT:
-            if (can_rotate) {
-                orientation = (orientation + (next_move.action == RIGHT ? 1 : 3)) % 4;
-                rotated_last_tick = true;
-            }
+            orientation = (orientation + (next_move.action == RIGHT ? 1 : 3)) % 4;
             break;
             
         default:
