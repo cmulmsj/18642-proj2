@@ -41,7 +41,6 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
 
     // Check if position changed
     if (last_pose.x != x || last_pose.y != y) {
-        // Verify movement direction matches orientation
         Pose current_pose = {x, y};
         Orientation movement_dir = getMovementDirection(last_pose, current_pose);
         
@@ -72,11 +71,3 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
 void visitInterrupt(ros::Time t, int visits) {}
 void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {}
 void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {}
-
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "mashengl_forward_monitor");
-    ROS_WARN("Monitor Forward Monitor (mashengl) is running at %s", ctime(0));
-    ros::NodeHandle nh;
-    ros::spin();
-    return 0;
-}
