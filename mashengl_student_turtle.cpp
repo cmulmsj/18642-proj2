@@ -245,6 +245,12 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
             robot_state = PLAN_NEXT;
             next_move.validAction = false;
             break;
+
+        default:
+            ROS_ERROR("Invalid robot state");
+            next_move.validAction = false;
+            robot_state = PLAN_NEXT;
+            break;
     }
 
     return next_move;
