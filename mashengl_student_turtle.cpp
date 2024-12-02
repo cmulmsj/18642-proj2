@@ -225,7 +225,8 @@
 #include "ros/ros.h"
 #endif
 
-// State definitions need to match student.h
+// Global state variables
+static RobotState current_state = S1_BEGIN;
 static uint8_t visit_map[GRID_SIZE][GRID_SIZE] = {{0}};
 static coordinate pos = {START_POS, START_POS};
 static int orientation = WEST;
@@ -267,26 +268,31 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
         update_visits(pos);
         result.visitCount = visit_map[pos.x][pos.y];
         is_initialized = true;
+        current_state = S1_BEGIN;
         return result;
     }
 
     // Handle completion
     if (at_goal) {
+        current_state = S3_END;
         result.validAction = false;
         return result;
     }
 
-    switch (robot_state) {
-        case STARTUP:
+    switch (current_state) {
+        case S1_BEGIN:
             check_count = 0;
             min_visits = UINT8_MAX;
             best_dir = -1;
             for (int i = 0; i < 4; i++) walls[i] = false;
-            robot_state = PLAN_NEXT;
+            current_state = S4_BUMPED_1;
             result.validAction = false;
             break;
 
-        case PLAN_NEXT:
+        case S4_BUMPED_1:
+        case S5_BUMPED_2:
+        case S6_BUMPED_3:
+        case S7_BUMPED_4:
             // Store wall information for current direction
             walls[orientation] = wall_detected;
             
@@ -302,42 +308,64 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
             }
             
             // Continue checking other directions
-            if (check_count < 3) {
-                result.action = RIGHT;
-                orientation = (orientation + 1) % 4;
-                check_count++;
-            } else {
-                robot_state = MOVING;
+            result.action = RIGHT;
+            orientation = (orientation + 1) % 4;
+            current_state = (RobotState)(((int)current_state) + 1);
+            if (current_state > S7_BUMPED_4) {
+                current_state = S8_MOVE_1;
                 result.validAction = false;
             }
             break;
 
-        case MOVING:
+        case S8_MOVE_1:
             if (best_dir == -1) {
                 // No valid direction found, start over
-                robot_state = STARTUP;
+                current_state = S1_BEGIN;
                 result.validAction = false;
             } else if (best_dir != orientation) {
                 // Need to rotate to best direction
                 result.action = RIGHT;
                 orientation = (orientation + 1) % 4;
-            } else if (!wall_detected) {
+                current_state = S9_MOVE_2;
+            } else {
+                current_state = S10_MOVE_3;
+                result.validAction = false;
+            }
+            break;
+
+        case S9_MOVE_2:
+            if (!wall_detected) {
+                current_state = S10_MOVE_3;
+                result.validAction = false;
+            } else {
+                current_state = S1_BEGIN;
+                result.validAction = false;
+            }
+            break;
+
+        case S10_MOVE_3:
+            if (!wall_detected) {
                 // Move forward
                 pos = next_position(orientation);
                 update_visits(pos);
                 result.action = FORWARD;
                 result.visitCount = visit_map[pos.x][pos.y];
-                robot_state = STARTUP;  // Prepare for next exploration
+                current_state = S1_BEGIN;  // Prepare for next exploration
             } else {
                 // Unexpected wall, restart exploration
-                robot_state = STARTUP;
+                current_state = S1_BEGIN;
                 result.validAction = false;
             }
             break;
 
+        case S2_CHECK_END:
+        case S3_END:
+            result.validAction = false;
+            break;
+
         default:
             ROS_ERROR("Invalid state");
-            robot_state = STARTUP;
+            current_state = S1_BEGIN;
             result.validAction = false;
             break;
     }
