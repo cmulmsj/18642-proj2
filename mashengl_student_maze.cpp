@@ -40,6 +40,9 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
+    // Add delay for timeout
+    ros::Duration(0.5).sleep();  // Half second delay between moves
+    
     // Check for wall and goal
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
