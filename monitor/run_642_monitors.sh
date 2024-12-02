@@ -18,6 +18,7 @@ MONITORS=(
 
 # Start all monitors and record their output
 for monitor in "${MONITORS[@]}"; do
+    echo "Starting $monitor..."
     rosrun ece642rtle "$monitor" > "${monitor}_output.tmp" 2>&1 &
 done
 
@@ -29,30 +30,48 @@ cleanup() {
     echo "Cleaning up..."
     pkill -f "ece642rtle_.*_monitor"
     
-    # Process violations
-    > VIOLATIONS.txt  # Create/clear violations file
+    echo "Creating VIOLATIONS.txt..."
+    rm -f VIOLATIONS.txt  # Remove if exists
+    touch VIOLATIONS.txt  # Create new file
     
     # Process each monitor's output
     for monitor in "${MONITORS[@]}"; do
+        echo "Checking ${monitor}_output.tmp..."
         if [ -f "${monitor}_output.tmp" ]; then
-            echo "Processing ${monitor}..."
-            # Get 5 lines before and after each violation
-            grep -B 5 -A 5 "VIOLATION:" "${monitor}_output.tmp" >> VIOLATIONS.txt
+            echo "Found output file for $monitor"
+            echo "=== Violations from $monitor ===" >> VIOLATIONS.txt
+            # First, print the raw content to see what we're working with
+            echo "Raw content of ${monitor}_output.tmp:" >> VIOLATIONS.txt
+            cat "${monitor}_output.tmp" >> VIOLATIONS.txt
             echo "----------------------------------------" >> VIOLATIONS.txt
+            
+            # Now try to extract violations
+            echo "Extracting violations..." >> VIOLATIONS.txt
+            grep -B 5 -A 5 "VIOLATION:" "${monitor}_output.tmp" >> VIOLATIONS.txt 2>/dev/null || echo "No violations found in $monitor"
+            echo "----------------------------------------" >> VIOLATIONS.txt
+        else
+            echo "Warning: ${monitor}_output.tmp not found!"
         fi
     done
     
     # Count total violations
-    TOTAL=$(grep -c "VIOLATION:" VIOLATIONS.txt)
-    echo "Total violations found: $TOTAL"
+    if [ -f VIOLATIONS.txt ]; then
+        TOTAL=$(grep -c "VIOLATION:" VIOLATIONS.txt)
+        echo "Total violations found: $TOTAL"
+        echo "Check VIOLATIONS.txt for details"
+    else
+        echo "Error: VIOLATIONS.txt was not created!"
+    fi
     
-    # Cleanup temp files
-    rm -f *_output.tmp
+    # Don't clean up temp files yet - leave them for inspection
+    echo "Temporary output files preserved for debugging"
     
     exit 0
 }
 
 trap cleanup SIGINT SIGTERM
+
+echo "Monitors started. Press Ctrl+C to stop and generate violation report."
 
 # Keep script running
 while true; do
