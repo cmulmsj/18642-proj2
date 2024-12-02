@@ -90,22 +90,34 @@ bool checkObstacle(QPointF pos, int direction) {
 // }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // Fixed delay for timing
-    ros::Duration(0.2).sleep();
-    
+    // Enforce tick-based gating
+    static bool tick_active = false;
+    if (!tick_active) {
+        ROS_WARN("moveTurtle called outside of active tick");
+        return false;
+    }
+
+    // Introduce state flag to separate movement and rotation
+    static bool action_done = false;
+
     // Check for wall and goal first
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
                              static_cast<int>(std::floor(pos.y())));
-    
+
     // Get next move
     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
-    
+
     if (!next_move.validAction) {
         return false;
     }
 
-    // Execute move
+    // Execute move based on state
+    if (action_done) {
+        ROS_WARN("Action already completed in this tick.");
+        return false;
+    }
+
     switch (next_move.action) {
         case FORWARD:
             if (!wall_detected && !reached_goal) {
@@ -119,19 +131,80 @@ bool moveTurtle(QPointF& pos, int& orientation) {
                         return false;
                 }
                 displayVisits(next_move.visitCount);
+                action_done = true;  // Mark action as done
             }
             break;
-            
+
         case RIGHT:
         case LEFT:
-            // For turns, just update orientation
+            // Handle rotation
             orientation = (orientation + (next_move.action == RIGHT ? 1 : 3)) % 4;
+            action_done = true;
             break;
-            
+
         default:
             ROS_ERROR("Invalid action");
             return false;
     }
-    
+
     return true;
 }
+
+// Called at the start of each tick
+void startTick() {
+    tick_active = true;
+    action_done = false;  // Reset for the new tick
+}
+
+// Called at the end of each tick
+void endTick() {
+    tick_active = false;
+}
+
+
+// bool moveTurtle(QPointF& pos, int& orientation) {
+//     // Fixed delay for timing
+//     ros::Duration(0.2).sleep();
+    
+//     // Check for wall and goal first
+//     bool wall_detected = checkObstacle(pos, orientation);
+//     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
+//                              static_cast<int>(std::floor(pos.y())));
+    
+//     // Get next move
+//     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
+    
+//     if (!next_move.validAction) {
+//         return false;
+//     }
+
+//     // Execute move
+//     switch (next_move.action) {
+//         case FORWARD:
+//             if (!wall_detected && !reached_goal) {
+//                 switch (orientation) {
+//                     case 0: pos.setX(pos.x() - 1.0); break;  // WEST
+//                     case 1: pos.setY(pos.y() - 1.0); break;  // NORTH
+//                     case 2: pos.setX(pos.x() + 1.0); break;  // EAST
+//                     case 3: pos.setY(pos.y() + 1.0); break;  // SOUTH
+//                     default:
+//                         ROS_ERROR("Invalid orientation");
+//                         return false;
+//                 }
+//                 displayVisits(next_move.visitCount);
+//             }
+//             break;
+            
+//         case RIGHT:
+//         case LEFT:
+//             // For turns, just update orientation
+//             orientation = (orientation + (next_move.action == RIGHT ? 1 : 3)) % 4;
+//             break;
+            
+//         default:
+//             ROS_ERROR("Invalid action");
+//             return false;
+//     }
+    
+//     return true;
+// }
