@@ -7,6 +7,8 @@
  * LAST UPDATE: 11/08/2024
  */
 
+/* mashengl_student_turtle.cpp */
+
 #ifdef testing
 #include "student_mock.h"
 #define ROS_INFO mock_ros_info
@@ -25,6 +27,7 @@ static int scans_completed = 0;  // Track how many directions we've scanned
 static bool scan_complete = false;  // Whether we've done a full 360 scan
 static int chosen_direction = -1;   // Direction we'll move after scanning
 static bool found_valid_move = false;  // Whether we found a valid direction to move
+static uint8_t min_visits = UINT8_MAX;  // Track least visited adjacent square
 
 void updateVisitMap(coordinate pos) {
     if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
@@ -34,12 +37,11 @@ void updateVisitMap(coordinate pos) {
 }
 
 int getVisitCount(coordinate pos) {
-    if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
+    if (pos.x >= 0 && pos.x < GRID_SIZE && pos.y >= 0 && pos.y < GRID_SIZE) {
         return visit_grid[pos.x][pos.y];
     }
     return INT_MAX;
 }
-#endif
 
 coordinate getNextPosition(coordinate pos, int direction) {
     coordinate next = pos;
@@ -54,6 +56,7 @@ coordinate getNextPosition(coordinate pos, int direction) {
     }
     return next;
 }
+#endif
 
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     turtleMove next_move = {FORWARD, true, 0};
@@ -72,6 +75,11 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         );
         first_run = false;
         robot_state = PLAN_NEXT;
+        scans_completed = 0;
+        scan_complete = false;
+        found_valid_move = false;
+        chosen_direction = -1;
+        min_visits = UINT8_MAX;
         return next_move;
     }
     
@@ -80,57 +88,72 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
             robot_state = PLAN_NEXT;
             scans_completed = 0;
             scan_complete = false;
-            chosen_direction = -1;
             found_valid_move = false;
+            chosen_direction = -1;
+            min_visits = UINT8_MAX;
             next_move.validAction = false;
             break;
         }
         
         case PLAN_NEXT: {
-            // If we haven't completed scanning all directions
+            // During scanning phase
             if (!scan_complete) {
-                // Check current direction if we haven't found a valid move yet
-                if (!found_valid_move && !bumped_wall) {
+                // Check current direction if we haven't bumped a wall
+                if (!bumped_wall) {
                     coordinate next_pos = getNextPosition(current_pos, facing_direction);
-                    if (getVisitCount(next_pos) < getVisitCount(current_pos)) {
-                        found_valid_move = true;
+                    uint8_t visits = static_cast<uint8_t>(
+                        std::min(getVisitCount(next_pos), static_cast<int>(UINT8_MAX))
+                    );
+                    
+                    // Update best direction if this is a better option
+                    if (visits < min_visits) {
+                        min_visits = visits;
                         chosen_direction = facing_direction;
+                        found_valid_move = true;
                     }
                 }
                 
-                // Increment scan counter
                 scans_completed++;
                 
-                // If we've checked all directions
-                if (scans_completed >= 4) {
+                // If we haven't completed scanning all directions, keep turning
+                if (scans_completed < 4) {
+                    next_move.action = RIGHT;
+                    facing_direction = (facing_direction + 1) % 4;
+                } else {
+                    // Completed full scan
                     scan_complete = true;
-                    // If we found a valid direction, turn back to it
+                    
+                    // If we found a valid move during scanning
                     if (found_valid_move) {
-                        if (facing_direction != chosen_direction) {
-                            next_move.action = RIGHT;  // Always turn right to get back
+                        // Turn back to chosen direction
+                        int turn_diff = (chosen_direction - facing_direction + 4) % 4;
+                        if (turn_diff != 0) {
+                            next_move.action = RIGHT;
+                            facing_direction = (facing_direction + 1) % 4;
                         } else {
-                            // Ready to move forward
+                            // We're facing the right direction, move forward
                             next_move.action = FORWARD;
                             current_pos = getNextPosition(current_pos, facing_direction);
                             updateVisitMap(current_pos);
                             next_move.visitCount = static_cast<uint8_t>(
                                 std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
                             );
+                            
                             // Reset scan state for next round
                             scan_complete = false;
                             scans_completed = 0;
                             found_valid_move = false;
                             chosen_direction = -1;
+                            min_visits = UINT8_MAX;
                         }
                     } else {
                         // No valid moves found, reset scan and try again
                         scan_complete = false;
                         scans_completed = 0;
+                        min_visits = UINT8_MAX;
+                        next_move.action = RIGHT;
+                        facing_direction = (facing_direction + 1) % 4;
                     }
-                } else {
-                    // Continue scanning - turn right
-                    next_move.action = RIGHT;
-                    facing_direction = (facing_direction + 1) % 4;
                 }
             }
             break;
@@ -149,9 +172,11 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         }
     }
     
-    ROS_INFO("Position: (%d,%d), Facing: %d, State: %d, Action: %d, Scans: %d, Chosen Dir: %d", 
+    ROS_INFO("Position: (%d,%d), Facing: %d, State: %d, Action: %d, Scans: %d, "
+             "Chosen Dir: %d, Wall: %d, Valid Move: %d", 
              current_pos.x, current_pos.y, facing_direction, robot_state, 
-             next_move.action, scans_completed, chosen_direction);
+             next_move.action, scans_completed, chosen_direction, 
+             bumped_wall, found_valid_move);
     
     return next_move;
 }
