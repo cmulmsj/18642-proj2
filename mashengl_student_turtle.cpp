@@ -37,7 +37,7 @@ void updateVisitMap(coordinate pos) {
 }
 
 int getVisitCount(coordinate pos) {
-    if (pos.x >= 0 && pos.x < GRID_SIZE && pos.y >= 0 && pos.y < GRID_SIZE) {
+    if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
         return visit_grid[pos.x][pos.y];
     }
     return INT_MAX;
