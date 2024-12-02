@@ -225,8 +225,7 @@
 #include "ros/ros.h"
 #endif
 
-// Global state variables
-static MazeState current_state = INIT;
+// State definitions need to match student.h
 static uint8_t visit_map[GRID_SIZE][GRID_SIZE] = {{0}};
 static coordinate pos = {START_POS, START_POS};
 static int orientation = WEST;
@@ -257,8 +256,7 @@ coordinate next_position(int dir) {
 }
 
 bool is_valid_position(coordinate next) {
-    return next.x >= 0 && next.x < GRID_SIZE && 
-           next.y >= 0 && next.y < GRID_SIZE;
+    return next.x < GRID_SIZE && next.y < GRID_SIZE;
 }
 
 turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
@@ -278,17 +276,17 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
         return result;
     }
 
-    switch (current_state) {
-        case INIT:
+    switch (robot_state) {
+        case STARTUP:
             check_count = 0;
             min_visits = UINT8_MAX;
             best_dir = -1;
             for (int i = 0; i < 4; i++) walls[i] = false;
-            current_state = CHECK_WALLS;
+            robot_state = PLAN_NEXT;
             result.validAction = false;
             break;
 
-        case CHECK_WALLS:
+        case PLAN_NEXT:
             // Store wall information for current direction
             walls[orientation] = wall_detected;
             
@@ -309,45 +307,37 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
                 orientation = (orientation + 1) % 4;
                 check_count++;
             } else {
-                current_state = CHOOSE_DIRECTION;
+                robot_state = MOVING;
                 result.validAction = false;
             }
             break;
 
-        case CHOOSE_DIRECTION:
+        case MOVING:
             if (best_dir == -1) {
                 // No valid direction found, start over
-                current_state = INIT;
+                robot_state = STARTUP;
                 result.validAction = false;
             } else if (best_dir != orientation) {
                 // Need to rotate to best direction
                 result.action = RIGHT;
                 orientation = (orientation + 1) % 4;
-            } else {
-                // Facing best direction, prepare to move
-                current_state = MOVE;
-                result.validAction = false;
-            }
-            break;
-
-        case MOVE:
-            if (!wall_detected) {
+            } else if (!wall_detected) {
                 // Move forward
                 pos = next_position(orientation);
                 update_visits(pos);
                 result.action = FORWARD;
                 result.visitCount = visit_map[pos.x][pos.y];
-                current_state = INIT;  // Prepare for next exploration
+                robot_state = STARTUP;  // Prepare for next exploration
             } else {
                 // Unexpected wall, restart exploration
-                current_state = INIT;
+                robot_state = STARTUP;
                 result.validAction = false;
             }
             break;
 
         default:
             ROS_ERROR("Invalid state");
-            current_state = INIT;
+            robot_state = STARTUP;
             result.validAction = false;
             break;
     }
