@@ -1,47 +1,38 @@
 #!/bin/bash
 
-# Kill any existing monitor processes
-pkill -f "ece642rtle_.*_monitor"
-sleep 2  # Increased sleep time
+# Don't kill existing monitors at start - let the parent script handle process management
 
-# Start each monitor and redirect output
-MONITORS=(
-    "ece642rtle_step_monitor"
-    "ece642rtle_turn_monitor"
-    "ece642rtle_tick_monitor"
-    "ece642rtle_forward_monitor"
-    "ece642rtle_wall_monitor"
-    "ece642rtle_face_monitor"
-    "ece642rtle_solved_monitor"
-    "ece642rtle_atend_monitor"
-)
+# Directory where this script is located
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$DIR"
 
-for m in "${MONITORS[@]}"; do
-    rosrun ece642rtle "$m" > "$m.output.tmp" 2>&1 &
-    sleep 1  # Give each monitor time to start properly
+# Initialize/clear output files
+for monitor in "$@"; do
+    > "${monitor}.output.tmp"
 done
 
-# Cleanup function
-cleanup() {
-    echo "Processing monitor outputs..."
+# Start each monitor
+for monitor in "$@"; do
+    echo "Starting $monitor..."
+    rosrun ece642rtle "$monitor" > "${monitor}.output.tmp" 2>&1 &
+    sleep 2  # Increased sleep between monitor starts
+done
+
+# Process for collecting violations
+collect_violations() {
     rm -f VIOLATIONS.txt
     
-    for m in "${MONITORS[@]}"; do
-        if [ -f "$m.output.tmp" ]; then
-            echo "Processing $m..."
-            grep -C 5 "\[ WARN\]" "$m.output.tmp" >> VIOLATIONS.txt
-            m_viol=$(grep "\[ WARN\]" "$m.output.tmp" | wc -l)
-            echo "$m: $m_viol violations"
+    # Process outputs
+    for monitor in "$@"; do
+        if [ -f "${monitor}.output.tmp" ]; then
+            echo "=== Violations from $monitor ===" >> VIOLATIONS.txt
+            grep -C 5 "\[ WARN\]" "${monitor}.output.tmp" >> VIOLATIONS.txt
         fi
     done
-    
-    # Keep output files for inspection
-    echo "Monitor outputs preserved in *.output.tmp files"
 }
 
-trap cleanup SIGINT SIGTERM
+# Set up signal handler
+trap "collect_violations $@" SIGINT SIGTERM
 
-# Keep script running
-while true; do
-    sleep 1
-done
+# Keep running until parent terminates
+wait
