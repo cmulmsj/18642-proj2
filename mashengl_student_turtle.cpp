@@ -7,6 +7,8 @@
  * LAST UPDATE: 11/08/2024
  */
 
+/* mashengl_student_turtle.cpp */
+
 #ifdef testing
 #include "student_mock.h"
 #define ROS_INFO mock_ros_info
@@ -24,6 +26,7 @@ static int facing_direction = 1; // Start facing NORTH
 static int scans_completed = 0;
 static bool ready_to_move = false;
 static int best_direction = -1;
+static uint8_t min_visit_count = UINT8_MAX;
 
 void updateVisitMap(coordinate pos) {
     if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
@@ -74,6 +77,7 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         scans_completed = 0;
         ready_to_move = false;
         best_direction = -1;
+        min_visit_count = UINT8_MAX;
         return next_move;
     }
     
@@ -97,39 +101,49 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
             ready_to_move = false;
             scans_completed = 0;
             best_direction = -1;
+            min_visit_count = UINT8_MAX;
         }
     } else {
         // During scanning phase
         if (!bumped_wall) {
-            // Found a potential path
-            best_direction = facing_direction;
-            ready_to_move = true;
-            next_move.action = RIGHT;
-            facing_direction = (facing_direction + 1) % 4;
-        } else {
-            // Hit a wall, turn right and continue scanning
-            next_move.action = RIGHT;
-            facing_direction = (facing_direction + 1) % 4;
-            scans_completed++;
+            // Found an available direction, check its visit count
+            coordinate next_pos = getNextPosition(current_pos, facing_direction);
+            uint8_t visit_count = static_cast<uint8_t>(
+                std::min(getVisitCount(next_pos), static_cast<int>(UINT8_MAX))
+            );
             
-            // If we've checked all directions and found no path
-            if (scans_completed >= 4) {
+            // Update best direction if this is the least visited
+            if (visit_count < min_visit_count) {
+                min_visit_count = visit_count;
+                best_direction = facing_direction;
+            }
+        }
+        
+        // Continue scanning
+        next_move.action = RIGHT;
+        facing_direction = (facing_direction + 1) % 4;
+        scans_completed++;
+        
+        // After complete scan, prepare to move if we found a direction
+        if (scans_completed >= 4) {
+            if (best_direction != -1) {
+                ready_to_move = true;
+            } else {
+                // No valid path found, reset scan
                 scans_completed = 0;
-                best_direction = -1;
+                min_visit_count = UINT8_MAX;
             }
         }
     }
     
     ROS_INFO("Position: (%d,%d), Facing: %d, State: %d, Action: %d, Scans: %d, "
-             "Best Dir: %d, Ready Move: %d, Wall: %d", 
+             "Best Dir: %d, Min Visits: %d, Ready Move: %d, Wall: %d", 
              current_pos.x, current_pos.y, facing_direction, robot_state, 
              next_move.action, scans_completed, best_direction, 
-             ready_to_move, bumped_wall);
+             min_visit_count, ready_to_move, bumped_wall);
     
     return next_move;
 }
-
-
 
 // #ifdef testing
 // #include "student_mock.h"
