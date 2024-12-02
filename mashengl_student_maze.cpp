@@ -90,10 +90,10 @@ bool checkObstacle(QPointF pos, int direction) {
 // }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // Fixed delay for timing
+    // Add fixed delay
     ros::Duration(0.2).sleep();
     
-    // Check for wall and goal first
+    // Check for wall and goal
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
                              static_cast<int>(std::floor(pos.y())));
@@ -104,18 +104,18 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     if (!next_move.validAction) {
         return false;
     }
-
+    
     // Execute move
     switch (next_move.action) {
         case FORWARD:
-            if (!wall_detected && !reached_goal) {
+            if (!wall_detected) {
                 switch (orientation) {
                     case 0: pos.setX(pos.x() - 1.0); break;  // WEST
                     case 1: pos.setY(pos.y() - 1.0); break;  // NORTH
                     case 2: pos.setX(pos.x() + 1.0); break;  // EAST
                     case 3: pos.setY(pos.y() + 1.0); break;  // SOUTH
                     default:
-                        ROS_ERROR("Invalid orientation");
+                        ROS_ERROR("Invalid orientation in moveTurtle");
                         return false;
                 }
                 displayVisits(next_move.visitCount);
@@ -123,13 +123,15 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             break;
             
         case RIGHT:
+            orientation = (orientation + 1) % 4;
+            break;
+            
         case LEFT:
-            // For turns, just update orientation
-            orientation = (orientation + (next_move.action == RIGHT ? 1 : 3)) % 4;
+            orientation = (orientation + 3) % 4;
             break;
             
         default:
-            ROS_ERROR("Invalid action");
+            ROS_ERROR("Invalid action in moveTurtle");
             return false;
     }
     
