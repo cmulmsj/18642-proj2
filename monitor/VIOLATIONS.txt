@@ -1,0 +1,1050 @@
+=== Violations from ece642rtle_step_monitor ===
+=== Violations from ece642rtle_turn_monitor ===
+=== Violations from ece642rtle_tick_monitor ===
+[0m[ INFO] [1733118281.949092298]: [[1733118281948081947 ns]] New tick started[0m
+[0m[ INFO] [1733118282.167186416]: [[1733118282149342266 ns]] Bump interrupt received: (5,0)->(5,1) = false[0m
+[0m[ INFO] [1733118282.177876790]: [[1733118282177747172 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118282.177889091]: [[1733118282177749622 ns]] Pose interrupt received: x=4, y=0[0m
+[0m[ INFO] [1733118282.187029532]: [[1733118282185596241 ns]] Tick completed[0m
+[33m[ WARN] [1733118282.399598157]: VIOLATION: Bump interrupt received outside of tick at time 1733118282387169845[0m
+[33m[ WARN] [1733118282.413451936]: VIOLATION: Pose interrupt received outside of tick at time 1733118282412264247[0m
+[0m[ INFO] [1733118282.429422367]: [[1733118282428911153 ns]] New tick started[0m
+[0m[ INFO] [1733118282.660331545]: [[1733118282633134093 ns]] Bump interrupt received: (4,0)->(5,0) = true[0m
+[0m[ INFO] [1733118282.671860813]: [[1733118282671332933 ns]] Pose interrupt received: x=4, y=0[0m
+[0m[ INFO] [1733118282.683117739]: [[1733118282682213591 ns]] Tick completed[0m
+[33m[ WARN] [1733118282.908030062]: VIOLATION: Bump interrupt received outside of tick at time 1733118282884401856[0m
+[33m[ WARN] [1733118282.921394838]: VIOLATION: Pose interrupt received outside of tick at time 1733118282920924613[0m
+[0m[ INFO] [1733118282.940193444]: [[1733118282937180077 ns]] New tick started[0m
+[0m[ INFO] [1733118283.169058003]: [[1733118283140434220 ns]] Bump interrupt received: (4,1)->(5,1) = true[0m
+[0m[ INFO] [1733118283.179815966]: [[1733118283178899405 ns]] Pose interrupt received: x=4, y=0[0m
+[0m[ INFO] [1733118283.198972319]: [[1733118283198410345 ns]] Tick completed[0m
+[33m[ WARN] [1733118283.417361939]: VIOLATION: Bump interrupt received outside of tick at time 1733118283399120022[0m
+[33m[ WARN] [1733118283.433651848]: VIOLATION: Visit interrupt received outside of tick at time 1733118283432987598[0m
+[33m[ WARN] [1733118283.433668037]: VIOLATION: Pose interrupt received outside of tick at time 1733118283432989143[0m
+[0m[ INFO] [1733118283.449466871]: [[1733118283449096606 ns]] New tick started[0m
+[0m[ INFO] [1733118283.665895802]: [[1733118283651471913 ns]] Bump interrupt received: (3,0)->(3,1) = true[0m
+[0m[ INFO] [1733118283.673874598]: [[1733118283673236937 ns]] Pose interrupt received: x=3, y=0[0m
+[0m[ INFO] [1733118283.689138312]: [[1733118283688764991 ns]] Tick completed[0m
+[33m[ WARN] [1733118283.905936145]: VIOLATION: Bump interrupt received outside of tick at time 1733118283891431557[0m
+[33m[ WARN] [1733118283.913854709]: VIOLATION: Pose interrupt received outside of tick at time 1733118283913349684[0m
+[0m[ INFO] [1733118283.929307141]: [[1733118283928934183 ns]] New tick started[0m
+[0m[ INFO] [1733118284.158325639]: [[1733118284129438416 ns]] Bump interrupt received: (4,0)->(4,1) = false[0m
+[0m[ INFO] [1733118284.169346072]: [[1733118284168933398 ns]] Pose interrupt received: x=3, y=0[0m
+[0m[ INFO] [1733118284.185470188]: [[1733118284185048330 ns]] Tick completed[0m
+[33m[ WARN] [1733118284.397682111]: VIOLATION: Bump interrupt received outside of tick at time 1733118284385580129[0m
+[33m[ WARN] [1733118284.409992654]: VIOLATION: Visit interrupt received outside of tick at time 1733118284409540646[0m
+[33m[ WARN] [1733118284.410005167]: VIOLATION: Pose interrupt received outside of tick at time 1733118284409540665[0m
+[0m[ INFO] [1733118284.428648795]: [[1733118284428021335 ns]] New tick started[0m
+[0m[ INFO] [1733118284.642757551]: [[1733118284630647282 ns]] Bump interrupt received: (3,2)->(4,2) = true[0m
+[0m[ INFO] [1733118284.652841814]: [[1733118284652067077 ns]] Pose interrupt received: x=3, y=1[0m
+[0m[ INFO] [1733118284.671781907]: [[1733118284671390128 ns]] Tick completed[0m
+[33m[ WARN] [1733118284.901866471]: VIOLATION: Bump interrupt received outside of tick at time 1733118284874713087[0m
+[33m[ WARN] [1733118284.913754355]: VIOLATION: Pose interrupt received outside of tick at time 1733118284913254451[0m
+[0m[ INFO] [1733118284.927754091]: [[1733118284926804181 ns]] New tick started[0m
+[0m[ INFO] [1733118285.151310435]: [[1733118285131300092 ns]] Bump interrupt received: (3,1)->(4,1) = false[0m
+[0m[ INFO] [1733118285.162417833]: [[1733118285161917791 ns]] Pose interrupt received: x=3, y=1[0m
+[0m[ INFO] [1733118285.180625015]: [[1733118285178930319 ns]] Tick completed[0m
+[33m[ WARN] [1733118285.418498288]: VIOLATION: Bump interrupt received outside of tick at time 1733118285385072702[0m
+[33m[ WARN] [1733118285.434223545]: VIOLATION: Pose interrupt received outside of tick at time 1733118285433801401[0m
+[0m[ INFO] [1733118285.449388292]: [[1733118285448965163 ns]] New tick started[0m
+[0m[ INFO] [1733118285.661831701]: [[1733118285650566693 ns]] Bump interrupt received: (3,1)->(4,1) = false[0m
+[0m[ INFO] [1733118285.675375004]: [[1733118285674050020 ns]] Pose interrupt received: x=3, y=1[0m
+[0m[ INFO] [1733118285.692272690]: [[1733118285691836481 ns]] Tick completed[0m
+[33m[ WARN] [1733118285.906920291]: VIOLATION: Bump interrupt received outside of tick at time 1733118285895502219[0m
+[33m[ WARN] [1733118285.918506168]: VIOLATION: Visit interrupt received outside of tick at time 1733118285917805889[0m
+[33m[ WARN] [1733118285.918522183]: VIOLATION: Pose interrupt received outside of tick at time 1733118285917810530[0m
+[0m[ INFO] [1733118285.930070483]: [[1733118285929672393 ns]] New tick started[0m
+[0m[ INFO] [1733118286.143804032]: [[1733118286130991380 ns]] Bump interrupt received: (2,1)->(2,2) = true[0m
+[0m[ INFO] [1733118286.158066724]: [[1733118286157769250 ns]] Pose interrupt received: x=2, y=1[0m
+[0m[ INFO] [1733118286.173833118]: [[1733118286173355567 ns]] Tick completed[0m
+[33m[ WARN] [1733118286.405810380]: VIOLATION: Bump interrupt received outside of tick at time 1733118286379741313[0m
+[33m[ WARN] [1733118286.418727227]: VIOLATION: Pose interrupt received outside of tick at time 1733118286415970494[0m
+[0m[ INFO] [1733118286.426845613]: [[1733118286425477428 ns]] New tick started[0m
+[0m[ INFO] [1733118286.648221848]: [[1733118286632246566 ns]] Bump interrupt received: (3,1)->(3,2) = false[0m
+[0m[ INFO] [1733118286.665726304]: [[1733118286665100827 ns]] Pose interrupt received: x=2, y=1[0m
+[0m[ INFO] [1733118286.682105764]: [[1733118286681687801 ns]] Tick completed[0m
+[33m[ WARN] [1733118286.901811428]: VIOLATION: Bump interrupt received outside of tick at time 1733118286882253558[0m
+[33m[ WARN] [1733118286.912273539]: VIOLATION: Pose interrupt received outside of tick at time 1733118286911290058[0m
+[0m[ INFO] [1733118286.922471762]: [[1733118286922086213 ns]] New tick started[0m
+[0m[ INFO] [1733118287.137490934]: [[1733118287123281049 ns]] Bump interrupt received: (3,1)->(3,2) = false[0m
+[0m[ INFO] [1733118287.149557645]: [[1733118287148747457 ns]] Pose interrupt received: x=2, y=1[0m
+[0m[ INFO] [1733118287.168235007]: [[1733118287167780283 ns]] Tick completed[0m
+[33m[ WARN] [1733118287.376461911]: VIOLATION: Bump interrupt received outside of tick at time 1733118287369164406[0m
+[33m[ WARN] [1733118287.385984087]: VIOLATION: Visit interrupt received outside of tick at time 1733118287385148315[0m
+[33m[ WARN] [1733118287.385996632]: VIOLATION: Pose interrupt received outside of tick at time 1733118287385149818[0m
+[0m[ INFO] [1733118287.404232968]: [[1733118287402210433 ns]] New tick started[0m
+[0m[ INFO] [1733118287.645753842]: [[1733118287609538165 ns]] Bump interrupt received: (2,0)->(3,0) = true[0m
+[0m[ INFO] [1733118287.659883311]: [[1733118287659513655 ns]] Pose interrupt received: x=2, y=0[0m
+[0m[ INFO] [1733118287.676792011]: [[1733118287675739307 ns]] Tick completed[0m
+[33m[ WARN] [1733118287.888852720]: VIOLATION: Bump interrupt received outside of tick at time 1733118287879288027[0m
+[33m[ WARN] [1733118287.900863767]: VIOLATION: Pose interrupt received outside of tick at time 1733118287900120389[0m
+[0m[ INFO] [1733118287.916728833]: [[1733118287916150152 ns]] New tick started[0m
+[0m[ INFO] [1733118288.128248767]: [[1733118288117406213 ns]] Bump interrupt received: (2,1)->(3,1) = false[0m
+[0m[ INFO] [1733118288.139823836]: [[1733118288139256372 ns]] Pose interrupt received: x=2, y=0[0m
+[0m[ INFO] [1733118288.153245292]: [[1733118288152882563 ns]] Tick completed[0m
+[33m[ WARN] [1733118288.380500486]: VIOLATION: Bump interrupt received outside of tick at time 1733118288354181762[0m
+[33m[ WARN] [1733118288.394075955]: VIOLATION: Visit interrupt received outside of tick at time 1733118288393582993[0m
+[33m[ WARN] [1733118288.394086820]: VIOLATION: Pose interrupt received outside of tick at time 1733118288393584144[0m
+[0m[ INFO] [1733118288.409760233]: [[1733118288409176181 ns]] New tick started[0m
+[0m[ INFO] [1733118288.621451310]: [[1733118288611171001 ns]] Bump interrupt received: (1,0)->(1,1) = false[0m
+[0m[ INFO] [1733118288.635080241]: [[1733118288634476134 ns]] Pose interrupt received: x=1, y=0[0m
+[0m[ INFO] [1733118288.651510278]: [[1733118288651112597 ns]] Tick completed[0m
+[33m[ WARN] [1733118288.866279780]: VIOLATION: Bump interrupt received outside of tick at time 1733118288851651552[0m
+[33m[ WARN] [1733118288.876709837]: VIOLATION: Pose interrupt received outside of tick at time 1733118288875736831[0m
+[0m[ INFO] [1733118288.896341050]: [[1733118288895548575 ns]] New tick started[0m
+[0m[ INFO] [1733118289.132219257]: [[1733118289098014866 ns]] Bump interrupt received: (2,0)->(2,1) = false[0m
+[0m[ INFO] [1733118289.145701624]: [[1733118289145233114 ns]] Pose interrupt received: x=1, y=0[0m
+[0m[ INFO] [1733118289.161941246]: [[1733118289161593394 ns]] Tick completed[0m
+[33m[ WARN] [1733118289.385333182]: VIOLATION: Bump interrupt received outside of tick at time 1733118289362070442[0m
+[33m[ WARN] [1733118289.403010448]: VIOLATION: Pose interrupt received outside of tick at time 1733118289402384147[0m
+[0m[ INFO] [1733118289.418469873]: [[1733118289417587430 ns]] New tick started[0m
+[0m[ INFO] [1733118289.640796880]: [[1733118289619076417 ns]] Bump interrupt received: (1,0)->(1,1) = false[0m
+[0m[ INFO] [1733118289.658386053]: [[1733118289657715592 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118289.658397991]: [[1733118289657716889 ns]] Pose interrupt received: x=0, y=0[0m
+[0m[ INFO] [1733118289.673909451]: [[1733118289673473190 ns]] Tick completed[0m
+[33m[ WARN] [1733118289.885758637]: VIOLATION: Bump interrupt received outside of tick at time 1733118289878043827[0m
+[33m[ WARN] [1733118289.897836263]: VIOLATION: Pose interrupt received outside of tick at time 1733118289897368507[0m
+[0m[ INFO] [1733118289.913389911]: [[1733118289913108674 ns]] New tick started[0m
+[0m[ INFO] [1733118290.139072078]: [[1733118290117365482 ns]] Bump interrupt received: (0,0)->(1,0) = true[0m
+[0m[ INFO] [1733118290.156314010]: [[1733118290155116348 ns]] Pose interrupt received: x=0, y=0[0m
+[0m[ INFO] [1733118290.169443933]: [[1733118290169084623 ns]] Tick completed[0m
+[33m[ WARN] [1733118290.387988102]: VIOLATION: Bump interrupt received outside of tick at time 1733118290377272267[0m
+[33m[ WARN] [1733118290.397046371]: VIOLATION: Pose interrupt received outside of tick at time 1733118290396554090[0m
+[0m[ INFO] [1733118290.415403882]: [[1733118290414790207 ns]] New tick started[0m
+[0m[ INFO] [1733118290.624013320]: [[1733118290616150030 ns]] Bump interrupt received: (0,1)->(1,1) = true[0m
+[0m[ INFO] [1733118290.636000327]: [[1733118290635307847 ns]] Pose interrupt received: x=0, y=0[0m
+[0m[ INFO] [1733118290.649409205]: [[1733118290649011093 ns]] Tick completed[0m
+[33m[ WARN] [1733118290.861442735]: VIOLATION: Bump interrupt received outside of tick at time 1733118290856130969[0m
+[33m[ WARN] [1733118290.873795950]: VIOLATION: Visit interrupt received outside of tick at time 1733118290873548790[0m
+[33m[ WARN] [1733118290.873807250]: VIOLATION: Pose interrupt received outside of tick at time 1733118290873550353[0m
+[0m[ INFO] [1733118290.889366331]: [[1733118290888964982 ns]] New tick started[0m
+[0m[ INFO] [1733118291.104189845]: [[1733118291090293946 ns]] Bump interrupt received: (2,0)->(2,1) = false[0m
+[0m[ INFO] [1733118291.116040010]: [[1733118291115297321 ns]] Pose interrupt received: x=1, y=0[0m
+[0m[ INFO] [1733118291.132000480]: [[1733118291131652034 ns]] Tick completed[0m
+[33m[ WARN] [1733118291.362623295]: VIOLATION: Bump interrupt received outside of tick at time 1733118291338027757[0m
+[33m[ WARN] [1733118291.373652640]: VIOLATION: Pose interrupt received outside of tick at time 1733118291373071475[0m
+[0m[ INFO] [1733118291.385279679]: [[1733118291384877005 ns]] New tick started[0m
+[0m[ INFO] [1733118291.601772440]: [[1733118291586438776 ns]] Bump interrupt received: (1,0)->(1,1) = false[0m
+[0m[ INFO] [1733118291.613315545]: [[1733118291612786756 ns]] Pose interrupt received: x=1, y=0[0m
+[0m[ INFO] [1733118291.636015092]: [[1733118291635453380 ns]] Tick completed[0m
+[33m[ WARN] [1733118291.870229245]: VIOLATION: Bump interrupt received outside of tick at time 1733118291839486968[0m
+[33m[ WARN] [1733118291.881592461]: VIOLATION: Pose interrupt received outside of tick at time 1733118291881121378[0m
+[0m[ INFO] [1733118291.898855021]: [[1733118291898300232 ns]] New tick started[0m
+[0m[ INFO] [1733118292.109937644]: [[1733118292100090406 ns]] Bump interrupt received: (1,0)->(1,1) = false[0m
+[0m[ INFO] [1733118292.122298008]: [[1733118292121813243 ns]] Pose interrupt received: x=1, y=0[0m
+[0m[ INFO] [1733118292.139639717]: [[1733118292138976909 ns]] Tick completed[0m
+[33m[ WARN] [1733118292.355274171]: VIOLATION: Bump interrupt received outside of tick at time 1733118292339745697[0m
+[33m[ WARN] [1733118292.363227521]: VIOLATION: Visit interrupt received outside of tick at time 1733118292362631804[0m
+[33m[ WARN] [1733118292.363239461]: VIOLATION: Pose interrupt received outside of tick at time 1733118292362633093[0m
+[0m[ INFO] [1733118292.381978417]: [[1733118292381659687 ns]] New tick started[0m
+[0m[ INFO] [1733118292.589625449]: [[1733118292582060463 ns]] Bump interrupt received: (1,2)->(2,2) = true[0m
+[0m[ INFO] [1733118292.602187541]: [[1733118292601464251 ns]] Pose interrupt received: x=1, y=1[0m
+[0m[ INFO] [1733118292.618475589]: [[1733118292617803124 ns]] Tick completed[0m
+[33m[ WARN] [1733118292.829518211]: VIOLATION: Bump interrupt received outside of tick at time 1733118292818731362[0m
+[33m[ WARN] [1733118292.842658342]: VIOLATION: Pose interrupt received outside of tick at time 1733118292841918718[0m
+[0m[ INFO] [1733118292.858648005]: [[1733118292858057244 ns]] New tick started[0m
+[0m[ INFO] [1733118293.081587665]: [[1733118293059425142 ns]] Bump interrupt received: (1,1)->(2,1) = false[0m
+[0m[ INFO] [1733118293.097659043]: [[1733118293097240278 ns]] Pose interrupt received: x=1, y=1[0m
+[0m[ INFO] [1733118293.114806003]: [[1733118293114125961 ns]] Tick completed[0m
+[33m[ WARN] [1733118293.337942942]: VIOLATION: Bump interrupt received outside of tick at time 1733118293314946614[0m
+[33m[ WARN] [1733118293.354217109]: VIOLATION: Pose interrupt received outside of tick at time 1733118293353737679[0m
+[0m[ INFO] [1733118293.369510328]: [[1733118293369078322 ns]] New tick started[0m
+[0m[ INFO] [1733118293.583172149]: [[1733118293569659112 ns]] Bump interrupt received: (1,1)->(2,1) = false[0m
+[0m[ INFO] [1733118293.602108537]: [[1733118293600971283 ns]] Pose interrupt received: x=1, y=1[0m
+[0m[ INFO] [1733118293.609807640]: [[1733118293609546373 ns]] Tick completed[0m
+[33m[ WARN] [1733118293.830635464]: VIOLATION: Bump interrupt received outside of tick at time 1733118293809962340[0m
+[33m[ WARN] [1733118293.840415838]: VIOLATION: Visit interrupt received outside of tick at time 1733118293839363274[0m
+[33m[ WARN] [1733118293.840426872]: VIOLATION: Pose interrupt received outside of tick at time 1733118293839364734[0m
+[0m[ INFO] [1733118293.849918220]: [[1733118293848884052 ns]] New tick started[0m
+[0m[ INFO] [1733118294.066314647]: [[1733118294050138369 ns]] Bump interrupt received: (0,1)->(0,2) = true[0m
+[0m[ INFO] [1733118294.075155727]: [[1733118294074213638 ns]] Pose interrupt received: x=0, y=1[0m
+[0m[ INFO] [1733118294.094686354]: [[1733118294094273176 ns]] Tick completed[0m
+[33m[ WARN] [1733118294.315215656]: VIOLATION: Bump interrupt received outside of tick at time 1733118294296153869[0m
+[33m[ WARN] [1733118294.329623168]: VIOLATION: Pose interrupt received outside of tick at time 1733118294329066115[0m
+[0m[ INFO] [1733118294.345941963]: [[1733118294345581480 ns]] New tick started[0m
+[0m[ INFO] [1733118294.569090896]: [[1733118294550603867 ns]] Bump interrupt received: (1,1)->(1,2) = false[0m
+[0m[ INFO] [1733118294.586090602]: [[1733118294585647505 ns]] Pose interrupt received: x=0, y=1[0m
+[0m[ INFO] [1733118294.602247656]: [[1733118294601415544 ns]] Tick completed[0m
+[33m[ WARN] [1733118294.827442355]: VIOLATION: Bump interrupt received outside of tick at time 1733118294802820802[0m
+[33m[ WARN] [1733118294.841825238]: VIOLATION: Visit interrupt received outside of tick at time 1733118294841263862[0m
+[33m[ WARN] [1733118294.841837311]: VIOLATION: Pose interrupt received outside of tick at time 1733118294841265070[0m
+[0m[ INFO] [1733118294.858209116]: [[1733118294857825623 ns]] New tick started[0m
+[0m[ INFO] [1733118295.073803524]: [[1733118295063772037 ns]] Bump interrupt received: (0,3)->(1,3) = true[0m
+[0m[ INFO] [1733118295.086869014]: [[1733118295085831564 ns]] Pose interrupt received: x=0, y=2[0m
+[0m[ INFO] [1733118295.102275268]: [[1733118295101418622 ns]] Tick completed[0m
+[33m[ WARN] [1733118295.312642913]: VIOLATION: Bump interrupt received outside of tick at time 1733118295302420660[0m
+[33m[ WARN] [1733118295.323610617]: VIOLATION: Pose interrupt received outside of tick at time 1733118295323089653[0m
+[0m[ INFO] [1733118295.342586851]: [[1733118295341829530 ns]] New tick started[0m
+[0m[ INFO] [1733118295.558444174]: [[1733118295542851890 ns]] Bump interrupt received: (0,2)->(1,2) = false[0m
+[0m[ INFO] [1733118295.568792452]: [[1733118295567773046 ns]] Pose interrupt received: x=0, y=2[0m
+[0m[ INFO] [1733118295.577615758]: [[1733118295576890483 ns]] Tick completed[0m
+[33m[ WARN] [1733118295.801749073]: VIOLATION: Bump interrupt received outside of tick at time 1733118295777900569[0m
+[33m[ WARN] [1733118295.817683087]: VIOLATION: Visit interrupt received outside of tick at time 1733118295817182105[0m
+[33m[ WARN] [1733118295.817694541]: VIOLATION: Pose interrupt received outside of tick at time 1733118295817183346[0m
+[0m[ INFO] [1733118295.834393923]: [[1733118295833829436 ns]] New tick started[0m
+[0m[ INFO] [1733118296.053202549]: [[1733118296035526033 ns]] Bump interrupt received: (2,2)->(2,3) = false[0m
+[0m[ INFO] [1733118296.059161604]: [[1733118296058549076 ns]] Pose interrupt received: x=1, y=2[0m
+[0m[ INFO] [1733118296.073984268]: [[1733118296073637006 ns]] Tick completed[0m
+[33m[ WARN] [1733118296.295182567]: VIOLATION: Bump interrupt received outside of tick at time 1733118296274116940[0m
+[33m[ WARN] [1733118296.305470364]: VIOLATION: Pose interrupt received outside of tick at time 1733118296304537778[0m
+[0m[ INFO] [1733118296.315217029]: [[1733118296313602705 ns]] New tick started[0m
+[0m[ INFO] [1733118296.536573933]: [[1733118296515449977 ns]] Bump interrupt received: (1,2)->(1,3) = false[0m
+[0m[ INFO] [1733118296.553647370]: [[1733118296553122705 ns]] Pose interrupt received: x=1, y=2[0m
+[0m[ INFO] [1733118296.570137503]: [[1733118296569713997 ns]] Tick completed[0m
+[33m[ WARN] [1733118296.786935324]: VIOLATION: Bump interrupt received outside of tick at time 1733118296770286329[0m
+[33m[ WARN] [1733118296.797693188]: VIOLATION: Pose interrupt received outside of tick at time 1733118296796949994[0m
+[0m[ INFO] [1733118296.809882171]: [[1733118296809480289 ns]] New tick started[0m
+[0m[ INFO] [1733118297.026743131]: [[1733118297010525508 ns]] Bump interrupt received: (2,2)->(2,3) = false[0m
+[0m[ INFO] [1733118297.038846925]: [[1733118297038249479 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118297.038860070]: [[1733118297038253016 ns]] Pose interrupt received: x=2, y=2[0m
+[0m[ INFO] [1733118297.052961755]: [[1733118297052407698 ns]] Tick completed[0m
+[33m[ WARN] [1733118297.274616540]: VIOLATION: Bump interrupt received outside of tick at time 1733118297253674933[0m
+[33m[ WARN] [1733118297.290377200]: VIOLATION: Pose interrupt received outside of tick at time 1733118297289845093[0m
+[0m[ INFO] [1733118297.305767969]: [[1733118297305130605 ns]] New tick started[0m
+[0m[ INFO] [1733118297.538201104]: [[1733118297506630824 ns]] Bump interrupt received: (2,3)->(3,3) = false[0m
+[0m[ INFO] [1733118297.548598398]: [[1733118297548136123 ns]] Pose interrupt received: x=2, y=2[0m
+[0m[ INFO] [1733118297.563806692]: [[1733118297563034436 ns]] Tick completed[0m
+[33m[ WARN] [1733118297.803841435]: VIOLATION: Bump interrupt received outside of tick at time 1733118297771109443[0m
+[33m[ WARN] [1733118297.817771930]: VIOLATION: Pose interrupt received outside of tick at time 1733118297817297878[0m
+[0m[ INFO] [1733118297.834014779]: [[1733118297833571981 ns]] New tick started[0m
+[0m[ INFO] [1733118298.047479287]: [[1733118298037021490 ns]] Bump interrupt received: (2,2)->(3,2) = true[0m
+[0m[ INFO] [1733118298.058565960]: [[1733118298057970019 ns]] Pose interrupt received: x=2, y=2[0m
+[0m[ INFO] [1733118298.077077556]: [[1733118298076450808 ns]] Tick completed[0m
+[33m[ WARN] [1733118298.308696640]: VIOLATION: Bump interrupt received outside of tick at time 1733118298283644951[0m
+[33m[ WARN] [1733118298.318812992]: VIOLATION: Pose interrupt received outside of tick at time 1733118298318325824[0m
+[0m[ INFO] [1733118298.332255280]: [[1733118298331477592 ns]] New tick started[0m
+[0m[ INFO] [1733118298.555777485]: [[1733118298533096757 ns]] Bump interrupt received: (2,3)->(3,3) = false[0m
+[0m[ INFO] [1733118298.569870307]: [[1733118298569301865 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118298.569882148]: [[1733118298569303041 ns]] Pose interrupt received: x=2, y=3[0m
+[0m[ INFO] [1733118298.586121485]: [[1733118298585770170 ns]] Tick completed[0m
+[33m[ WARN] [1733118298.797932385]: VIOLATION: Bump interrupt received outside of tick at time 1733118298787526081[0m
+[33m[ WARN] [1733118298.810403848]: VIOLATION: Pose interrupt received outside of tick at time 1733118298809561018[0m
+[0m[ INFO] [1733118298.827726729]: [[1733118298827168588 ns]] New tick started[0m
+[0m[ INFO] [1733118299.053728521]: [[1733118299032869668 ns]] Bump interrupt received: (2,3)->(2,4) = false[0m
+[0m[ INFO] [1733118299.066934703]: [[1733118299066332917 ns]] Pose interrupt received: x=2, y=3[0m
+[0m[ INFO] [1733118299.083647815]: [[1733118299083281275 ns]] Tick completed[0m
+[33m[ WARN] [1733118299.297232347]: VIOLATION: Bump interrupt received outside of tick at time 1733118299283776773[0m
+[33m[ WARN] [1733118299.306881034]: VIOLATION: Pose interrupt received outside of tick at time 1733118299305889917[0m
+[0m[ INFO] [1733118299.321278693]: [[1733118299320938592 ns]] New tick started[0m
+[0m[ INFO] [1733118299.550552714]: [[1733118299522074543 ns]] Bump interrupt received: (3,3)->(3,4) = false[0m
+[0m[ INFO] [1733118299.561625138]: [[1733118299561203300 ns]] Pose interrupt received: x=2, y=3[0m
+[0m[ INFO] [1733118299.580373501]: [[1733118299579857010 ns]] Tick completed[0m
+[33m[ WARN] [1733118299.808988587]: VIOLATION: Bump interrupt received outside of tick at time 1733118299784968356[0m
+[33m[ WARN] [1733118299.818295757]: VIOLATION: Visit interrupt received outside of tick at time 1733118299817587378[0m
+[33m[ WARN] [1733118299.818308391]: VIOLATION: Pose interrupt received outside of tick at time 1733118299817589367[0m
+[0m[ INFO] [1733118299.836405351]: [[1733118299835499033 ns]] New tick started[0m
+[0m[ INFO] [1733118300.072726944]: [[1733118300044851057 ns]] Bump interrupt received: (2,5)->(3,5) = true[0m
+[0m[ INFO] [1733118300.089937202]: [[1733118300089493481 ns]] Pose interrupt received: x=2, y=4[0m
+[0m[ INFO] [1733118300.105285850]: [[1733118300104887777 ns]] Tick completed[0m
+[33m[ WARN] [1733118300.337246315]: VIOLATION: Bump interrupt received outside of tick at time 1733118300305476341[0m
+[33m[ WARN] [1733118300.347626120]: VIOLATION: Pose interrupt received outside of tick at time 1733118300347204401[0m
+[0m[ INFO] [1733118300.363911216]: [[1733118300363229451 ns]] New tick started[0m
+[0m[ INFO] [1733118300.583253858]: [[1733118300564860156 ns]] Bump interrupt received: (2,4)->(3,4) = false[0m
+[0m[ INFO] [1733118300.595547377]: [[1733118300590700312 ns]] Pose interrupt received: x=2, y=4[0m
+[0m[ INFO] [1733118300.602009265]: [[1733118300601527182 ns]] Tick completed[0m
+[33m[ WARN] [1733118300.821674493]: VIOLATION: Bump interrupt received outside of tick at time 1733118300802117235[0m
+[33m[ WARN] [1733118300.833088132]: VIOLATION: Pose interrupt received outside of tick at time 1733118300832476146[0m
+[0m[ INFO] [1733118300.843013548]: [[1733118300841858835 ns]] New tick started[0m
+[0m[ INFO] [1733118301.066022197]: [[1733118301043324763 ns]] Bump interrupt received: (2,4)->(3,4) = false[0m
+[0m[ INFO] [1733118301.081967791]: [[1733118301081486568 ns]] Pose interrupt received: x=2, y=4[0m
+[0m[ INFO] [1733118301.097217712]: [[1733118301096797352 ns]] Tick completed[0m
+[33m[ WARN] [1733118301.326782185]: VIOLATION: Bump interrupt received outside of tick at time 1733118301297967848[0m
+[33m[ WARN] [1733118301.338258389]: VIOLATION: Visit interrupt received outside of tick at time 1733118301337660762[0m
+[33m[ WARN] [1733118301.338272462]: VIOLATION: Pose interrupt received outside of tick at time 1733118301337662558[0m
+[0m[ INFO] [1733118301.355796266]: [[1733118301354472009 ns]] New tick started[0m
+[0m[ INFO] [1733118301.578007023]: [[1733118301557150331 ns]] Bump interrupt received: (1,4)->(1,5) = false[0m
+[0m[ INFO] [1733118301.593812508]: [[1733118301593380388 ns]] Pose interrupt received: x=1, y=4[0m
+[0m[ INFO] [1733118301.610080374]: [[1733118301609661046 ns]] Tick completed[0m
+[33m[ WARN] [1733118301.840508649]: VIOLATION: Bump interrupt received outside of tick at time 1733118301810252961[0m
+[33m[ WARN] [1733118301.849833043]: VIOLATION: Pose interrupt received outside of tick at time 1733118301849420373[0m
+[0m[ INFO] [1733118301.869683925]: [[1733118301869176363 ns]] New tick started[0m
+[0m[ INFO] [1733118302.077900141]: [[1733118302069811447 ns]] Bump interrupt received: (2,4)->(2,5) = false[0m
+[0m[ INFO] [1733118302.090281047]: [[1733118302089486026 ns]] Pose interrupt received: x=1, y=4[0m
+[0m[ INFO] [1733118302.105200941]: [[1733118302104846212 ns]] Tick completed[0m
+[33m[ WARN] [1733118302.323933575]: VIOLATION: Bump interrupt received outside of tick at time 1733118302312586921[0m
+[33m[ WARN] [1733118302.335132884]: VIOLATION: Pose interrupt received outside of tick at time 1733118302334350048[0m
+[0m[ INFO] [1733118302.346373904]: [[1733118302345994060 ns]] New tick started[0m
+[0m[ INFO] [1733118302.563577515]: [[1733118302552597468 ns]] Bump interrupt received: (1,4)->(1,5) = false[0m
+[0m[ INFO] [1733118302.576129649]: [[1733118302575311815 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118302.576148166]: [[1733118302575313979 ns]] Pose interrupt received: x=0, y=4[0m
+[0m[ INFO] [1733118302.586764635]: [[1733118302585569665 ns]] Tick completed[0m
+[33m[ WARN] [1733118302.819017889]: VIOLATION: Bump interrupt received outside of tick at time 1733118302793315441[0m
+[33m[ WARN] [1733118302.830740813]: VIOLATION: Pose interrupt received outside of tick at time 1733118302829855296[0m
+[0m[ INFO] [1733118302.848283747]: [[1733118302847718867 ns]] New tick started[0m
+[0m[ INFO] [1733118303.071304629]: [[1733118303050472944 ns]] Bump interrupt received: (0,4)->(1,4) = true[0m
+[0m[ INFO] [1733118303.083730052]: [[1733118303082667337 ns]] Pose interrupt received: x=0, y=4[0m
+[0m[ INFO] [1733118303.099939095]: [[1733118303099355101 ns]] Tick completed[0m
+[33m[ WARN] [1733118303.309455974]: VIOLATION: Bump interrupt received outside of tick at time 1733118303303665986[0m
+[33m[ WARN] [1733118303.322201726]: VIOLATION: Pose interrupt received outside of tick at time 1733118303321732091[0m
+[0m[ INFO] [1733118303.339111846]: [[1733118303338292085 ns]] New tick started[0m
+[0m[ INFO] [1733118303.571645353]: [[1733118303545910456 ns]] Bump interrupt received: (0,5)->(1,5) = false[0m
+[0m[ INFO] [1733118303.584137956]: [[1733118303583187393 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118303.584154119]: [[1733118303583189105 ns]] Pose interrupt received: x=0, y=5[0m
+[0m[ INFO] [1733118303.594679157]: [[1733118303594099978 ns]] Tick completed[0m
+[33m[ WARN] [1733118303.811795990]: VIOLATION: Bump interrupt received outside of tick at time 1733118303795854813[0m
+[33m[ WARN] [1733118303.820753121]: VIOLATION: Pose interrupt received outside of tick at time 1733118303820294082[0m
+[0m[ INFO] [1733118303.837563187]: [[1733118303836810932 ns]] New tick started[0m
+[0m[ INFO] [1733118304.069204803]: [[1733118304043049329 ns]] Bump interrupt received: (0,5)->(0,6) = true[0m
+[0m[ INFO] [1733118304.084261114]: [[1733118304082891633 ns]] Pose interrupt received: x=0, y=5[0m
+[0m[ INFO] [1733118304.093260186]: [[1733118304092387652 ns]] Tick completed[0m
+[33m[ WARN] [1733118304.312494701]: VIOLATION: Bump interrupt received outside of tick at time 1733118304293868462[0m
+[33m[ WARN] [1733118304.329568526]: VIOLATION: Pose interrupt received outside of tick at time 1733118304329148948[0m
+[0m[ INFO] [1733118304.345642171]: [[1733118304345285633 ns]] New tick started[0m
+[0m[ INFO] [1733118304.563876603]: [[1733118304545761062 ns]] Bump interrupt received: (1,5)->(1,6) = true[0m
+[0m[ INFO] [1733118304.575683781]: [[1733118304574966216 ns]] Pose interrupt received: x=0, y=5[0m
+[0m[ INFO] [1733118304.586720478]: [[1733118304584828256 ns]] Tick completed[0m
+[33m[ WARN] [1733118304.822321628]: VIOLATION: Bump interrupt received outside of tick at time 1733118304794810594[0m
+[33m[ WARN] [1733118304.835479012]: VIOLATION: Visit interrupt received outside of tick at time 1733118304834498956[0m
+[33m[ WARN] [1733118304.835498454]: VIOLATION: Pose interrupt received outside of tick at time 1733118304834501596[0m
+[0m[ INFO] [1733118304.845548457]: [[1733118304842292129 ns]] New tick started[0m
+[0m[ INFO] [1733118305.077094060]: [[1733118305050585585 ns]] Bump interrupt received: (0,4)->(1,4) = true[0m
+[0m[ INFO] [1733118305.087694051]: [[1733118305087267472 ns]] Pose interrupt received: x=0, y=4[0m
+[0m[ INFO] [1733118305.104656985]: [[1733118305104146430 ns]] Tick completed[0m
+[33m[ WARN] [1733118305.313618748]: VIOLATION: Bump interrupt received outside of tick at time 1733118305304793387[0m
+[33m[ WARN] [1733118305.321666773]: VIOLATION: Pose interrupt received outside of tick at time 1733118305321167499[0m
+[0m[ INFO] [1733118305.345102410]: [[1733118305343112696 ns]] New tick started[0m
+[0m[ INFO] [1733118305.575639630]: [[1733118305547202760 ns]] Bump interrupt received: (0,5)->(1,5) = false[0m
+[0m[ INFO] [1733118305.594367138]: [[1733118305593822594 ns]] Pose interrupt received: x=0, y=4[0m
+[0m[ INFO] [1733118305.610660636]: [[1733118305610135426 ns]] Tick completed[0m
+[33m[ WARN] [1733118305.834805239]: VIOLATION: Bump interrupt received outside of tick at time 1733118305814161044[0m
+[33m[ WARN] [1733118305.852954973]: VIOLATION: Pose interrupt received outside of tick at time 1733118305851696352[0m
+[0m[ INFO] [1733118305.866969865]: [[1733118305866387769 ns]] New tick started[0m
+[0m[ INFO] [1733118306.090792994]: [[1733118306070667008 ns]] Bump interrupt received: (0,5)->(1,5) = false[0m
+[0m[ INFO] [1733118306.105885516]: [[1733118306105460800 ns]] Pose interrupt received: x=0, y=4[0m
+[0m[ INFO] [1733118306.122044560]: [[1733118306121622501 ns]] Tick completed[0m
+[33m[ WARN] [1733118306.333703001]: VIOLATION: Bump interrupt received outside of tick at time 1733118306328324103[0m
+[33m[ WARN] [1733118306.346288458]: VIOLATION: Visit interrupt received outside of tick at time 1733118306345306978[0m
+[33m[ WARN] [1733118306.346308513]: VIOLATION: Pose interrupt received outside of tick at time 1733118306345309864[0m
+[0m[ INFO] [1733118306.363031567]: [[1733118306362364421 ns]] New tick started[0m
+[0m[ INFO] [1733118306.573670087]: [[1733118306566880517 ns]] Bump interrupt received: (2,4)->(2,5) = false[0m
+[0m[ INFO] [1733118306.585592974]: [[1733118306585142183 ns]] Pose interrupt received: x=1, y=4[0m
+[0m[ INFO] [1733118306.603278632]: [[1733118306602655837 ns]] Tick completed[0m
+[33m[ WARN] [1733118306.825451838]: VIOLATION: Bump interrupt received outside of tick at time 1733118306803412418[0m
+[33m[ WARN] [1733118306.842102148]: VIOLATION: Pose interrupt received outside of tick at time 1733118306841614074[0m
+[0m[ INFO] [1733118306.858935148]: [[1733118306857814424 ns]] New tick started[0m
+[0m[ INFO] [1733118307.084763969]: [[1733118307059825764 ns]] Bump interrupt received: (1,4)->(1,5) = false[0m
+[0m[ INFO] [1733118307.098227406]: [[1733118307097637387 ns]] Pose interrupt received: x=1, y=4[0m
+[0m[ INFO] [1733118307.115774179]: [[1733118307114702431 ns]] Tick completed[0m
+[33m[ WARN] [1733118307.349108090]: VIOLATION: Bump interrupt received outside of tick at time 1733118307323792120[0m
+[33m[ WARN] [1733118307.360930474]: VIOLATION: Pose interrupt received outside of tick at time 1733118307360132896[0m
+[0m[ INFO] [1733118307.370599038]: [[1733118307368991870 ns]] New tick started[0m
+[0m[ INFO] [1733118307.597349169]: [[1733118307571778573 ns]] Bump interrupt received: (2,4)->(2,5) = false[0m
+[0m[ INFO] [1733118307.609996297]: [[1733118307609340715 ns]] Visit interrupt received: visits=2[0m
+[0m[ INFO] [1733118307.610008983]: [[1733118307609341877 ns]] Pose interrupt received: x=2, y=4[0m
+[0m[ INFO] [1733118307.625204061]: [[1733118307624837795 ns]] Tick completed[0m
+[33m[ WARN] [1733118307.850034899]: VIOLATION: Bump interrupt received outside of tick at time 1733118307826287347[0m
+[33m[ WARN] [1733118307.865862270]: VIOLATION: Pose interrupt received outside of tick at time 1733118307865458960[0m
+[0m[ INFO] [1733118307.882020488]: [[1733118307881618348 ns]] New tick started[0m
+[0m[ INFO] [1733118308.106565496]: [[1733118308082165833 ns]] Bump interrupt received: (2,5)->(3,5) = true[0m
+[0m[ INFO] [1733118308.123248754]: [[1733118308122509590 ns]] Pose interrupt received: x=2, y=4[0m
+[0m[ INFO] [1733118308.139126213]: [[1733118308137995921 ns]] Tick completed[0m
+[33m[ WARN] [1733118308.369007660]: VIOLATION: Bump interrupt received outside of tick at time 1733118308340050751[0m
+[33m[ WARN] [1733118308.384470775]: VIOLATION: Pose interrupt received outside of tick at time 1733118308384008166[0m
+[0m[ INFO] [1733118308.393654163]: [[1733118308393242956 ns]] New tick started[0m
+[0m[ INFO] [1733118308.620784622]: [[1733118308594582941 ns]] Bump interrupt received: (2,4)->(3,4) = false[0m
+[0m[ INFO] [1733118308.633787429]: [[1733118308633299734 ns]] Visit interrupt received: visits=2[0m
+[0m[ INFO] [1733118308.633798904]: [[1733118308633300802 ns]] Pose interrupt received: x=2, y=3[0m
+[0m[ INFO] [1733118308.650093066]: [[1733118308649684666 ns]] Tick completed[0m
+[33m[ WARN] [1733118308.873973406]: VIOLATION: Bump interrupt received outside of tick at time 1733118308851061327[0m
+[33m[ WARN] [1733118308.889389669]: VIOLATION: Pose interrupt received outside of tick at time 1733118308889122309[0m
+[0m[ INFO] [1733118308.905701845]: [[1733118308905104925 ns]] New tick started[0m
+[0m[ INFO] [1733118309.125095966]: [[1733118309105873443 ns]] Bump interrupt received: (3,3)->(3,4) = false[0m
+[0m[ INFO] [1733118309.136016078]: [[1733118309135390150 ns]] Pose interrupt received: x=2, y=3[0m
+[0m[ INFO] [1733118309.145682435]: [[1733118309145004353 ns]] Tick completed[0m
+[33m[ WARN] [1733118309.367633243]: VIOLATION: Bump interrupt received outside of tick at time 1733118309347441605[0m
+[33m[ WARN] [1733118309.386055037]: VIOLATION: Pose interrupt received outside of tick at time 1733118309385644600[0m
+[0m[ INFO] [1733118309.401202514]: [[1733118309400788691 ns]] New tick started[0m
+[0m[ INFO] [1733118309.632527040]: [[1733118309602336583 ns]] Bump interrupt received: (2,3)->(2,4) = false[0m
+[0m[ INFO] [1733118309.642692345]: [[1733118309642077314 ns]] Pose interrupt received: x=2, y=3[0m
+[0m[ INFO] [1733118309.657765023]: [[1733118309657360291 ns]] Tick completed[0m
+[33m[ WARN] [1733118309.880741664]: VIOLATION: Bump interrupt received outside of tick at time 1733118309857923735[0m
+[33m[ WARN] [1733118309.898035643]: VIOLATION: Pose interrupt received outside of tick at time 1733118309897573095[0m
+[0m[ INFO] [1733118309.913463685]: [[1733118309912906027 ns]] New tick started[0m
+[0m[ INFO] [1733118310.129348905]: [[1733118310115490174 ns]] Bump interrupt received: (3,3)->(3,4) = false[0m
+[0m[ INFO] [1733118310.137665343]: [[1733118310137006587 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118310.137681715]: [[1733118310137008157 ns]] Pose interrupt received: x=3, y=3[0m
+[0m[ INFO] [1733118310.153559437]: [[1733118310153120265 ns]] Tick completed[0m
+[33m[ WARN] [1733118310.377317320]: VIOLATION: Bump interrupt received outside of tick at time 1733118310354998093[0m
+[33m[ WARN] [1733118310.394870725]: VIOLATION: Pose interrupt received outside of tick at time 1733118310394185327[0m
+[0m[ INFO] [1733118310.412284855]: [[1733118310411834495 ns]] New tick started[0m
+[0m[ INFO] [1733118310.634781118]: [[1733118310612412500 ns]] Bump interrupt received: (3,4)->(4,4) = false[0m
+[0m[ INFO] [1733118310.650139792]: [[1733118310649619852 ns]] Pose interrupt received: x=3, y=3[0m
+[0m[ INFO] [1733118310.666420937]: [[1733118310665543093 ns]] Tick completed[0m
+[33m[ WARN] [1733118310.898534290]: VIOLATION: Bump interrupt received outside of tick at time 1733118310867015503[0m
+[33m[ WARN] [1733118310.905989497]: VIOLATION: Pose interrupt received outside of tick at time 1733118310905085899[0m
+[0m[ INFO] [1733118310.921965710]: [[1733118310921560595 ns]] New tick started[0m
+[0m[ INFO] [1733118311.148086773]: [[1733118311122836979 ns]] Bump interrupt received: (3,3)->(4,3) = true[0m
+[0m[ INFO] [1733118311.165550175]: [[1733118311165367355 ns]] Pose interrupt received: x=3, y=3[0m
+[0m[ INFO] [1733118311.178214809]: [[1733118311177684870 ns]] Tick completed[0m
+[33m[ WARN] [1733118311.396937886]: VIOLATION: Bump interrupt received outside of tick at time 1733118311378349296[0m
+[33m[ WARN] [1733118311.405149037]: VIOLATION: Pose interrupt received outside of tick at time 1733118311404475616[0m
+[0m[ INFO] [1733118311.418003009]: [[1733118311417566956 ns]] New tick started[0m
+[0m[ INFO] [1733118311.641960023]: [[1733118311618190835 ns]] Bump interrupt received: (3,4)->(4,4) = false[0m
+[0m[ INFO] [1733118311.657715148]: [[1733118311657144206 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118311.657726834]: [[1733118311657145526 ns]] Pose interrupt received: x=3, y=4[0m
+[0m[ INFO] [1733118311.674076640]: [[1733118311673630998 ns]] Tick completed[0m
+[33m[ WARN] [1733118311.905603370]: VIOLATION: Bump interrupt received outside of tick at time 1733118311874188928[0m
+[33m[ WARN] [1733118311.916512502]: VIOLATION: Pose interrupt received outside of tick at time 1733118311916018704[0m
+[0m[ INFO] [1733118311.932595736]: [[1733118311931863717 ns]] New tick started[0m
+[0m[ INFO] [1733118312.142296364]: [[1733118312135821184 ns]] Bump interrupt received: (3,4)->(3,5) = true[0m
+[0m[ INFO] [1733118312.155032159]: [[1733118312154427676 ns]] Pose interrupt received: x=3, y=4[0m
+[0m[ INFO] [1733118312.169554415]: [[1733118312169552674 ns]] Tick completed[0m
+[33m[ WARN] [1733118312.403736821]: VIOLATION: Bump interrupt received outside of tick at time 1733118312377751640[0m
+[33m[ WARN] [1733118312.415118927]: VIOLATION: Pose interrupt received outside of tick at time 1733118312414415773[0m
+[0m[ INFO] [1733118312.426588342]: [[1733118312424996017 ns]] New tick started[0m
+[0m[ INFO] [1733118312.642514398]: [[1733118312626950744 ns]] Bump interrupt received: (4,4)->(4,5) = true[0m
+[0m[ INFO] [1733118312.653343826]: [[1733118312652812156 ns]] Pose interrupt received: x=3, y=4[0m
+[0m[ INFO] [1733118312.667714041]: [[1733118312665520461 ns]] Tick completed[0m
+[33m[ WARN] [1733118312.881336068]: VIOLATION: Bump interrupt received outside of tick at time 1733118312872997967[0m
+[33m[ WARN] [1733118312.894243795]: VIOLATION: Visit interrupt received outside of tick at time 1733118312893533008[0m
+[33m[ WARN] [1733118312.894260400]: VIOLATION: Pose interrupt received outside of tick at time 1733118312893535364[0m
+[0m[ INFO] [1733118312.905919722]: [[1733118312905517336 ns]] New tick started[0m
+[0m[ INFO] [1733118313.131382896]: [[1733118313109974858 ns]] Bump interrupt received: (3,6)->(4,6) = true[0m
+[0m[ INFO] [1733118313.146649867]: [[1733118313146084493 ns]] Pose interrupt received: x=3, y=5[0m
+[0m[ INFO] [1733118313.161917519]: [[1733118313161482948 ns]] Tick completed[0m
+[33m[ WARN] [1733118313.375189604]: VIOLATION: Bump interrupt received outside of tick at time 1733118313362070518[0m
+[33m[ WARN] [1733118313.386226612]: VIOLATION: Pose interrupt received outside of tick at time 1733118313385298285[0m
+[0m[ INFO] [1733118313.404854454]: [[1733118313404115461 ns]] New tick started[0m
+[0m[ INFO] [1733118313.618595189]: [[1733118313604981044 ns]] Bump interrupt received: (3,5)->(4,5) = false[0m
+[0m[ INFO] [1733118313.629501809]: [[1733118313629033525 ns]] Pose interrupt received: x=3, y=5[0m
+[0m[ INFO] [1733118313.643935380]: [[1733118313643281679 ns]] Tick completed[0m
+[33m[ WARN] [1733118313.857716986]: VIOLATION: Bump interrupt received outside of tick at time 1733118313847627958[0m
+[33m[ WARN] [1733118313.869364216]: VIOLATION: Visit interrupt received outside of tick at time 1733118313868669403[0m
+[33m[ WARN] [1733118313.869380757]: VIOLATION: Pose interrupt received outside of tick at time 1733118313868671622[0m
+[0m[ INFO] [1733118313.885538784]: [[1733118313885183498 ns]] New tick started[0m
+[0m[ INFO] [1733118314.120780224]: [[1733118314091152184 ns]] Bump interrupt received: (5,5)->(5,6) = false[0m
+[0m[ INFO] [1733118314.137969243]: [[1733118314137539227 ns]] Pose interrupt received: x=4, y=5[0m
+[0m[ INFO] [1733118314.154171220]: [[1733118314153711105 ns]] Tick completed[0m
+[33m[ WARN] [1733118314.367320881]: VIOLATION: Bump interrupt received outside of tick at time 1733118314356560648[0m
+[33m[ WARN] [1733118314.379099950]: VIOLATION: Pose interrupt received outside of tick at time 1733118314378261693[0m
+[0m[ INFO] [1733118314.396259421]: [[1733118314395940518 ns]] New tick started[0m
+[0m[ INFO] [1733118314.607847007]: [[1733118314596405020 ns]] Bump interrupt received: (4,5)->(4,6) = false[0m
+[0m[ INFO] [1733118314.619484013]: [[1733118314618688875 ns]] Pose interrupt received: x=4, y=5[0m
+[0m[ INFO] [1733118314.638287057]: [[1733118314637360063 ns]] Tick completed[0m
+[33m[ WARN] [1733118314.857185658]: VIOLATION: Bump interrupt received outside of tick at time 1733118314839281568[0m
+[33m[ WARN] [1733118314.874779971]: VIOLATION: Pose interrupt received outside of tick at time 1733118314874122340[0m
+[0m[ INFO] [1733118314.889888084]: [[1733118314889474580 ns]] New tick started[0m
+[0m[ INFO] [1733118315.111160113]: [[1733118315090514106 ns]] Bump interrupt received: (5,5)->(5,6) = false[0m
+[0m[ INFO] [1733118315.130552073]: [[1733118315129923275 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118315.130566388]: [[1733118315129924749 ns]] Pose interrupt received: x=5, y=5[0m
+[0m[ INFO] [1733118315.145986014]: [[1733118315145594571 ns]] Tick completed[0m
+[33m[ WARN] [1733118315.359459081]: VIOLATION: Bump interrupt received outside of tick at time 1733118315347118809[0m
+[33m[ WARN] [1733118315.369530218]: VIOLATION: Pose interrupt received outside of tick at time 1733118315369016952[0m
+[0m[ INFO] [1733118315.388258356]: [[1733118315387553103 ns]] New tick started[0m
+[0m[ INFO] [1733118315.620111960]: [[1733118315592902696 ns]] Bump interrupt received: (5,6)->(6,6) = true[0m
+[0m[ INFO] [1733118315.634406608]: [[1733118315633645506 ns]] Pose interrupt received: x=5, y=5[0m
+[0m[ INFO] [1733118315.644392087]: [[1733118315641107530 ns]] Tick completed[0m
+[33m[ WARN] [1733118315.877274271]: VIOLATION: Bump interrupt received outside of tick at time 1733118315850466483[0m
+[33m[ WARN] [1733118315.889735284]: VIOLATION: Pose interrupt received outside of tick at time 1733118315889183954[0m
+[0m[ INFO] [1733118315.899816884]: [[1733118315898710353 ns]] New tick started[0m
+[0m[ INFO] [1733118316.127846821]: [[1733118316100024296 ns]] Bump interrupt received: (5,5)->(6,5) = false[0m
+[0m[ INFO] [1733118316.137965029]: [[1733118316137470035 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118316.137976049]: [[1733118316137471248 ns]] Pose interrupt received: x=5, y=4[0m
+[0m[ INFO] [1733118316.153388624]: [[1733118316152932325 ns]] Tick completed[0m
+[33m[ WARN] [1733118316.367874487]: VIOLATION: Bump interrupt received outside of tick at time 1733118316353517863[0m
+[33m[ WARN] [1733118316.379554353]: VIOLATION: Pose interrupt received outside of tick at time 1733118316379007908[0m
+[0m[ INFO] [1733118316.395805970]: [[1733118316395454862 ns]] New tick started[0m
+[0m[ INFO] [1733118316.606225672]: [[1733118316595931906 ns]] Bump interrupt received: (6,4)->(6,5) = false[0m
+[0m[ INFO] [1733118316.618184340]: [[1733118316617200990 ns]] Pose interrupt received: x=5, y=4[0m
+[0m[ INFO] [1733118316.635245880]: [[1733118316634812370 ns]] Tick completed[0m
+[33m[ WARN] [1733118316.867284910]: VIOLATION: Bump interrupt received outside of tick at time 1733118316842514584[0m
+[33m[ WARN] [1733118316.879238121]: VIOLATION: Pose interrupt received outside of tick at time 1733118316878258943[0m
+[0m[ INFO] [1733118316.890039373]: [[1733118316889630714 ns]] New tick started[0m
+[0m[ INFO] [1733118317.106532038]: [[1733118317093721620 ns]] Bump interrupt received: (5,4)->(5,5) = true[0m
+[0m[ INFO] [1733118317.117027897]: [[1733118317116680065 ns]] Pose interrupt received: x=5, y=4[0m
+[0m[ INFO] [1733118317.136196025]: [[1733118317135655301 ns]] Tick completed[0m
+[33m[ WARN] [1733118317.356003583]: VIOLATION: Bump interrupt received outside of tick at time 1733118317336466421[0m
+[33m[ WARN] [1733118317.369763938]: VIOLATION: Pose interrupt received outside of tick at time 1733118317369342361[0m
+[0m[ INFO] [1733118317.385944070]: [[1733118317385475181 ns]] New tick started[0m
+[0m[ INFO] [1733118317.602990441]: [[1733118317589206617 ns]] Bump interrupt received: (6,4)->(6,5) = false[0m
+[0m[ INFO] [1733118317.613356802]: [[1733118317612311465 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733118317.613367948]: [[1733118317612312795 ns]] Pose interrupt received: x=6, y=4[0m
+[0m[ INFO] [1733118317.631747762]: [[1733118317630115891 ns]] Tick completed[0m
+[33m[ WARN] [1733118317.851393609]: VIOLATION: Bump interrupt received outside of tick at time 1733118317831976338[0m
+[33m[ WARN] [1733118317.865685424]: VIOLATION: Pose interrupt received outside of tick at time 1733118317865225657[0m
+[0m[ INFO] [1733118317.881868572]: [[1733118317881417368 ns]] New tick started[0m
+[0m[ INFO] [1733118318.100793641]: [[1733118318082060446 ns]] Bump interrupt received: (6,5)->(7,5) = true[0m
+[0m[ INFO] [1733118318.113911839]: [[1733118318112769521 ns]] Pose interrupt received: x=6, y=4[0m
+[0m[ INFO] [1733118318.123652180]: [[1733118318121164140 ns]] Tick completed[0m
+[33m[ WARN] [1733118318.346030512]: VIOLATION: Bump interrupt received outside of tick at time 1733118318325655467[0m
+[33m[ WARN] [1733118318.362510789]: VIOLATION: Pose interrupt received outside of tick at time 1733118318361954562[0m
+[0m[ INFO] [1733118318.378542296]: [[1733118318377871612 ns]] New tick started[0m
+[0m[ INFO] [1733118318.593452148]: [[1733118318583635929 ns]] Bump interrupt received: (6,4)->(7,4) = true[0m
+[0m[ INFO] [1733118318.605106045]: [[1733118318604511313 ns]] Pose interrupt received: x=6, y=4[0m
+[0m[ INFO] [1733118318.618801755]: [[1733118318618212252 ns]] Tick completed[0m
+[33m[ WARN] [1733118318.836594661]: VIOLATION: Bump interrupt received outside of tick at time 1733118318818934633[0m
+[33m[ WARN] [1733118318.848665480]: VIOLATION: Visit interrupt received outside of tick at time 1733118318847977989[0m
+[33m[ WARN] [1733118318.848682640]: VIOLATION: Pose interrupt received outside of tick at time 1733118318847980134[0m
+[0m[ INFO] [1733118318.859990986]: [[1733118318857816084 ns]] New tick started[0m
+[0m[ INFO] [1733118319.095948056]: [[1733118319067484205 ns]] Bump interrupt received: (8,4)->(8,5) = true[0m
+[0m[ INFO] [1733118319.114329374]: [[1733118319113805062 ns]] Pose interrupt received: x=7, y=4[0m
+[0m[ INFO] [1733118319.129491527]: [[1733118319129041925 ns]] Tick completed[0m
+[33m[ WARN] [1733118319.349967152]: VIOLATION: Bump interrupt received outside of tick at time 1733118319329641750[0m
+[33m[ WARN] [1733118319.357661956]: VIOLATION: Pose interrupt received outside of tick at time 1733118319357188551[0m
+[0m[ INFO] [1733118319.375250141]: [[1733118319374335868 ns]] New tick started[0m
+[0m[ INFO] [1733118319.605649564]: [[1733118319581042480 ns]] Bump interrupt received: (7,4)->(7,5) = false[0m
+[0m[ INFO] [1733118319.616517107]: [[1733118319615919346 ns]] Pose interrupt received: x=7, y=4[0m
+[0m[ INFO] [1733118319.626170330]: [[1733118319625725830 ns]] Tick completed[0m
+[33m[ WARN] [1733118319.864988912]: VIOLATION: Bump interrupt received outside of tick at time 1733118319833977280[0m
+[33m[ WARN] [1733118319.872264268]: VIOLATION: Visit interrupt received outside of tick at time 1733118319871305932[0m
+[33m[ WARN] [1733118319.872275034]: VIOLATION: Pose interrupt received outside of tick at time 1733118319871307120[0m
+[0m[ INFO] [1733118319.883821288]: [[1733118319882724622 ns]] New tick started[0m
+[0m[ INFO] [1733118320.099238475]: [[1733118320084234694 ns]] Bump interrupt received: (7,3)->(8,3) = true[0m
+[0m[ INFO] [1733118320.112937783]: [[1733118320111434063 ns]] Pose interrupt received: x=7, y=3[0m
+[0m[ INFO] [1733118320.124260023]: [[1733118320123417114 ns]] Tick completed[0m
+[33m[ WARN] [1733118320.360305491]: VIOLATION: Bump interrupt received outside of tick at time 1733118320328885739[0m
+[33m[ WARN] [1733118320.377527781]: VIOLATION: Pose interrupt received outside of tick at time 1733118320377039857[0m
+[0m[ INFO] [1733118320.393838001]: [[1733118320393377214 ns]] New tick started[0m
+[0m[ INFO] [1733118320.622703654]: [[1733118320594928214 ns]] Bump interrupt received: (7,4)->(8,4) = false[0m
+[0m[ INFO] [1733118320.633944618]: [[1733118320633464262 ns]] Pose interrupt received: x=7, y=3[0m
+[0m[ INFO] [1733118320.652459101]: [[1733118320651962759 ns]] Tick completed[0m
+[33m[ WARN] [1733118320.877662008]: VIOLATION: Bump interrupt received outside of tick at time 1733118320857629793[0m
+[33m[ WARN] [1733118320.892108260]: VIOLATION: Visit interrupt received outside of tick at time 1733118320891568124[0m
+[33m[ WARN] [1733118320.892120185]: VIOLATION: Pose interrupt received outside of tick at time 1733118320891570876[0m
+[0m[ INFO] [1733118320.905332742]: [[1733118320904918370 ns]] New tick started[0m
+[0m[ INFO] [1733118321.121584086]: [[1733118321105473780 ns]] Bump interrupt received: (6,3)->(6,4) = true[0m
+[0m[ INFO] [1733118321.145343090]: [[1733118321144926627 ns]] Tick completed[0m
+[33m[ WARN] [1733118321.363181164]: VIOLATION: Bump interrupt received outside of tick at time 1733118321350248269[0m
+[0m[ INFO] [1733118321.386047915]: [[1733118321385591870 ns]] New tick started[0m
+[0m[ INFO] [1733118321.604864105]: [[1733118321586178991 ns]] Bump interrupt received: (6,3)->(6,4) = true[0m
+[0m[ INFO] [1733118321.632322354]: [[1733118321629863976 ns]] Tick completed[0m
+[33m[ WARN] [1733118321.837501956]: VIOLATION: Bump interrupt received outside of tick at time 1733118321832491795[0m
+[0m[ INFO] [1733118321.867771805]: [[1733118321866864259 ns]] New tick started[0m
+[0m[ INFO] [1733118322.082255116]: [[1733118322070420798 ns]] Bump interrupt received: (6,3)->(6,4) = true[0m
+[0m[ INFO] [1733118322.108051406]: [[1733118322105762213 ns]] Tick completed[0m
+[33m[ WARN] [1733118322.332028107]: VIOLATION: Bump interrupt received outside of tick at time 1733118322308314167[0m
+[0m[ INFO] [1733118322.361963613]: [[1733118322361517192 ns]] New tick started[0m
+[0m[ INFO] [
+=== Violations from ece642rtle_forward_monitor ===
+[0m[ INFO] [1733118282.178036972]: [[1733118282177749622 ns]] Initial position: (4,0), orientation: 0[0m
+[0m[ INFO] [1733118282.413570993]: [[1733118282412264247 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118282.671897783]: [[1733118282671332933 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118282.921427437]: [[1733118282920924613 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118283.179849157]: [[1733118283178899405 ns]] Rotation from 3 to 0[0m
+[33m[ WARN] [1733118283.433713098]: VIOLATION: Movement occurred in same tick as rotation at time 1733118283432989143[0m
+[0m[ INFO] [1733118283.433724186]: [[1733118283432989143 ns]] Movement from (4,0) to (3,0), orientation: 0[0m
+[0m[ INFO] [1733118283.673918343]: [[1733118283673236937 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118283.913898241]: [[1733118283913349684 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118284.169376287]: [[1733118284168933398 ns]] Rotation from 2 to 3[0m
+[33m[ WARN] [1733118284.410040531]: VIOLATION: Movement occurred in same tick as rotation at time 1733118284409540665[0m
+[0m[ INFO] [1733118284.410049725]: [[1733118284409540665 ns]] Movement from (3,0) to (3,1), orientation: 3[0m
+[0m[ INFO] [1733118284.652888871]: [[1733118284652067077 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118284.913786271]: [[1733118284913254451 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118285.162456403]: [[1733118285161917791 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118285.434255121]: [[1733118285433801401 ns]] Rotation from 2 to 1[0m
+[0m[ INFO] [1733118285.675496649]: [[1733118285674050020 ns]] Rotation from 1 to 0[0m
+[33m[ WARN] [1733118285.918566263]: VIOLATION: Movement occurred in same tick as rotation at time 1733118285917810530[0m
+[0m[ INFO] [1733118285.918576604]: [[1733118285917810530 ns]] Movement from (3,1) to (2,1), orientation: 0[0m
+[0m[ INFO] [1733118286.158455543]: [[1733118286157769250 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118286.418813976]: [[1733118286415970494 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118286.665769795]: [[1733118286665100827 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118286.912309757]: [[1733118286911290058 ns]] Rotation from 3 to 2[0m
+[0m[ INFO] [1733118287.149650545]: [[1733118287148747457 ns]] Rotation from 2 to 1[0m
+[33m[ WARN] [1733118287.386033625]: VIOLATION: Movement occurred in same tick as rotation at time 1733118287385149818[0m
+[0m[ INFO] [1733118287.386042253]: [[1733118287385149818 ns]] Movement from (2,1) to (2,0), orientation: 1[0m
+[0m[ INFO] [1733118287.659911834]: [[1733118287659513655 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118287.900900538]: [[1733118287900120389 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118288.139871303]: [[1733118288139256372 ns]] Rotation from 3 to 0[0m
+[33m[ WARN] [1733118288.394115248]: VIOLATION: Movement occurred in same tick as rotation at time 1733118288393584144[0m
+[0m[ INFO] [1733118288.394123296]: [[1733118288393584144 ns]] Movement from (2,0) to (1,0), orientation: 0[0m
+[0m[ INFO] [1733118288.635116577]: [[1733118288634476134 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118288.876756112]: [[1733118288875736831 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118289.145736834]: [[1733118289145233114 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118289.403041824]: [[1733118289402384147 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118289.658433892]: [[1733118289657716889 ns]] Movement from (1,0) to (0,0), orientation: 0[0m
+[0m[ INFO] [1733118289.897883092]: [[1733118289897368507 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118290.156411717]: [[1733118290155116348 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118290.397079144]: [[1733118290396554090 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118290.636048893]: [[1733118290635307847 ns]] Rotation from 3 to 2[0m
+[33m[ WARN] [1733118290.873753975]: VIOLATION: Movement occurred in same tick as rotation at time 1733118290873550353[0m
+[0m[ INFO] [1733118290.873761752]: [[1733118290873550353 ns]] Movement from (0,0) to (1,0), orientation: 2[0m
+[0m[ INFO] [1733118291.116101954]: [[1733118291115297321 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118291.373699171]: [[1733118291373071475 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118291.613352427]: [[1733118291612786756 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118291.881627229]: [[1733118291881121378 ns]] Rotation from 1 to 0[0m
+[0m[ INFO] [1733118292.122330404]: [[1733118292121813243 ns]] Rotation from 0 to 3[0m
+[33m[ WARN] [1733118292.363268954]: VIOLATION: Movement occurred in same tick as rotation at time 1733118292362633093[0m
+[0m[ INFO] [1733118292.363277479]: [[1733118292362633093 ns]] Movement from (1,0) to (1,1), orientation: 3[0m
+[0m[ INFO] [1733118292.602230197]: [[1733118292601464251 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118292.842868331]: [[1733118292841918718 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118293.097690188]: [[1733118293097240278 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118293.354251195]: [[1733118293353737679 ns]] Rotation from 2 to 1[0m
+[0m[ INFO] [1733118293.602144659]: [[1733118293600971283 ns]] Rotation from 1 to 0[0m
+[33m[ WARN] [1733118293.840455054]: VIOLATION: Movement occurred in same tick as rotation at time 1733118293839364734[0m
+[0m[ INFO] [1733118293.840463512]: [[1733118293839364734 ns]] Movement from (1,1) to (0,1), orientation: 0[0m
+[0m[ INFO] [1733118294.075208806]: [[1733118294074213638 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118294.329666416]: [[1733118294329066115 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118294.586121960]: [[1733118294585647505 ns]] Rotation from 2 to 3[0m
+[33m[ WARN] [1733118294.841871606]: VIOLATION: Movement occurred in same tick as rotation at time 1733118294841265070[0m
+[0m[ INFO] [1733118294.841880062]: [[1733118294841265070 ns]] Movement from (0,1) to (0,2), orientation: 3[0m
+[0m[ INFO] [1733118295.086986420]: [[1733118295085831564 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118295.323644983]: [[1733118295323089653 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118295.568864139]: [[1733118295567773046 ns]] Rotation from 1 to 2[0m
+[33m[ WARN] [1733118295.817821124]: VIOLATION: Movement occurred in same tick as rotation at time 1733118295817183346[0m
+[0m[ INFO] [1733118295.817829358]: [[1733118295817183346 ns]] Movement from (0,2) to (1,2), orientation: 2[0m
+[0m[ INFO] [1733118296.059208936]: [[1733118296058549076 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118296.305500170]: [[1733118296304537778 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118296.553681466]: [[1733118296553122705 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118296.797960991]: [[1733118296796949994 ns]] Rotation from 1 to 2[0m
+--
+[0m[ INFO] [1733118298.569915837]: [[1733118298569303041 ns]] Movement from (2,2) to (2,3), orientation: 3[0m
+[0m[ INFO] [1733118298.810454220]: [[1733118298809561018 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118299.066966776]: [[1733118299066332917 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118299.306919244]: [[1733118299305889917 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118299.561655058]: [[1733118299561203300 ns]] Rotation from 2 to 3[0m
+[33m[ WARN] [1733118299.818341672]: VIOLATION: Movement occurred in same tick as rotation at time 1733118299817589367[0m
+[0m[ INFO] [1733118299.818350758]: [[1733118299817589367 ns]] Movement from (2,3) to (2,4), orientation: 3[0m
+[0m[ INFO] [1733118300.089968383]: [[1733118300089493481 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118300.347671652]: [[1733118300347204401 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118300.595595288]: [[1733118300590700312 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118300.833144129]: [[1733118300832476146 ns]] Rotation from 2 to 1[0m
+[0m[ INFO] [1733118301.082003479]: [[1733118301081486568 ns]] Rotation from 1 to 0[0m
+[33m[ WARN] [1733118301.338306531]: VIOLATION: Movement occurred in same tick as rotation at time 1733118301337662558[0m
+[0m[ INFO] [1733118301.338314594]: [[1733118301337662558 ns]] Movement from (2,4) to (1,4), orientation: 0[0m
+[0m[ INFO] [1733118301.593845305]: [[1733118301593380388 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118301.849863205]: [[1733118301849420373 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118302.090408177]: [[1733118302089486026 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118302.335184194]: [[1733118302334350048 ns]] Rotation from 3 to 0[0m
+--
+[0m[ INFO] [1733118303.584215650]: [[1733118303583189105 ns]] Movement from (0,4) to (0,5), orientation: 3[0m
+[0m[ INFO] [1733118303.820532651]: [[1733118303820294082 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118304.084417068]: [[1733118304082891633 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118304.329599777]: [[1733118304329148948 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118304.575730633]: [[1733118304574966216 ns]] Rotation from 2 to 1[0m
+[33m[ WARN] [1733118304.835544196]: VIOLATION: Movement occurred in same tick as rotation at time 1733118304834501596[0m
+[0m[ INFO] [1733118304.835560049]: [[1733118304834501596 ns]] Movement from (0,5) to (0,4), orientation: 1[0m
+[0m[ INFO] [1733118305.087725886]: [[1733118305087267472 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118305.321698732]: [[1733118305321167499 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118305.594410748]: [[1733118305593822594 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118305.853055539]: [[1733118305851696352 ns]] Rotation from 0 to 3[0m
+[0m[ INFO] [1733118306.105923515]: [[1733118306105460800 ns]] Rotation from 3 to 2[0m
+[33m[ WARN] [1733118306.346352707]: VIOLATION: Movement occurred in same tick as rotation at time 1733118306345309864[0m
+[0m[ INFO] [1733118306.346367445]: [[1733118306345309864 ns]] Movement from (0,4) to (1,4), orientation: 2[0m
+[0m[ INFO] [1733118306.585626458]: [[1733118306585142183 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118306.842136326]: [[1733118306841614074 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118307.098263163]: [[1733118307097637387 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118307.361217100]: [[1733118307360132896 ns]] Rotation from 1 to 2[0m
+--
+[0m[ INFO] [1733118311.657762802]: [[1733118311657145526 ns]] Movement from (3,3) to (3,4), orientation: 3[0m
+[0m[ INFO] [1733118311.916558558]: [[1733118311916018704 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118312.155071963]: [[1733118312154427676 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118312.415162623]: [[1733118312414415773 ns]] Rotation from 1 to 2[0m
+[0m[ INFO] [1733118312.653378000]: [[1733118312652812156 ns]] Rotation from 2 to 3[0m
+[33m[ WARN] [1733118312.894480503]: VIOLATION: Movement occurred in same tick as rotation at time 1733118312893535364[0m
+[0m[ INFO] [1733118312.894490505]: [[1733118312893535364 ns]] Movement from (3,4) to (3,5), orientation: 3[0m
+[0m[ INFO] [1733118313.146683324]: [[1733118313146084493 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118313.386285768]: [[1733118313385298285 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118313.629532132]: [[1733118313629033525 ns]] Rotation from 1 to 2[0m
+[33m[ WARN] [1733118313.869427338]: VIOLATION: Movement occurred in same tick as rotation at time 1733118313868671622[0m
+[0m[ INFO] [1733118313.869437791]: [[1733118313868671622 ns]] Movement from (3,5) to (4,5), orientation: 2[0m
+[0m[ INFO] [1733118314.138014342]: [[1733118314137539227 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118314.379148786]: [[1733118314378261693 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118314.619537721]: [[1733118314618688875 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118314.874815464]: [[1733118314874122340 ns]] Rotation from 1 to 2[0m
+--
+[0m[ INFO] [1733118317.613397969]: [[1733118317612312795 ns]] Movement from (5,4) to (6,4), orientation: 2[0m
+[0m[ INFO] [1733118317.865715555]: [[1733118317865225657 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118318.113989158]: [[1733118318112769521 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118318.362543986]: [[1733118318361954562 ns]] Rotation from 0 to 1[0m
+[0m[ INFO] [1733118318.605150548]: [[1733118318604511313 ns]] Rotation from 1 to 2[0m
+[33m[ WARN] [1733118318.848751718]: VIOLATION: Movement occurred in same tick as rotation at time 1733118318847980134[0m
+[0m[ INFO] [1733118318.848762617]: [[1733118318847980134 ns]] Movement from (6,4) to (7,4), orientation: 2[0m
+[0m[ INFO] [1733118319.114378066]: [[1733118319113805062 ns]] Rotation from 2 to 3[0m
+[0m[ INFO] [1733118319.357692383]: [[1733118319357188551 ns]] Rotation from 3 to 0[0m
+[0m[ INFO] [1733118319.616519909]: [[1733118319615919346 ns]] Rotation from 0 to 1[0m
+[33m[ WARN] [1733118319.872303744]: VIOLATION: Movement occurred in same tick as rotation at time 1733118319871307120[0m
+[0m[ INFO] [1733118319.872311510]: [[1733118319871307120 ns]] Movement from (7,4) to (7,3), orientation: 1[0m
+[0m[ INFO] [1733118320.113033408]: [[17331183201114340
+=== Violations from ece642rtle_wall_monitor ===
+=== Violations from ece642rtle_face_monitor ===
+[33m[ WARN] [1733118282.166934435]: VIOLATION: Bump check before position initialization at time 1733118282149342266[0m
+[0m[ INFO] [1733118282.178134755]: [[1733118282177749622 ns]] Updated position: (4,0), orientation: 0[0m
+[0m[ INFO] [1733118282.399526045]: [[1733118282387169845 ns]] Valid bump check for wall (4,0)->(4,1)[0m
+[0m[ INFO] [1733118282.412891473]: [[1733118282412264247 ns]] Updated position: (4,0), orientation: 1[0m
+[0m[ INFO] [1733118282.660249852]: [[1733118282633134093 ns]] Valid bump check for wall (4,0)->(5,0)[0m
+[0m[ INFO] [1733118282.671721289]: [[1733118282671332933 ns]] Updated position: (4,0), orientation: 2[0m
+=== Violations from ece642rtle_solved_monitor ===
+[0m[ INFO] [1733118320.112574608]: [[1733118320111434063 ns]] Position update: (7,3), orientation: 2[0m
+[0m[ INFO] [1733118320.377412079]: [[1733118320377039857 ns]] Position update: (7,3), orientation: 3[0m
+[0m[ INFO] [1733118320.633818488]: [[1733118320633464262 ns]] Position update: (7,3), orientation: 0[0m
+[0m[ INFO] [1733118320.892009848]: [[1733118320891570876 ns]] Position update: (6,3), orientation: 0[0m
+[0m[ INFO] [1733118321.132040168]: [[1733118321121067745 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118321.363120876]: VIOLATION: Bump check after maze completion at time 1733118321350248269[0m
+[0m[ INFO] [1733118321.374668634]: [[1733118321362175563 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118321.604953871]: VIOLATION: Bump check after maze completion at time 1733118321586178991[0m
+[0m[ INFO] [1733118321.612484388]: [[1733118321604226932 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118321.837536459]: VIOLATION: Bump check after maze completion at time 1733118321832491795[0m
+[0m[ INFO] [1733118321.849522457]: [[1733118321837042347 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118322.082199805]: VIOLATION: Bump check after maze completion at time 1733118322070420798[0m
+[0m[ INFO] [1733118322.093880974]: [[1733118322081589130 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118322.331772401]: VIOLATION: Bump check after maze completion at time 1733118322308314167[0m
+[0m[ INFO] [1733118322.345883343]: [[1733118322330467291 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118322.588868928]: VIOLATION: Bump check after maze completion at time 1733118322563809947[0m
+[0m[ INFO] [1733118322.602349179]: [[1733118322588369186 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118322.831026224]: VIOLATION: Bump check after maze completion at time 1733118322822828953[0m
+[0m[ INFO] [1733118322.843210863]: [[1733118322830134844 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118323.070401491]: VIOLATION: Bump check after maze completion at time 1733118323060335340[0m
+[0m[ INFO] [1733118323.081582457]: [[1733118323069175537 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118323.311767999]: VIOLATION: Bump check after maze completion at time 1733118323301496631[0m
+[0m[ INFO] [1733118323.324755492]: [[1733118323310706969 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118323.553877748]: VIOLATION: Bump check after maze completion at time 1733118323540535158[0m
+[0m[ INFO] [1733118323.564955719]: [[1733118323552480407 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118323.799180497]: VIOLATION: Bump check after maze completion at time 1733118323777503896[0m
+[0m[ INFO] [1733118323.817643365]: [[1733118323797985445 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118324.058524642]: VIOLATION: Bump check after maze completion at time 1733118324035448825[0m
+[0m[ INFO] [1733118324.075595634]: [[1733118324058065821 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118324.322827791]: VIOLATION: Bump check after maze completion at time 1733118324290005414[0m
+[0m[ INFO] [1733118324.334015447]: [[1733118324322229538 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118324.584531001]: VIOLATION: Bump check after maze completion at time 1733118324555346827[0m
+[0m[ INFO] [1733118324.604677309]: [[1733118324584047451 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118324.842259583]: VIOLATION: Bump check after maze completion at time 1733118324818085760[0m
+[0m[ INFO] [1733118324.857956878]: [[1733118324841393454 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118325.092975767]: VIOLATION: Bump check after maze completion at time 1733118325074213521[0m
+[0m[ INFO] [1733118325.098633585]: [[1733118325092466810 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118325.333645954]: VIOLATION: Bump check after maze completion at time 1733118325314594429[0m
+[0m[ INFO] [1733118325.341364045]: [[1733118325333102804 ns]] Maze completed at position (6,3)[0m
+[33m[ WARN] [1733118325.595967305]: VIOLATION: Bump check after maze completion at time 1733118325563960612[0m
+[0m[ INFO] [1733118325.609456981]: [[1733118325595338400 ns]] Maze completed at position (6,3)[0m
+[33m[ WAR
+=== Violations from ece642rtle_atend_monitor ===
+[33m[ WARN] [1733118282.177584743]: VIOLATION: atEnd check before position initialization at time 1733118282166050844[0m
+[0m[ INFO] [1733118282.178515570]: [[1733118282177749622 ns]] Position updated: (4,0)[0m
+[0m[ INFO] [1733118282.413253775]: [[1733118282412264247 ns]] Position updated: (4,0)[0m
+[0m[ INFO] [1733118282.413327173]: [[1733118282399113164 ns]] Valid atEnd check at (4,0)[0m
+[0m[ INFO] [1733118282.671787869]: [[1733118282671332933 ns]] Position updated: (4,0)[0m
+[0m[ INFO] [1733118282.671799982]: [[1733118282659323416 ns]] Valid atEnd check at (4,0)[0m
+[0m[ INFO] [1733118282.921323331]: [[1733118282920924613 ns]] Position updated: (4,0)[0m
+[0m[ INFO] [1733118282.921335259]: [[1733118282907390866 ns]] Valid atEnd check at (4,0)[0m
+[0m[ INFO] [1733118283.179743835]: [[1733118283178899405 ns]] Position updated: (4,0)[0m
+[0m[ INFO] [1733118283.179756086]: [[1733118283168471195 ns]] Valid atEnd check at (4,0)[0m
+[0m[ INFO] [1733118283.433568600]: [[1733118283432989143 ns]] Position updated: (3,0)[0m
+[33m[ WARN] [1733118283.433586209]: VIOLATION: atEnd check at (4,0) while turtle is at (3,0) at time 1733118283416910315[0m
+[0m[ INFO] [1733118283.673736401]: [[1733118283673236937 ns]] Position updated: (3,0)[0m
+[0m[ INFO] [1733118283.673753164]: [[1733118283665335946 ns]] Valid atEnd check at (3,0)[0m
+[0m[ INFO] [1733118283.913765770]: [[1733118283913349684 ns]] Position updated: (3,0)[0m
+[0m[ INFO] [1733118283.913781798]: [[1733118283905181032 ns]] Valid atEnd check at (3,0)[0m
+[0m[ INFO] [1733118284.169275020]: [[1733118284168933398 ns]] Position updated: (3,0)[0m
+[0m[ INFO] [1733118284.169287340]: [[1733118284157824761 ns]] Valid atEnd check at (3,0)[0m
+[0m[ INFO] [1733118284.409926805]: [[1733118284409540665 ns]] Position updated: (3,1)[0m
+[33m[ WARN] [1733118284.409940463]: VIOLATION: atEnd check at (3,0) while turtle is at (3,1) at time 1733118284397125999[0m
+[0m[ INFO] [1733118284.652731534]: [[1733118284652067077 ns]] Position updated: (3,1)[0m
+[0m[ INFO] [1733118284.652755199]: [[1733118284641958614 ns]] Valid atEnd check at (3,1)[0m
+[0m[ INFO] [1733118284.913683073]: [[1733118284913254451 ns]] Position updated: (3,1)[0m
+[0m[ INFO] [1733118284.913695649]: [[1733118284900993674 ns]] Valid atEnd check at (3,1)[0m
+[0m[ INFO] [1733118285.162336699]: [[1733118285161917791 ns]] Position updated: (3,1)[0m
+--
+[0m[ INFO] [1733118285.434152128]: [[1733118285433801401 ns]] Position updated: (3,1)[0m
+[0m[ INFO] [1733118285.434164517]: [[1733118285416586032 ns]] Valid atEnd check at (3,1)[0m
+[0m[ INFO] [1733118285.674895326]: [[1733118285674050020 ns]] Position updated: (3,1)[0m
+[0m[ INFO] [1733118285.674963490]: [[1733118285661067576 ns]] Valid atEnd check at (3,1)[0m
+[0m[ INFO] [1733118285.918428403]: [[1733118285917810530 ns]] Position updated: (2,1)[0m
+[33m[ WARN] [1733118285.918444406]: VIOLATION: atEnd check at (3,1) while turtle is at (2,1) at time 1733118285905849345[0m
+[0m[ INFO] [1733118286.157442090]: [[1733118286140979626 ns]] Valid atEnd check at (2,1)[0m
+[0m[ INFO] [1733118286.158388545]: [[1733118286157769250 ns]] Position updated: (2,1)[0m
+[0m[ INFO] [1733118286.418482688]: [[1733118286415970494 ns]] Position updated: (2,1)[0m
+[0m[ INFO] [1733118286.418528662]: [[1733118286404025372 ns]] Valid atEnd check at (2,1)[0m
+[0m[ INFO] [1733118286.665640356]: [[1733118286665100827 ns]] Position updated: (2,1)[0m
+--
+[0m[ INFO] [1733118286.912200471]: [[1733118286911290058 ns]] Position updated: (2,1)[0m
+[0m[ INFO] [1733118286.912213691]: [[1733118286901302731 ns]] Valid atEnd check at (2,1)[0m
+[0m[ INFO] [1733118287.149310340]: [[1733118287148747457 ns]] Position updated: (2,1)[0m
+[0m[ INFO] [1733118287.149356807]: [[1733118287136986891 ns]] Valid atEnd check at (2,1)[0m
+[0m[ INFO] [1733118287.385900432]: [[1733118287385149818 ns]] Position updated: (2,0)[0m
+[33m[ WARN] [1733118287.385931348]: VIOLATION: atEnd check at (2,1) while turtle is at (2,0) at time 1733118287375819895[0m
+[0m[ INFO] [1733118287.659822273]: [[1733118287659513655 ns]] Position updated: (2,0)[0m
+[0m[ INFO] [1733118287.659833804]: [[1733118287643862077 ns]] Valid atEnd check at (2,0)[0m
+[0m[ INFO] [1733118287.900776971]: [[1733118287900120389 ns]] Position updated: (2,0)[0m
+[0m[ INFO] [1733118287.900794449]: [[1733118287887549502 ns]] Valid atEnd check at (2,0)[0m
+[0m[ INFO] [1733118288.139723984]: [[1733118288139256372 ns]] Position updated: (2,0)[0m
+[0m[ INFO] [1733118288.139741700]: [[1733118288127161310 ns]] Valid atEnd check at (2,0)[0m
+[0m[ INFO] [1733118288.394023111]: [[1733118288393584144 ns]] Position updated: (1,0)[0m
+[33m[ WARN] [1733118288.394034816]: VIOLATION: atEnd check at (2,0) while turtle is at (1,0) at time 1733118288380134468[0m
+[0m[ INFO] [1733118288.635001231]: [[1733118288634476134 ns]] Position updated: (1,0)[0m
+[0m[ INFO] [1733118288.635015138]: [[1733118288620388946 ns]] Valid atEnd check at (1,0)[0m
+[0m[ INFO] [1733118288.876468683]: [[1733118288875736831 ns]] Position updated: (1,0)[0m
+[0m[ INFO] [1733118288.876489841]: [[1733118288865638481 ns]] Valid atEnd check at (1,0)[0m
+[0m[ INFO] [1733118289.145621639]: [[1733118289145233114 ns]] Position updated: (1,0)[0m
+[0m[ INFO] [1733118289.145635319]: [[1733118289130667055 ns]] Valid atEnd check at (1,0)[0m
+[0m[ INFO] [1733118289.402940453]: [[1733118289402384147 ns]] Position updated: (1,0)[0m
+[0m[ INFO] [1733118289.402951398]: [[1733118289384980709 ns]] Valid atEnd check at (1,0)[0m
+[0m[ INFO] [1733118289.658322811]: [[1733118289657716889 ns]] Position updated: (0,0)[0m
+[33m[ WARN] [1733118289.658335822]: VIOLATION: atEnd check at (1,0) while turtle is at (0,0) at time 1733118289639100435[0m
+[0m[ INFO] [1733118289.897762178]: [[1733118289897368507 ns]] Position updated: (0,0)[0m
+[0m[ INFO] [1733118289.897774201]: [[1733118289885044748 ns]] Valid atEnd check at (0,0)[0m
+[0m[ INFO] [1733118290.155466988]: [[1733118290155116348 ns]] Position updated: (0,0)[0m
+[0m[ INFO] [1733118290.155501897]: [[1733118290137281843 ns]] Valid atEnd check at (0,0)[0m
+[0m[ INFO] [1733118290.396955778]: [[1733118290396554090 ns]] Position updated: (0,0)[0m
+--
+[0m[ INFO] [1733118291.881513031]: [[1733118291881121378 ns]] Position updated: (1,0)[0m
+[0m[ INFO] [1733118291.881526313]: [[1733118291869667277 ns]] Valid atEnd check at (1,0)[0m
+[0m[ INFO] [1733118292.122223924]: [[1733118292121813243 ns]] Position updated: (1,0)[0m
+[0m[ INFO] [1733118292.122235755]: [[1733118292109201168 ns]] Valid atEnd check at (1,0)[0m
+[0m[ INFO] [1733118292.363166307]: [[1733118292362633093 ns]] Position updated: (1,1)[0m
+[33m[ WARN] [1733118292.363179655]: VIOLATION: atEnd check at (1,0) while turtle is at (1,1) at time 1733118292353628371[0m
+[0m[ INFO] [1733118292.601990286]: [[1733118292601464251 ns]] Position updated: (1,1)[0m
+[0m[ INFO] [1733118292.602003162]: [[1733118292589044339 ns]] Valid atEnd check at (1,1)[0m
+[0m[ INFO] [1733118292.842533967]: [[1733118292841918718 ns]] Position updated: (1,1)[0m
+[0m[ INFO] [1733118292.842578366]: [[1733118292829048355 ns]] Valid atEnd check at (1,1)[0m
+[0m[ INFO] [1733118293.097586977]: [[1733118293097240278 ns]] Position updated: (1,1)[0m
+--
+[0m[ INFO] [1733118293.354137798]: [[1733118293353737679 ns]] Position updated: (1,1)[0m
+[0m[ INFO] [1733118293.354151242]: [[1733118293337207041 ns]] Valid atEnd check at (1,1)[0m
+[0m[ INFO] [1733118293.601960859]: [[1733118293600971283 ns]] Position updated: (1,1)[0m
+[0m[ INFO] [1733118293.601974246]: [[1733118293582631088 ns]] Valid atEnd check at (1,1)[0m
+[0m[ INFO] [1733118293.840357973]: [[1733118293839364734 ns]] Position updated: (0,1)[0m
+[33m[ WARN] [1733118293.840370480]: VIOLATION: atEnd check at (1,1) while turtle is at (0,1) at time 1733118293829839955[0m
+[0m[ INFO] [1733118294.075005307]: [[1733118294074213638 ns]] Position updated: (0,1)[0m
+[0m[ INFO] [1733118294.075025844]: [[1733118294065110227 ns]] Valid atEnd check at (0,1)[0m
+[0m[ INFO] [1733118294.329528759]: [[1733118294329066115 ns]] Position updated: (0,1)[0m
+[0m[ INFO] [1733118294.329544797]: [[1733118294314778319 ns]] Valid atEnd check at (0,1)[0m
+[0m[ INFO] [1733118294.586020510]: [[1733118294585647505 ns]] Position updated: (0,1)[0m
+[0m[ INFO] [1733118294.586032099]: [[1733118294568173031 ns]] Valid atEnd check at (0,1)[0m
+[0m[ INFO] [1733118294.841764035]: [[1733118294841265070 ns]] Position updated: (0,2)[0m
+[33m[ WARN] [1733118294.841776781]: VIOLATION: atEnd check at (0,1) while turtle is at (0,2) at time 1733118294826945443[0m
+[0m[ INFO] [1733118295.086771847]: [[1733118295085831564 ns]] Position updated: (0,2)[0m
+[0m[ INFO] [1733118295.086788023]: [[1733118295073457888 ns]] Valid atEnd check at (0,2)[0m
+[0m[ INFO] [1733118295.323536415]: [[1733118295323089653 ns]] Position updated: (0,2)[0m
+[0m[ INFO] [1733118295.323549780]: [[1733118295312164230 ns]] Valid atEnd check at (0,2)[0m
+[0m[ INFO] [1733118295.568642518]: [[1733118295567773046 ns]] Position updated: (0,2)[0m
+[0m[ INFO] [1733118295.568662261]: [[1733118295557823469 ns]] Valid atEnd check at (0,2)[0m
+[0m[ INFO] [1733118295.817628479]: [[1733118295817183346 ns]] Position updated: (1,2)[0m
+[33m[ WARN] [1733118295.817640167]: VIOLATION: atEnd check at (0,2) while turtle is at (1,2) at time 1733118295800659329[0m
+[0m[ INFO] [1733118296.059040711]: [[1733118296058549076 ns]] Position updated: (1,2)[0m
+[0m[ INFO] [1733118296.059056807]: [[1733118296052776930 ns]] Valid atEnd check at (1,2)[0m
+[0m[ INFO] [1733118296.305402362]: [[1733118296304537778 ns]] Position updated: (1,2)[0m
+[0m[ INFO] [1733118296.305414004]: [[1733118296294474960 ns]] Valid atEnd check at (1,2)[0m
+[0m[ INFO] [1733118296.553567572]: [[1733118296553122705 ns]] Position updated: (1,2)[0m
+[0m[ INFO] [1733118296.553581241]: [[1733118296535301845 ns]] Valid atEnd check at (1,2)[0m
+[0m[ INFO] [1733118296.797569543]: [[1733118296796949994 ns]] Position updated: (1,2)[0m
+[0m[ INFO] [1733118296.797590594]: [[1733118296786086981 ns]] Valid atEnd check at (1,2)[0m
+[0m[ INFO] [1733118297.038784826]: [[1733118297038253016 ns]] Position updated: (2,2)[0m
+[33m[ WARN] [1733118297.038797979]: VIOLATION: atEnd check at (1,2) while turtle is at (2,2) at time 1733118297026215579[0m
+[0m[ INFO] [1733118297.290214957]: [[1733118297289845093 ns]] Position updated: (2,2)[0m
+[0m[ INFO] [1733118297.290226957]: [[1733118297274181717 ns]] Valid atEnd check at (2,2)[0m
+[0m[ INFO] [1733118297.548507584]: [[1733118297548136123 ns]] Position updated: (2,2)[0m
+[0m[ INFO] [1733118297.548520101]: [[1733118297537688876 ns]] Valid atEnd check at (2,2)[0m
+[0m[ INFO] [1733118297.817700099]: [[1733118297817297878 ns]] Position updated: (2,2)[0m
+--
+[0m[ INFO] [1733118298.058426642]: [[1733118298057970019 ns]] Position updated: (2,2)[0m
+[0m[ INFO] [1733118298.058465719]: [[1733118298046101132 ns]] Valid atEnd check at (2,2)[0m
+[0m[ INFO] [1733118298.318739483]: [[1733118298318325824 ns]] Position updated: (2,2)[0m
+[0m[ INFO] [1733118298.318752560]: [[1733118298307991423 ns]] Valid atEnd check at (2,2)[0m
+[0m[ INFO] [1733118298.569809224]: [[1733118298569303041 ns]] Position updated: (2,3)[0m
+[33m[ WARN] [1733118298.569821835]: VIOLATION: atEnd check at (2,2) while turtle is at (2,3) at time 1733118298554842405[0m
+[0m[ INFO] [1733118298.810292807]: [[1733118298809561018 ns]] Position updated: (2,3)[0m
+[0m[ INFO] [1733118298.810311858]: [[1733118298797178876 ns]] Valid atEnd check at (2,3)[0m
+[0m[ INFO] [1733118299.066864212]: [[1733118299066332917 ns]] Position updated: (2,3)[0m
+[0m[ INFO] [1733118299.066876736]: [[1733118299053163714 ns]] Valid atEnd check at (2,3)[0m
+[0m[ INFO] [1733118299.306606272]: [[1733118299305889917 ns]] Position updated: (2,3)[0m
+[0m[ INFO] [1733118299.306627842]: [[1733118299296613457 ns]] Valid atEnd check at (2,3)[0m
+[0m[ INFO] [1733118299.561558280]: [[1733118299561203300 ns]] Position updated: (2,3)[0m
+[0m[ INFO] [1733118299.561570451]: [[1733118299550055270 ns]] Valid atEnd check at (2,3)[0m
+[0m[ INFO] [1733118299.818229216]: [[1733118299817589367 ns]] Position updated: (2,4)[0m
+[33m[ WARN] [1733118299.818242599]: VIOLATION: atEnd check at (2,3) while turtle is at (2,4) at time 1733118299808462443[0m
+[0m[ INFO] [1733118300.089864511]: [[1733118300089493481 ns]] Position updated: (2,4)[0m
+[0m[ INFO] [1733118300.089877250]: [[1733118300072199996 ns]] Valid atEnd check at (2,4)[0m
+[0m[ INFO] [1733118300.347555797]: [[1733118300347204401 ns]] Position updated: (2,4)[0m
+[0m[ INFO] [1733118300.347567605]: [[1733118300336747561 ns]] Valid atEnd check at (2,4)[0m
+[0m[ INFO] [1733118300.595386119]: [[1733118300590700312 ns]] Position updated: (2,4)[0m
+--
+[0m[ INFO] [1733118300.832971027]: [[1733118300832476146 ns]] Position updated: (2,4)[0m
+[0m[ INFO] [1733118300.832987902]: [[1733118300821095790 ns]] Valid atEnd check at (2,4)[0m
+[0m[ INFO] [1733118301.081887787]: [[1733118301081486568 ns]] Position updated: (2,4)[0m
+[0m[ INFO] [1733118301.081901303]: [[1733118301065015940 ns]] Valid atEnd check at (2,4)[0m
+[0m[ INFO] [1733118301.338192670]: [[1733118301337662558 ns]] Position updated: (1,4)[0m
+[33m[ WARN] [1733118301.338205911]: VIOLATION: atEnd check at (2,4) while turtle is at (1,4) at time 1733118301326275990[0m
+[0m[ INFO] [1733118301.593739115]: [[1733118301593380388 ns]] Position updated: (1,4)[0m
+[0m[ INFO] [1733118301.593752207]: [[1733118301577427998 ns]] Valid atEnd check at (1,4)[0m
+[0m[ INFO] [1733118301.849765916]: [[1733118301849420373 ns]] Position updated: (1,4)[0m
+[0m[ INFO] [1733118301.849777379]: [[1733118301839999251 ns]] Valid atEnd check at (1,4)[0m
+[0m[ INFO] [1733118302.090168818]: [[1733118302089486026 ns]] Position updated: (1,4)[0m
+[0m[ INFO] [1733118302.090189309]: [[1733118302077076390 ns]] Valid atEnd check at (1,4)[0m
+[0m[ INFO] [1733118302.335036408]: [[1733118302334350048 ns]] Position updated: (1,4)[0m
+[0m[ INFO] [1733118302.335052743]: [[1733118302321908513 ns]] Valid atEnd check at (1,4)[0m
+[0m[ INFO] [1733118302.576041274]: [[1733118302575313979 ns]] Position updated: (0,4)[0m
+[33m[ WARN] [1733118302.576057987]: VIOLATION: atEnd check at (1,4) while turtle is at (0,4) at time 1733118302562544010[0m
+[0m[ INFO] [1733118302.830656117]: [[1733118302829855296 ns]] Position updated: (0,4)[0m
+[0m[ INFO] [1733118302.830656192]: [[1733118302818052941 ns]] Valid atEnd check at (0,4)[0m
+[0m[ INFO] [1733118303.083631886]: [[1733118303082667337 ns]] Position updated: (0,4)[0m
+[0m[ INFO] [1733118303.083649370]: [[1733118303070726103 ns]] Valid atEnd check at (0,4)[0m
+[0m[ INFO] [1733118303.322111705]: [[1733118303321732091 ns]] Position updated: (0,4)[0m
+[0m[ INFO] [1733118303.322123735]: [[1733118303309001164 ns]] Valid atEnd check at (0,4)[0m
+[0m[ INFO] [1733118303.584049375]: [[1733118303583189105 ns]] Position updated: (0,5)[0m
+[33m[ WARN] [1733118303.584064271]: VIOLATION: atEnd check at (0,4) while turtle is at (0,5) at time 1733118303570223992[0m
+[0m[ INFO] [1733118303.820062115]: [[1733118303811207699 ns]] Valid atEnd check at (0,5)[0m
+[0m[ INFO] [1733118303.820831253]: [[1733118303820294082 ns]] Position updated: (0,5)[0m
+[0m[ INFO] [1733118304.083710449]: [[1733118304082891633 ns]] Position updated: (0,5)[0m
+[0m[ INFO] [1733118304.083919687]: [[1733118304068219196 ns]] Valid atEnd check at (0,5)[0m
+[0m[ INFO] [1733118304.329499501]: [[1733118304329148948 ns]] Position updated: (0,5)[0m
+[0m[ INFO] [1733118304.329511307]: [[1733118304312007600 ns]] Valid atEnd check at (0,5)[0m
+[0m[ INFO] [1733118304.575582934]: [[1733118304574966216 ns]] Position updated: (0,5)[0m
+[0m[ INFO] [1733118304.575599537]: [[1733118304562813958 ns]] Valid atEnd check at (0,5)[0m
+[0m[ INFO] [1733118304.835389502]: [[1733118304834501596 ns]] Position updated: (0,4)[0m
+[33m[ WARN] [1733118304.835408846]: VIOLATION: atEnd check at (0,5) while turtle is at (0,4) at time 1733118304820467816[0m
+[0m[ INFO] [1733118305.087624095]: [[1733118305087267472 ns]] Position updated: (0,4)[0m
+[0m[ INFO] [1733118305.087636430]: [[1733118305076799231 ns]] Valid atEnd check at (0,4)[0m
+[0m[ INFO] [1733118305.321596355]: [[1733118305321167499 ns]] Position updated: (0,4)[0m
+[0m[ INFO] [1733118305.321608410]: [[1733118305313048801 ns]] Valid atEnd check at (0,4)[0m
+[0m[ INFO] [1733118305.594271446]: [[1733118305593822594 ns]] Position updated: (0,4)[0m
+--
+[0m[ INFO] [1733118305.852055287]: [[1733118305851696352 ns]] Position updated: (0,4)[0m
+[0m[ INFO] [1733118305.852087540]: [[1733118305833715994 ns]] Valid atEnd check at (0,4)[0m
+[0m[ INFO] [1733118306.105798079]: [[1733118306105460800 ns]] Position updated: (0,4)[0m
+[0m[ INFO] [1733118306.105809577]: [[1733118306090269403 ns]] Valid atEnd check at (0,4)[0m
+[0m[ INFO] [1733118306.346204075]: [[1733118306345309864 ns]] Position updated: (1,4)[0m
+[33m[ WARN] [1733118306.346223051]: VIOLATION: atEnd check at (0,4) while turtle is at (1,4) at time 1733118306333026966[0m
+[0m[ INFO] [1733118306.585519171]: [[1733118306585142183 ns]] Position updated: (1,4)[0m
+[0m[ INFO] [1733118306.585531160]: [[1733118306573099311 ns]] Valid atEnd check at (1,4)[0m
+[0m[ INFO] [1733118306.842025915]: [[1733118306841614074 ns]] Position updated: (1,4)[0m
+[0m[ INFO] [1733118306.842039010]: [[1733118306825113442 ns]] Valid atEnd check at (1,4)[0m
+[0m[ INFO] [1733118307.098144195]: [[1733118307097637387 ns]] Position updated: (1,4)[0m
+[0m[ INFO] [1733118307.098158793]: [[1733118307084242535 ns]] Valid atEnd check at (1,4)[0m
+[0m[ INFO] [1733118307.360578302]: [[1733118307360132896 ns]] Position updated: (1,4)[0m
+[0m[ INFO] [1733118307.360595846]: [[1733118307348200742 ns]] Valid atEnd check at (1,4)[0m
+[0m[ INFO] [1733118307.609918481]: [[1733118307609341877 ns]] Position updated: (2,4)[0m
+[33m[ WARN] [1733118307.609934913]: VIOLATION: atEnd check at (1,4) while turtle is at (2,4) at time 1733118307596703258[0m
+[0m[ INFO] [1733118307.865795494]: [[1733118307865458960 ns]] Position updated: (2,4)[0m
+[0m[ INFO] [1733118307.865806875]: [[1733118307849414550 ns]] Valid atEnd check at (2,4)[0m
+[0m[ INFO] [1733118308.123157876]: [[1733118308122509590 ns]] Position updated: (2,4)[0m
+[0m[ INFO] [1733118308.123172547]: [[1733118308105638114 ns]] Valid atEnd check at (2,4)[0m
+[0m[ INFO] [1733118308.384401521]: [[1733118308384008166 ns]] Position updated: (2,4)[0m
+[0m[ INFO] [1733118308.384413633]: [[1733118308368496848 ns]] Valid atEnd check at (2,4)[0m
+[0m[ INFO] [1733118308.633732762]: [[1733118308633300802 ns]] Position updated: (2,3)[0m
+[33m[ WARN] [1733118308.633745514]: VIOLATION: atEnd check at (2,4) while turtle is at (2,3) at time 1733118308620257511[0m
+[0m[ INFO] [1733118308.889389389]: [[1733118308889122309 ns]] Position updated: (2,3)[0m
+[0m[ INFO] [1733118308.889389463]: [[1733118308873352197 ns]] Valid atEnd check at (2,3)[0m
+[0m[ INFO] [1733118309.135906440]: [[1733118309135390150 ns]] Position updated: (2,3)[0m
+[0m[ INFO] [1733118309.135924183]: [[1733118309123409597 ns]] Valid atEnd check at (2,3)[0m
+[0m[ INFO] [1733118309.385988397]: [[1733118309385644600 ns]] Position updated: (2,3)[0m
+--
+[0m[ INFO] [1733118309.642625313]: [[1733118309642077314 ns]] Position updated: (2,3)[0m
+[0m[ INFO] [1733118309.642637520]: [[1733118309631943995 ns]] Valid atEnd check at (2,3)[0m
+[0m[ INFO] [1733118309.897956988]: [[1733118309897573095 ns]] Position updated: (2,3)[0m
+[0m[ INFO] [1733118309.897970897]: [[1733118309880145750 ns]] Valid atEnd check at (2,3)[0m
+[0m[ INFO] [1733118310.137590215]: [[1733118310137008157 ns]] Position updated: (3,3)[0m
+[33m[ WARN] [1733118310.137605783]: VIOLATION: atEnd check at (2,3) while turtle is at (3,3) at time 1733118310128645644[0m
+[0m[ INFO] [1733118310.394691416]: [[1733118310394185327 ns]] Position updated: (3,3)[0m
+[0m[ INFO] [1733118310.394703596]: [[1733118310376686027 ns]] Valid atEnd check at (3,3)[0m
+[0m[ INFO] [1733118310.650058939]: [[1733118310649619852 ns]] Position updated: (3,3)[0m
+[0m[ INFO] [1733118310.650073129]: [[1733118310634209924 ns]] Valid atEnd check at (3,3)[0m
+[0m[ INFO] [1733118310.905919155]: [[1733118310905085899 ns]] Position updated: (3,3)[0m
+--
+[0m[ INFO] [1733118311.164034652]: [[1733118311147561058 ns]] Valid atEnd check at (3,3)[0m
+[0m[ INFO] [1733118311.166062835]: [[1733118311165367355 ns]] Position updated: (3,3)[0m
+[0m[ INFO] [1733118311.405065285]: [[1733118311404475616 ns]] Position updated: (3,3)[0m
+[0m[ INFO] [1733118311.405078840]: [[1733118311396057759 ns]] Valid atEnd check at (3,3)[0m
+[0m[ INFO] [1733118311.657639886]: [[1733118311657145526 ns]] Position updated: (3,4)[0m
+[33m[ WARN] [1733118311.657652802]: VIOLATION: atEnd check at (3,3) while turtle is at (3,4) at time 1733118311641301104[0m
+[0m[ INFO] [1733118311.916439645]: [[1733118311916018704 ns]] Position updated: (3,4)[0m
+[0m[ INFO] [1733118311.916451109]: [[1733118311905100210 ns]] Valid atEnd check at (3,4)[0m
+[0m[ INFO] [1733118312.154938042]: [[1733118312154427676 ns]] Position updated: (3,4)[0m
+[0m[ INFO] [1733118312.154951639]: [[1733118312141239772 ns]] Valid atEnd check at (3,4)[0m
+[0m[ INFO] [1733118312.415017416]: [[1733118312414415773 ns]] Position updated: (3,4)[0m
+[0m[ INFO] [1733118312.415034666]: [[1733118312402222493 ns]] Valid atEnd check at (3,4)[0m
+[0m[ INFO] [1733118312.653268844]: [[1733118312652812156 ns]] Position updated: (3,4)[0m
+[0m[ INFO] [1733118312.653282015]: [[1733118312641740453 ns]] Valid atEnd check at (3,4)[0m
+[0m[ INFO] [1733118312.894156760]: [[1733118312893535364 ns]] Position updated: (3,5)[0m
+[33m[ WARN] [1733118312.894174138]: VIOLATION: atEnd check at (3,4) while turtle is at (3,5) at time 1733118312881055383[0m
+[0m[ INFO] [1733118313.146570153]: [[1733118313146084493 ns]] Position updated: (3,5)[0m
+[0m[ INFO] [1733118313.146584135]: [[1733118313130504242 ns]] Valid atEnd check at (3,5)[0m
+[0m[ INFO] [1733118313.385975826]: [[1733118313385298285 ns]] Position updated: (3,5)[0m
+[0m[ INFO] [1733118313.386001483]: [[1733118313374108336 ns]] Valid atEnd check at (3,5)[0m
+[0m[ INFO] [1733118313.629435580]: [[1733118313629033525 ns]] Position updated: (3,5)[0m
+[0m[ INFO] [1733118313.629446541]: [[1733118313617779669 ns]] Valid atEnd check at (3,5)[0m
+[0m[ INFO] [1733118313.869278230]: [[1733118313868671622 ns]] Position updated: (4,5)[0m
+[33m[ WARN] [1733118313.869296436]: VIOLATION: atEnd check at (3,5) while turtle is at (4,5) at time 1733118313856698397[0m
+[0m[ INFO] [1733118314.137885999]: [[1733118314137539227 ns]] Position updated: (4,5)[0m
+[0m[ INFO] [1733118314.137898074]: [[1733118314120265531 ns]] Valid atEnd check at (4,5)[0m
+[0m[ INFO] [1733118314.378882874]: [[1733118314378261693 ns]] Position updated: (4,5)[0m
+[0m[ INFO] [1733118314.378899120]: [[1733118314366114793 ns]] Valid atEnd check at (4,5)[0m
+[0m[ INFO] [1733118314.619363538]: [[1733118314618688875 ns]] Position updated: (4,5)[0m
+[0m[ INFO] [1733118314.619384558]: [[1733118314606791443 ns]] Valid atEnd check at (4,5)[0m
+[0m[ INFO] [1733118314.874610259]: [[1733118314874122340 ns]] Position updated: (4,5)[0m
+[0m[ INFO] [1733118314.874622865]: [[1733118314856541313 ns]] Valid atEnd check at (4,5)[0m
+[0m[ INFO] [1733118315.130474882]: [[1733118315129924749 ns]] Position updated: (5,5)[0m
+[33m[ WARN] [1733118315.130488489]: VIOLATION: atEnd check at (4,5) while turtle is at (5,5) at time 1733118315110612806[0m
+[0m[ INFO] [1733118315.369447731]: [[1733118315369016952 ns]] Position updated: (5,5)[0m
+[0m[ INFO] [1733118315.369460942]: [[1733118315358704062 ns]] Valid atEnd check at (5,5)[0m
+[0m[ INFO] [1733118315.634162177]: [[1733118315633645506 ns]] Position updated: (5,5)[0m
+[0m[ INFO] [1733118315.634210228]: [[1733118315619323063 ns]] Valid atEnd check at (5,5)[0m
+[0m[ INFO] [1733118315.889641786]: [[1733118315889183954 ns]] Position updated: (5,5)[0m
+[0m[ INFO] [1733118315.889658279]: [[1733118315876410765 ns]] Valid atEnd check at (5,5)[0m
+[0m[ INFO] [1733118316.137913216]: [[1733118316137471248 ns]] Position updated: (5,4)[0m
+[33m[ WARN] [1733118316.137924823]: VIOLATION: atEnd check at (5,5) while turtle is at (5,4) at time 1733118316127341440[0m
+[0m[ INFO] [1733118316.379521412]: [[1733118316379007908 ns]] Position updated: (5,4)[0m
+[0m[ INFO] [1733118316.379539320]: [[1733118316366894968 ns]] Valid atEnd check at (5,4)[0m
+[0m[ INFO] [1733118316.617891107]: [[1733118316617200990 ns]] Position updated: (5,4)[0m
+[0m[ INFO] [1733118316.617922624]: [[1733118316605205070 ns]] Valid atEnd check at (5,4)[0m
+[0m[ INFO] [1733118316.879109597]: [[1733118316878258943 ns]] Position updated: (5,4)[0m
+--
+[0m[ INFO] [1733118317.116420390]: [[1733118317105953258 ns]] Valid atEnd check at (5,4)[0m
+[0m[ INFO] [1733118317.117277411]: [[1733118317116680065 ns]] Position updated: (5,4)[0m
+[0m[ INFO] [1733118317.369693353]: [[1733118317369342361 ns]] Position updated: (5,4)[0m
+[0m[ INFO] [1733118317.369706222]: [[1733118317355071800 ns]] Valid atEnd check at (5,4)[0m
+[0m[ INFO] [1733118317.613300405]: [[1733118317612312795 ns]] Position updated: (6,4)[0m
+[33m[ WARN] [1733118317.613313126]: VIOLATION: atEnd check at (5,4) while turtle is at (6,4) at time 1733118317601715446[0m
+[0m[ INFO] [1733118317.865617567]: [[1733118317865225657 ns]] Position updated: (6,4)[0m
+[0m[ INFO] [1733118317.865629433]: [[1733118317850413366 ns]] Valid atEnd check at (6,4)[0m
+[0m[ INFO] [1733118318.113687375]: [[1733118318112769521 ns]] Position updated: (6,4)[0m
+[0m[ INFO] [1733118318.113746337]: [[1733118318099606764 ns]] Valid atEnd check at (6,4)[0m
+[0m[ INFO] [1733118318.362436469]: [[1733118318361954562 ns]] Position updated: (6,4)[0m
+[0m[ INFO] [1733118318.362449289]: [[1733118318344863154 ns]] Valid atEnd check at (6,4)[0m
+[0m[ INFO] [1733118318.605006972]: [[1733118318604511313 ns]] Position updated: (6,4)[0m
+[0m[ INFO] [1733118318.605024383]: [[1733118318592594285 ns]] Valid atEnd check at (6,4)[0m
+[0m[ INFO] [1733118318.848583724]: [[1733118318847980134 ns]] Position updated: (7,4)[0m
+[33m[ WARN] [1733118318.848602181]: VIOLATION: atEnd check at (6,4) while turtle is at (7,4) at time 1733118318836086263[0m
+[0m[ INFO] [1733118319.114214544]: [[1733118319113805062 ns]] Position updated: (7,4)[0m
+[0m[ INFO] [1733118319.114227733]: [[1733118319094331807 ns]] Valid atEnd check at (7,4)[0m
+[0m[ INFO] [1733118319.357582838]: [[1733118319357188551 ns]] Position updated: (7,4)[0m
+[0m[ INFO] [1733118319.357594799]: [[1733118319349044706 ns]] Valid atEnd check at (7,4)[0m
+[0m[ INFO] [1733118319.616467948]: [[1733118319615919346 ns]] Position updated: (7,4)[0m
+[0m[ INFO] [1733118319.616483831]: [[1733118319605073689 ns]] Valid atEnd check at (7,4)[0m
+[0m[ INFO] [1733118319.872213841]: [[1733118319871307120 ns]] Position updated: (7,3)[0m
+[33m[ WARN] [1733118319.872225251]: VIOLATION: atEnd check at (7,4) while turtle is at (7,3) at time 1733118319864121756[0m
+[0m[ INFO] [1733118320.112662170]: [[1733118320111434063 ns]] Position updated: (7,3)[0m
+[0m[ INFO] [1733118320.112727405]: [[1733118320098742683 ns]] Valid atEnd check at (7,3)[0m
+[0m[ INFO] [1733118320.377449718]: [[1733118320377039857 ns]] Position updated: (7,3)[0m
+[0m[ INFO] [1733118320.377463201]: [[1733118320358731566 ns]] Valid atEnd check at (7,3)[0m
+[0m[ INFO] [1733118320.633869766]: [[1733118320633464262 ns]] Position updated: (7,3)[0m
+[0m[ INFO] [1733118320.633883375]: [[1733118320622258158 ns]] Valid atEnd check at (7,3)[0m
+[0m[ INFO] [1733118320.892050365]: [[1733118320891570876 ns]] Position updated: (6,3)[0m
+[33m[ WARN] [1733118320.892062681]: VIOLATION: atEnd check at (7,3) while turtle is at (6,3) at time 1733118320877102298[0m
+[0m[ INFO] [1733118321.132081279]: [[1733118321121067745 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118321.145243308]: Successful atEnd[0m
+[0m[ INFO] [1733118321.374710574]: [[1733118321362175563 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118321.385929964]: Successful atEnd[0m
+[0m[ INFO] [1733118321.612523336]: [[1733118321604226932 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118321.631003123]: Successful atEnd[0m
+[0m[ INFO] [1733118321.849571993]: [[1733118321837042347 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118321.867650599]: Successful atEnd[0m
+[0m[ INFO] [1733118322.093912228]: [[1733118322081589130 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118322.106562436]: Successful atEnd[0m
+[0m[ INFO] [1733118322.345912940]: [[1733118322330467291 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118322.361846634]: Successful atEnd[0m
+[0m[ INFO] [1733118322.602388429]: [[1733118322588369186 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118322.622382759]: Successful atEnd[0m
+[0m[ INFO] [1733118322.843260630]: [[1733118322830134844 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118322.860101698]: Successful atEnd[0m
+[0m[ INFO] [1733118323.081621185]: [[1733118323069175537 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118323.097664057]: Successful atEnd[0m
+[0m[ INFO] [1733118323.324804436]: [[1733118323310706969 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118323.337143726]: Successful atEnd[0m
+[0m[ INFO] [1733118323.564997650]: [[1733118323552480407 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118323.577213933]: Successful atEnd[0m
+[0m[ INFO] [1733118323.817672380]: [[1733118323797985445 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118323.834444188]: Successful atEnd[0m
+[0m[ INFO] [1733118324.075628876]: [[1733118324058065821 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118324.089806461]: Successful atEnd[0m
+[0m[ INFO] [1733118324.334054065]: [[1733118324322229538 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118324.352660630]: Successful atEnd[0m
+[0m[ INFO] [1733118324.604800236]: [[1733118324584047451 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118324.617859104]: Successful atEnd[0m
+[0m[ INFO] [1733118324.857992985]: [[1733118324841393454 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118324.873992262]: Successful atEnd[0m
+[0m[ INFO] [1733118325.098662516]: [[1733118325092466810 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118325.114365091]: Successful atEnd[0m
+[0m[ INFO] [1733118325.341399135]: [[1733118325333102804 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118325.358131520]: Successful atEnd[0m
+[0m[ INFO] [1733118325.609493884]: [[1733118325595338400 ns]] Valid atEnd check at (6,3)[0m
+[33m[ WARN] [1733118325.627691097]: Successful atEnd[0m
+[0m[ INFO] [1733118325.8660068
