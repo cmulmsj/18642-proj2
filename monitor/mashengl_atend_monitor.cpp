@@ -40,11 +40,3 @@ void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
         maze_completed = true;
     }
 }
-
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "mashengl_atend_monitor");
-    ROS_WARN("Monitor AtEnd Monitor (mashengl) is running at %s", ctime(0));
-    ros::NodeHandle nh;
-    ros::spin();
-    return 0;
-}
