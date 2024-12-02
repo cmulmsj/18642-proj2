@@ -39,10 +39,59 @@ bool checkObstacle(QPointF pos, int direction) {
     return bumped(x1, y1, x2, y2);
 }
 
+// bool moveTurtle(QPointF& pos, int& orientation) {
+//     // Add delay for timeout
+//     static const double MOVE_DELAY = 0.2;
+//     ros::Duration(MOVE_DELAY).sleep();  // 200ms delay
+    
+//     // Check for wall and goal
+//     bool wall_detected = checkObstacle(pos, orientation);
+//     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
+//                              static_cast<int>(std::floor(pos.y())));
+    
+//     // Get next move
+//     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
+    
+//     if (!next_move.validAction) {
+//         return false;
+//     }
+    
+//     // Execute move
+//     switch (next_move.action) {
+//         case FORWARD:
+//             if (!wall_detected) {
+//                 switch (orientation) {
+//                     case 0: pos.setX(pos.x() - 1.0); break;
+//                     case 1: pos.setY(pos.y() - 1.0); break;
+//                     case 2: pos.setX(pos.x() + 1.0); break;
+//                     case 3: pos.setY(pos.y() + 1.0); break;
+//                     default:
+//                         ROS_ERROR("Invalid orientation in moveTurtle");
+//                         return false;
+//                 }
+//                 displayVisits(next_move.visitCount);
+//             }
+//             break;
+            
+//         case RIGHT:
+//             orientation = (orientation + 1) % 4;
+//             break;
+            
+//         case LEFT:
+//             orientation = (orientation + 3) % 4;
+//             break;
+            
+//         default:
+//             ROS_ERROR("Invalid action in moveTurtle");
+//             return false;
+//     }
+    
+//     return true;
+// }
+
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // Add delay for timeout
-    static const double MOVE_DELAY = 0.2;
-    ros::Duration(MOVE_DELAY).sleep();  // 200ms delay
+    // Add fixed delay to control timing
+    ros::Duration(0.2).sleep();  // 200ms delay
     
     // Check for wall and goal
     bool wall_detected = checkObstacle(pos, orientation);
@@ -56,9 +105,17 @@ bool moveTurtle(QPointF& pos, int& orientation) {
         return false;
     }
     
-    // Execute move
+    // Execute move - but ensure rotation and movement don't happen in same tick
+    static bool rotated_last_tick = false;
+    
     switch (next_move.action) {
         case FORWARD:
+            if (rotated_last_tick) {
+                // Skip this tick if we just rotated
+                rotated_last_tick = false;
+                break;
+            }
+            
             if (!wall_detected) {
                 switch (orientation) {
                     case 0: pos.setX(pos.x() - 1.0); break;
@@ -75,10 +132,12 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             
         case RIGHT:
             orientation = (orientation + 1) % 4;
+            rotated_last_tick = true;
             break;
             
         case LEFT:
             orientation = (orientation + 3) % 4;
+            rotated_last_tick = true;
             break;
             
         default:
@@ -88,4 +147,3 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     
     return true;
 }
-
