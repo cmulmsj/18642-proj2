@@ -63,11 +63,3 @@ void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
 }
 
 void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {}
-
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "mashengl_face_monitor");
-    ROS_WARN("Monitor Face Monitor (mashengl) is running at %s", ctime(0));
-    ros::NodeHandle nh;
-    ros::spin();
-    return 0;
-}
