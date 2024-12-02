@@ -226,15 +226,14 @@
 #endif
 
 // Global state variables
-static RobotState current_state = S1_BEGIN;
+static turtleState state = S1_BEGIN;
 static uint8_t visit_map[GRID_SIZE][GRID_SIZE] = {{0}};
 static coordinate pos = {START_POS, START_POS};
 static int orientation = WEST;
-static int check_count = 0;
-static bool walls[4] = {false};  // Track walls in each direction
+static bool is_initialized = false;
+static int scan_count = 0;
 static uint8_t min_visits = UINT8_MAX;
 static int best_dir = -1;
-static bool is_initialized = false;
 
 void update_visits(coordinate p) {
     if (p.x < GRID_SIZE && p.y < GRID_SIZE) {
@@ -256,10 +255,6 @@ coordinate next_position(int dir) {
     return next;
 }
 
-bool is_valid_position(coordinate next) {
-    return next.x < GRID_SIZE && next.y < GRID_SIZE;
-}
-
 turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
     turtleMove result = {FORWARD, true, 0};
 
@@ -268,24 +263,34 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
         update_visits(pos);
         result.visitCount = visit_map[pos.x][pos.y];
         is_initialized = true;
-        current_state = S1_BEGIN;
         return result;
     }
 
-    // Handle completion
     if (at_goal) {
-        current_state = S3_END;
+        state = S3_END;
         result.validAction = false;
         return result;
     }
 
-    switch (current_state) {
+    switch (state) {
         case S1_BEGIN:
-            check_count = 0;
             min_visits = UINT8_MAX;
             best_dir = -1;
-            for (int i = 0; i < 4; i++) walls[i] = false;
-            current_state = S4_BUMPED_1;
+            scan_count = 0;
+            state = S2_CHECK_END;
+            result.validAction = false;
+            break;
+
+        case S2_CHECK_END:
+            if (at_goal) {
+                state = S3_END;
+            } else {
+                state = S4_BUMPED_1;
+            }
+            result.validAction = false;
+            break;
+
+        case S3_END:
             result.validAction = false;
             break;
 
@@ -293,81 +298,68 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
         case S5_BUMPED_2:
         case S6_BUMPED_3:
         case S7_BUMPED_4:
-            // Store wall information for current direction
-            walls[orientation] = wall_detected;
-            
-            // Check visit count in this direction if no wall
+            // Check current direction before rotating
             if (!wall_detected) {
                 coordinate next = next_position(orientation);
-                if (is_valid_position(next)) {
-                    if (visit_map[next.x][next.y] < min_visits) {
-                        min_visits = visit_map[next.x][next.y];
-                        best_dir = orientation;
-                    }
+                if (next.x < GRID_SIZE && next.y < GRID_SIZE &&
+                    visit_map[next.x][next.y] < min_visits) {
+                    min_visits = visit_map[next.x][next.y];
+                    best_dir = orientation;
                 }
             }
             
-            // Continue checking other directions
+            // Turn right to check next direction
             result.action = RIGHT;
             orientation = (orientation + 1) % 4;
-            current_state = (RobotState)(((int)current_state) + 1);
-            if (current_state > S7_BUMPED_4) {
-                current_state = S8_MOVE_1;
-                result.validAction = false;
+            scan_count++;
+            
+            // Move to next state
+            state = (turtleState)(((int)state) + 1);
+            if (scan_count >= 4) {
+                state = S8_MOVE_1;
             }
             break;
 
         case S8_MOVE_1:
             if (best_dir == -1) {
-                // No valid direction found, start over
-                current_state = S1_BEGIN;
+                state = S1_BEGIN;
                 result.validAction = false;
             } else if (best_dir != orientation) {
-                // Need to rotate to best direction
                 result.action = RIGHT;
                 orientation = (orientation + 1) % 4;
-                current_state = S9_MOVE_2;
+                state = S9_MOVE_2;
             } else {
-                current_state = S10_MOVE_3;
+                state = S10_MOVE_3;
                 result.validAction = false;
             }
             break;
 
         case S9_MOVE_2:
-            if (!wall_detected) {
-                current_state = S10_MOVE_3;
-                result.validAction = false;
+            if (best_dir == orientation && !wall_detected) {
+                state = S10_MOVE_3;
             } else {
-                current_state = S1_BEGIN;
-                result.validAction = false;
+                state = S1_BEGIN;
             }
+            result.validAction = false;
             break;
 
         case S10_MOVE_3:
             if (!wall_detected) {
-                // Move forward
                 pos = next_position(orientation);
                 update_visits(pos);
                 result.action = FORWARD;
                 result.visitCount = visit_map[pos.x][pos.y];
-                current_state = S1_BEGIN;  // Prepare for next exploration
+                state = S1_BEGIN;
             } else {
-                // Unexpected wall, restart exploration
-                current_state = S1_BEGIN;
+                state = S1_BEGIN;
                 result.validAction = false;
             }
             break;
 
-        case S2_CHECK_END:
-        case S3_END:
-            result.validAction = false;
-            break;
-
         default:
             ROS_ERROR("Invalid state");
-            current_state = S1_BEGIN;
+            state = S1_BEGIN;
             result.validAction = false;
-            break;
     }
 
     return result;
