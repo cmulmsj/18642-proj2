@@ -168,13 +168,12 @@ coordinate getNextPosition(coordinate pos, int direction) {
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     turtleMove next_move = {FORWARD, true, 0};
 
-    // Stop if maze complete
     if (at_goal) {
         next_move.validAction = false;
         return next_move;
     }
 
-    // Initialize on first run
+    static bool first_run = true;
     if (first_run) {
         updateVisitMap(current_pos);
         next_move.visitCount = static_cast<uint8_t>(
@@ -189,85 +188,147 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     }
 
     switch (robot_state) {
-        case STARTUP:
-            robot_state = PLAN_NEXT;
-            rotations_checked = 0;
-            min_visits = UINT8_MAX;
-            best_direction = -1;
-            next_move.validAction = false;
-            break;
-
         case PLAN_NEXT:
-            // Check current direction first
-            if (rotations_checked == 0) {
-                min_visits = UINT8_MAX;
-                best_direction = -1;
-            }
-
-            // Check current facing direction
-            if (!bumped_wall) {
+            // Check all directions for the least visited
+            if (rotations_checked < 4) {
                 coordinate next_pos = getNextPosition(current_pos, facing_direction);
-                uint8_t current_visits = static_cast<uint8_t>(
-                    std::min(getVisitCount(next_pos), static_cast<int>(UINT8_MAX))
-                );
-                if (current_visits < min_visits) {
-                    min_visits = current_visits;
+                uint8_t visits = getVisitCount(next_pos);
+                if (visits < min_visits && !bumped_wall) {
+                    min_visits = visits;
                     best_direction = facing_direction;
                 }
-            }
-
-            if (rotations_checked < 3) {
-                // Continue scanning directions
-                rotations_checked++;
                 facing_direction = (facing_direction + 1) % 4;
-                next_move.action = RIGHT;
+                rotations_checked++;
+                next_move.action = RIGHT;  // Rotate for the next check
             } else {
-                // Move in best direction if found
-                if (best_direction != -1) {
-                    if (best_direction == facing_direction) {
-                        if (!bumped_wall) {
-                            coordinate next_pos = getNextPosition(current_pos, facing_direction);
-                            current_pos = next_pos;
-                            updateVisitMap(current_pos);
-                            next_move.action = FORWARD;
-                            next_move.visitCount = static_cast<uint8_t>(
-                                std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
-                            );
-                            // Reset for next scan
-                            rotations_checked = 0;
-                            min_visits = UINT8_MAX;
-                            best_direction = -1;
-                        }
-                    } else {
-                        // Turn toward best direction
-                        int diff = (best_direction - facing_direction + 4) % 4;
-                        if (diff == 1) {
-                            next_move.action = RIGHT;
-                            facing_direction = (facing_direction + 1) % 4;
-                        } else {
-                            next_move.action = LEFT;
-                            facing_direction = (facing_direction + 3) % 4;
-                        }
-                    }
+                // Plan movement towards best direction
+                if (best_direction != -1 && best_direction != facing_direction) {
+                    next_move.action = (best_direction - facing_direction + 4) % 4 == 1 ? RIGHT : LEFT;
+                } else if (!bumped_wall) {
+                    next_move.action = FORWARD;
+                    current_pos = getNextPosition(current_pos, facing_direction);
+                    updateVisitMap(current_pos);
                 } else {
-                    // No valid direction found, reset and try again
-                    rotations_checked = 0;
-                    next_move.validAction = false;
+                    next_move.validAction = false;  // No valid moves
                 }
+                rotations_checked = 0;
             }
-            break;
-
-        case MOVING:
-            robot_state = PLAN_NEXT;
-            next_move.validAction = false;
             break;
 
         default:
-            ROS_ERROR("Invalid robot state");
-            robot_state = PLAN_NEXT;
+            ROS_ERROR("Unknown state in studentTurtleStep.");
             next_move.validAction = false;
             break;
     }
 
     return next_move;
 }
+
+
+
+// turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
+//     turtleMove next_move = {FORWARD, true, 0};
+
+//     // Stop if maze complete
+//     if (at_goal) {
+//         next_move.validAction = false;
+//         return next_move;
+//     }
+
+//     // Initialize on first run
+//     if (first_run) {
+//         updateVisitMap(current_pos);
+//         next_move.visitCount = static_cast<uint8_t>(
+//             std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
+//         );
+//         first_run = false;
+//         robot_state = PLAN_NEXT;
+//         rotations_checked = 0;
+//         min_visits = UINT8_MAX;
+//         best_direction = -1;
+//         return next_move;
+//     }
+
+//     switch (robot_state) {
+//         case STARTUP:
+//             robot_state = PLAN_NEXT;
+//             rotations_checked = 0;
+//             min_visits = UINT8_MAX;
+//             best_direction = -1;
+//             next_move.validAction = false;
+//             break;
+
+//         case PLAN_NEXT:
+//             // Check current direction first
+//             if (rotations_checked == 0) {
+//                 min_visits = UINT8_MAX;
+//                 best_direction = -1;
+//             }
+
+//             // Check current facing direction
+//             if (!bumped_wall) {
+//                 coordinate next_pos = getNextPosition(current_pos, facing_direction);
+//                 uint8_t current_visits = static_cast<uint8_t>(
+//                     std::min(getVisitCount(next_pos), static_cast<int>(UINT8_MAX))
+//                 );
+//                 if (current_visits < min_visits) {
+//                     min_visits = current_visits;
+//                     best_direction = facing_direction;
+//                 }
+//             }
+
+//             if (rotations_checked < 3) {
+//                 // Continue scanning directions
+//                 rotations_checked++;
+//                 facing_direction = (facing_direction + 1) % 4;
+//                 next_move.action = RIGHT;
+//             } else {
+//                 // Move in best direction if found
+//                 if (best_direction != -1) {
+//                     if (best_direction == facing_direction) {
+//                         if (!bumped_wall) {
+//                             coordinate next_pos = getNextPosition(current_pos, facing_direction);
+//                             current_pos = next_pos;
+//                             updateVisitMap(current_pos);
+//                             next_move.action = FORWARD;
+//                             next_move.visitCount = static_cast<uint8_t>(
+//                                 std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
+//                             );
+//                             // Reset for next scan
+//                             rotations_checked = 0;
+//                             min_visits = UINT8_MAX;
+//                             best_direction = -1;
+//                         }
+//                     } else {
+//                         // Turn toward best direction
+//                         int diff = (best_direction - facing_direction + 4) % 4;
+//                         if (diff == 1) {
+//                             next_move.action = RIGHT;
+//                             facing_direction = (facing_direction + 1) % 4;
+//                         } else {
+//                             next_move.action = LEFT;
+//                             facing_direction = (facing_direction + 3) % 4;
+//                         }
+//                     }
+//                 } else {
+//                     // No valid direction found, reset and try again
+//                     rotations_checked = 0;
+//                     next_move.validAction = false;
+//                 }
+//             }
+//             break;
+
+//         case MOVING:
+//             robot_state = PLAN_NEXT;
+//             next_move.validAction = false;
+//             break;
+
+//         default:
+//             ROS_ERROR("Invalid robot state");
+//             robot_state = PLAN_NEXT;
+//             next_move.validAction = false;
+//             break;
+//     }
+
+//     return next_move;
+// }
