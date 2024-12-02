@@ -1,10 +1,10 @@
-#include "monitor_interface.h"  // Include this first
+#include "monitor_interface.h"  // Include the full definitions here
 #include "monitor_utils.h"
 #include <cmath>
 
+// Implementation of static members
 Endpoints MonitorUtils::canonicalizeWall(int x1, int y1, int x2, int y2) {
     Endpoints wall;
-    // Ensure wall segments are stored in canonical format:
     if (y1 == y2) {
         if (x1 <= x2) {
             wall = {x1, y1, x2, y2};
@@ -31,16 +31,16 @@ bool MonitorUtils::wallsEqual(const Endpoints& wall1, const Endpoints& wall2) {
 Endpoints MonitorUtils::getWallInFront(int x, int y, Orientation o) {
     Endpoints wall;
     switch(o) {
-        case WEST:  // x-1
+        case WEST:
             wall = canonicalizeWall(x, y, x, y+1);
             break;
-        case NORTH:  // y-1
+        case NORTH:
             wall = canonicalizeWall(x, y, x+1, y);
             break;
-        case EAST:  // x+1
+        case EAST:
             wall = canonicalizeWall(x+1, y, x+1, y+1);
             break;
-        case SOUTH:  // y+1
+        case SOUTH:
             wall = canonicalizeWall(x, y+1, x+1, y+1);
             break;
         default:
