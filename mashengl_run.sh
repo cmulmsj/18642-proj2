@@ -4,16 +4,11 @@
 kill_processes() {
     echo "Shutting down and checking for violations..."
     
-    # Get the actual monitor process name (first 15 chars)
-    MONITOR_PROC="ece642rtle_turn_"
-    
-    # Kill the monitor first and wait for VIOLATIONS.txt
-    if [[ -n $(pgrep ${MONITOR_PROC}) ]]; then
-        echo "Stopping monitor..."
-        pkill -f ${MONITOR_PROC}
-        # Wait a moment for VIOLATIONS.txt to be generated
-        sleep 3
-    fi
+    # Kill all monitor processes
+    echo "Stopping monitors..."
+    pkill -f "ece642rtle_.*_monitor"
+    # Wait a moment for VIOLATIONS.txt to be generated
+    sleep 3
 
     # Kill other processes
     for p in "$@"; do
@@ -31,6 +26,15 @@ kill_processes() {
         echo "===================================================="
         VIOL_COUNT=$(grep -c "VIOLATION:" "$turtledir/monitors/VIOLATIONS.txt")
         echo "TOTAL VIOLATIONS: $VIOL_COUNT"
+        
+        # Add detailed violation count by monitor
+        echo "Violations by monitor:"
+        for monitor in turn tick forward wall face solved atend step; do
+            violations=$(grep -c "VIOLATION.*${monitor}" "$turtledir/monitors/VIOLATIONS.txt")
+            if [ $violations -gt 0 ]; then
+                echo "${monitor^} Monitor: $violations violations"
+            fi
+        done
     else
         echo "TOTAL VIOLATIONS: 0"
     fi
@@ -83,8 +87,8 @@ sleep 5
 # Set maze file parameter
 rosparam set /maze_file "$maze_file"
 
-# Start turn monitor (with correct paths)
-echo "Starting turn monitor..."
+# Start all monitors
+echo "Starting monitors..."
 if [ ! -d "$turtledir/monitors" ]; then
     echo "Error: monitors directory not found at $turtledir/monitors"
     exit 1
@@ -94,7 +98,18 @@ if [ ! -f "run_642_monitors.sh" ]; then
     echo "Error: run_642_monitors.sh not found in monitors directory"
     exit 1
 fi
-./run_642_monitors.sh ece642rtle_turn_monitor &
+
+# Run all monitors
+./run_642_monitors.sh \
+    ece642rtle_step_monitor \
+    ece642rtle_turn_monitor \
+    ece642rtle_tick_monitor \
+    ece642rtle_forward_monitor \
+    ece642rtle_wall_monitor \
+    ece642rtle_face_monitor \
+    ece642rtle_solved_monitor \
+    ece642rtle_atend_monitor &
+
 MONITOR_PID=$!
 sleep 2
 
@@ -121,7 +136,7 @@ STUDENT_PID=$!
 
 trap 'kill_processes $MONITOR_PID $STUDENT_PID $TURTLE_PID $ROSCORE_PID' SIGINT
 
-echo "All processes started. Monitor active. Press Ctrl+C to stop and view violations."
+echo "All processes started. All monitors active. Press Ctrl+C to stop and view violations."
 
 # Wait for Ctrl+C
 while [ 1 -eq 1 ]; do
