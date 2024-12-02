@@ -1,5 +1,4 @@
 #include "monitor_interface.h"
-#include "monitor_utils.h"
 
 static Pose current_pose;
 static bool maze_completed = false;
@@ -18,13 +17,9 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
     ROS_INFO("[[%ld ns]] Position updated: (%d,%d)", t.toNSec(), x, y);
 }
 
-void visitInterrupt(ros::Time t, int visits) {
-    // Not needed for atend monitoring
-}
+void visitInterrupt(ros::Time t, int visits) {}
 
-void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
-    // Not needed for atend monitoring
-}
+void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {}
 
 void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
     if (!pose_initialized) {
@@ -48,7 +43,7 @@ void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "mashengl_atend_monitor");
-    MonitorUtils::logMonitorStart("AtEnd Monitor (mashengl)");
+    ROS_WARN("Monitor AtEnd Monitor (mashengl) is running at %s", ctime(0));
     ros::NodeHandle nh;
     ros::spin();
     return 0;
