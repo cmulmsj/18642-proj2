@@ -118,7 +118,7 @@
 // }
 
 
-##include "student.h"
+#include "student.h"
 
 bool checkObstacle(QPointF pos, int direction) {
     int x = static_cast<int>(std::floor(pos.x()));
