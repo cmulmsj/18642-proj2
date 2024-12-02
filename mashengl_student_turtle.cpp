@@ -167,6 +167,7 @@ coordinate getNextPosition(coordinate pos, int direction) {
 
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     turtleMove next_move = {FORWARD, true, 0};
+    static bool waiting_for_move = false;
 
     // Stop if maze complete
     if (at_goal) {
@@ -198,6 +199,13 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
             break;
 
         case PLAN_NEXT:
+            if (waiting_for_move) {
+                // Wait for previous movement to complete
+                next_move.validAction = false;
+                waiting_for_move = false;
+                break;
+            }
+
             // Check current direction first
             if (rotations_checked == 0) {
                 min_visits = UINT8_MAX;
@@ -221,6 +229,7 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
                 rotations_checked++;
                 facing_direction = (facing_direction + 1) % 4;
                 next_move.action = RIGHT;
+                waiting_for_move = true;
             } else {
                 // Move in best direction if found
                 if (best_direction != -1) {
@@ -237,17 +246,17 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
                             rotations_checked = 0;
                             min_visits = UINT8_MAX;
                             best_direction = -1;
+                            waiting_for_move = true;
                         }
                     } else {
                         // Turn toward best direction
                         int diff = (best_direction - facing_direction + 4) % 4;
                         if (diff == 1) {
                             next_move.action = RIGHT;
-                            facing_direction = (facing_direction + 1) % 4;
                         } else {
                             next_move.action = LEFT;
-                            facing_direction = (facing_direction + 3) % 4;
                         }
+                        waiting_for_move = true;
                     }
                 } else {
                     // No valid direction found, reset and try again
