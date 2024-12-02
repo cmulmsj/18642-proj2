@@ -61,12 +61,6 @@ void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
              t.toNSec(), x1, y1, x2, y2, bumped ? "true" : "false");
 }
 
-void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {}
-
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "mashengl_tick_monitor");
-    ROS_WARN("Monitor Tick Monitor (mashengl) is running at %s", ctime(0));
-    ros::NodeHandle nh;
-    ros::spin();
-    return 0;
+void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
+    // Not needed for tick monitoring
 }
