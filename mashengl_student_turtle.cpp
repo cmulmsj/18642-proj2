@@ -230,12 +230,11 @@ static MazeState current_state = INIT;
 static uint8_t visit_map[GRID_SIZE][GRID_SIZE] = {{0}};
 static coordinate pos = {START_POS, START_POS};
 static int orientation = WEST;
-static int scan_count = 0;
-static bool has_moved_in_tick = false;
-static bool has_rotated_in_tick = false;
-static bool is_initialized = false;
-static int least_visited_dir = -1;
+static int check_count = 0;
+static bool walls[4] = {false};  // Track walls in each direction
 static uint8_t min_visits = UINT8_MAX;
+static int best_dir = -1;
+static bool is_initialized = false;
 
 void update_visits(coordinate p) {
     if (p.x < GRID_SIZE && p.y < GRID_SIZE) {
@@ -257,116 +256,93 @@ coordinate next_position(int dir) {
     return next;
 }
 
-bool can_move_to(coordinate next) {
-    return next.x < GRID_SIZE && next.y < GRID_SIZE;
-}
-
-void check_current_direction(bool wall_detected) {
-    coordinate next = next_position(orientation);
-    if (!wall_detected && can_move_to(next)) {
-        uint8_t visits = visit_map[next.x][next.y];
-        if (visits < min_visits) {
-            min_visits = visits;
-            least_visited_dir = orientation;
-        }
-    }
+bool is_valid_position(coordinate next) {
+    return next.x >= 0 && next.x < GRID_SIZE && 
+           next.y >= 0 && next.y < GRID_SIZE;
 }
 
 turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
     turtleMove result = {FORWARD, true, 0};
 
-    // Initialization handling
+    // Handle initialization
     if (!is_initialized) {
         update_visits(pos);
         result.visitCount = visit_map[pos.x][pos.y];
         is_initialized = true;
         return result;
     }
-    
-    // Reset per-tick flags
-    if (!has_moved_in_tick && !has_rotated_in_tick) {
-        has_moved_in_tick = false;
-        has_rotated_in_tick = false;
-    }
 
-    // Terminal condition
+    // Handle completion
     if (at_goal) {
-        current_state = COMPLETE;
         result.validAction = false;
         return result;
     }
 
     switch (current_state) {
         case INIT:
-            scan_count = 0;
-            least_visited_dir = -1;
+            check_count = 0;
             min_visits = UINT8_MAX;
-            current_state = SCAN;
+            best_dir = -1;
+            for (int i = 0; i < 4; i++) walls[i] = false;
+            current_state = CHECK_WALLS;
             result.validAction = false;
             break;
 
-        case SCAN:
-            if (has_rotated_in_tick) {
-                result.validAction = false;
-                break;
-            }
+        case CHECK_WALLS:
+            // Store wall information for current direction
+            walls[orientation] = wall_detected;
             
-            // Check current direction
-            check_current_direction(wall_detected);
-            
-            if (scan_count < 3) {
-                // Continue scanning
-                orientation = (orientation + 1) % 4;
-                result.action = RIGHT;
-                has_rotated_in_tick = true;
-                scan_count++;
-            } else {
-                // Scanning complete, prepare to move
-                if (least_visited_dir != -1) {
-                    // If not facing best direction, rotate towards it
-                    if (orientation != least_visited_dir) {
-                        result.action = RIGHT;
-                        has_rotated_in_tick = true;
-                        orientation = (orientation + 1) % 4;
-                    } else {
-                        current_state = DECIDE;
-                        result.validAction = false;
+            // Check visit count in this direction if no wall
+            if (!wall_detected) {
+                coordinate next = next_position(orientation);
+                if (is_valid_position(next)) {
+                    if (visit_map[next.x][next.y] < min_visits) {
+                        min_visits = visit_map[next.x][next.y];
+                        best_dir = orientation;
                     }
-                } else {
-                    // No valid direction found, restart scan
-                    current_state = INIT;
-                    result.validAction = false;
                 }
             }
-            break;
-
-        case DECIDE:
-            if (!wall_detected && !has_moved_in_tick) {
-                current_state = EXECUTE;
+            
+            // Continue checking other directions
+            if (check_count < 3) {
+                result.action = RIGHT;
+                orientation = (orientation + 1) % 4;
+                check_count++;
             } else {
-                current_state = INIT;
+                current_state = CHOOSE_DIRECTION;
+                result.validAction = false;
             }
-            result.validAction = false;
             break;
 
-        case EXECUTE:
-            if (!wall_detected && !has_moved_in_tick) {
-                // Execute forward movement
+        case CHOOSE_DIRECTION:
+            if (best_dir == -1) {
+                // No valid direction found, start over
+                current_state = INIT;
+                result.validAction = false;
+            } else if (best_dir != orientation) {
+                // Need to rotate to best direction
+                result.action = RIGHT;
+                orientation = (orientation + 1) % 4;
+            } else {
+                // Facing best direction, prepare to move
+                current_state = MOVE;
+                result.validAction = false;
+            }
+            break;
+
+        case MOVE:
+            if (!wall_detected) {
+                // Move forward
                 pos = next_position(orientation);
                 update_visits(pos);
                 result.action = FORWARD;
                 result.visitCount = visit_map[pos.x][pos.y];
-                has_moved_in_tick = true;
-                current_state = INIT;  // Go back to scanning after movement
+                current_state = INIT;  // Prepare for next exploration
             } else {
-                // Can't move, go back to scanning
+                // Unexpected wall, restart exploration
                 current_state = INIT;
                 result.validAction = false;
             }
-            break;
-
-        case COMPLETE:
-            result.validAction = false;
             break;
 
         default:
