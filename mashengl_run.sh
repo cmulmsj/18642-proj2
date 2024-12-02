@@ -4,13 +4,7 @@
 kill_processes() {
     echo "Shutting down and checking for violations..."
     
-    # Kill all monitor processes
-    echo "Stopping monitors..."
-    pkill -f "ece642rtle_.*_monitor"
-    # Wait a moment for VIOLATIONS.txt to be generated
-    sleep 3
-
-    # Kill other processes
+    # Kill other processes first
     for p in "$@"; do
         if [[ -n $(ps -p $p) ]]; then
             echo "Killing process $p"
@@ -19,28 +13,24 @@ kill_processes() {
         fi
     done
     
+    # Give monitors time to finish processing
+    sleep 5
+    
+    # Now stop monitors and check violations
+    pkill -f "ece642rtle_.*_monitor"
+    sleep 2
+    
     # Check for violations file
     if [ -f "$turtledir/monitors/VIOLATIONS.txt" ]; then
         echo "=================== VIOLATIONS FOUND ==================="
         cat "$turtledir/monitors/VIOLATIONS.txt"
         echo "===================================================="
-        VIOL_COUNT=$(grep -c "VIOLATION:" "$turtledir/monitors/VIOLATIONS.txt")
+        VIOL_COUNT=$(grep -c "\[ WARN\]" "$turtledir/monitors/VIOLATIONS.txt")
         echo "TOTAL VIOLATIONS: $VIOL_COUNT"
-        
-        # Add detailed violation count by monitor
-        echo "Violations by monitor:"
-        for monitor in turn tick forward wall face solved atend step; do
-            violations=$(grep -c "VIOLATION.*${monitor}" "$turtledir/monitors/VIOLATIONS.txt")
-            if [ $violations -gt 0 ]; then
-                echo "${monitor^} Monitor: $violations violations"
-            fi
-        done
     else
-        echo "TOTAL VIOLATIONS: 0"
+        echo "No VIOLATIONS.txt found"
     fi
-    echo "Any violations logged in VIOLATIONS.txt"
     
-    echo "All processes terminated"
     exit 0
 }
 
@@ -109,9 +99,8 @@ fi
     ece642rtle_face_monitor \
     ece642rtle_solved_monitor \
     ece642rtle_atend_monitor &
-
 MONITOR_PID=$!
-sleep 2
+sleep 5  # Increased sleep time
 
 # Add monitor to trap
 trap 'kill_processes $MONITOR_PID $ROSCORE_PID' SIGINT
