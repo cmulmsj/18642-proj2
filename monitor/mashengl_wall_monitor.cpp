@@ -2,7 +2,6 @@
 #include <queue>
 #include <cstdlib>
 
-// Store recent bump checks
 static const int MAX_BUMP_MEMORY = 4;
 static std::queue<std::pair<Endpoints, bool>> bump_memory;
 static Pose last_pose;
@@ -74,14 +73,9 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
         return;
     }
 
-    // Check if position changed
     if (last_pose.x != x || last_pose.y != y) {
         Pose current_pose = {x, y};
-        
-        // Get wall between previous and current position
         Endpoints crossed_wall = wallBetween(last_pose, current_pose);
-        
-        // Check if we tried to cross this wall
         bool wall_blocked = bumpedInMemory(crossed_wall);
         
         if (wall_blocked) {
@@ -92,7 +86,6 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
                      t.toNSec(), last_pose.x, last_pose.y, x, y);
         }
         
-        // Clear bump memory after moving
         while (!bump_memory.empty()) {
             bump_memory.pop();
         }
@@ -106,7 +99,6 @@ void visitInterrupt(ros::Time t, int visits) {}
 void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
     Endpoints wall = canonicalizeWall(x1, y1, x2, y2);
     
-    // Store bump check in circular buffer
     bump_memory.push({wall, bumped});
     if (bump_memory.size() > MAX_BUMP_MEMORY) {
         bump_memory.pop();
@@ -117,11 +109,3 @@ void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
 }
 
 void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {}
-
-int main(int argc, char** argv) {
-    ros::init(argc, argv, "mashengl_wall_monitor");
-    ROS_WARN("Monitor Wall Monitor (mashengl) is running at %s", ctime(0));
-    ros::NodeHandle nh;
-    ros::spin();
-    return 0;
-}
