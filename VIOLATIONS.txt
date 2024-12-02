@@ -1,0 +1,100 @@
+=== Violations from ece642rtle_step_monitor ===
+=== Violations from ece642rtle_turn_monitor ===
+=== Violations from ece642rtle_tick_monitor ===
+[0m[ INFO] [1733125114.812035060]: [[1733125114811564544 ns]] New tick started[0m
+[0m[ INFO] [1733125115.036910310]: [[1733125115015129455 ns]] Bump interrupt received: (5,0)->(5,1) = false[0m
+[0m[ INFO] [1733125115.051631357]: [[1733125115051252409 ns]] Visit interrupt received: visits=1[0m
+[0m[ INFO] [1733125115.051645065]: [[1733125115051253751 ns]] Pose interrupt received: x=4, y=0[0m
+[0m[ INFO] [1733125115.068291249]: [[1733125115068024928 ns]] Tick completed[0m
+[33m[ WARN] [1733125115.292688989]: VIOLATION: Bump interrupt received outside of tick at time 1733125115268859759[0m
+[33m[ WARN] [1733125115.308168122]: VIOLATION: Pose interrupt received outside of tick at time 1733125115307864911[0m
+[0m[ INFO] [1733125115.323296621]: [[1733125115323061744 ns]] New tick started[0m
+[0m[ INFO] [1733125115.555491140]: [[1733125115523540908 ns]] Bump interrupt received: (4,0)->(4,1) = false[0m
+[0m[ INFO] [1733125115.587198636]: [[1733125115586541405 ns]] Tick completed[0m
+[33m[ WARN] [1733125115.823619517]: VIOLATION: Bump interrupt received outside of tick at time 1733125115790468633[0m
+[33m[ WARN] [1733125115.835689823]: VIOLATION: Pose interrupt received outside of tick at time 1733125115835400408[0m
+[0m[ INFO] [1733125115.852096604]: [[1733125115851653085 ns]] New tick started[0m
+[0m[ INFO] [1733125116.070696380]: [[1733125116052492759 ns]] Bump interrupt received: (4,0)->(5,0) = true[0m
+[0m[ INFO] [1733125116.092694852]: [[1733125116091980548 ns]] Tick completed[0m
+[33m[ WARN] [1733125116.311371656]: VIOLATION: Bump interrupt received outside of tick at time 1733125116293401254[0m
+[33m[ WARN] [1733125116.318115265]: VIOLATION: Pose interrupt received outside of tick at time 1733125116317838797[0m
+[0m[ INFO] [1733125116.331357259]: [[1733125116331071276 ns]] New tick started[0m
+[0m[ INFO] [1733125116.554529521]: [[1733125116531648984 ns]] Bump interrupt received: (5,0)->(5,1) = false[0m
+[0m[ INFO] [1733125116.587380899]: [[1733125116587106107 ns]] Tick completed[0m
+[33m[ WARN] [1733125116.808349425]: VIOLATION: Bump interrupt received outside of tick at time 1733125116787632528[0m
+[33m[ WARN] [1733125116.818424186]: VIOLATION: Pose interrupt received outside of tick at time 1733125116818136273[0m
+[0m[ INFO] [1733125116.828691036]: [[1733125116828190177 ns]] New tick started[0m
+[0m[ INFO] [1733125117.044185215]: [[1733125117030886293 ns]] Bump interrupt received: (4,1)->(5,1) = true[0m
+[0m[ INFO] [1733125117.072931886]: [[1733125117071941307 ns]] Tick completed[0m
+[33m[ WARN] [1733125117.302007244]: VIOLATION: Bump interrupt received outside of tick at time 1733125117278121366[0m
+[33m[ WARN] [1733125117.313347220]: VIOLATION: Pose interrupt received outside of tick at time 1733125117312975201[0m
+[0m[ INFO] [1733125117.324060676]: [[1733125117323678145 ns]] New tick started[0m
+[0m[ INFO] [1733125117.545362473]: [[1733125117525182133 ns]] Bump interrupt received: (4,0)->(4,1) = false[0m
+[0m[ INFO] [1733125117.579462498]: [[1733125117579175916 ns]] Tick completed[0m
+[33m[ WARN] [1733125117.795899605]: VIOLATION: Bump interrupt received outside of tick at time 1733125117779767774[0m
+[33m[ WARN] [1733125117.810872931]: VIOLATION: Pose interrupt received outside of tick at time 1733125117810252510[0m
+[0m[ INFO] [1733125117.826356382]: [[1733125117825507860 ns]] New tick started[0m
+[0m[ INFO] [1733125118.059144544]: [[1733125118030469492 ns]] Bump interrupt received: (4,0)->(5,0) = true[0m
+[0m[ INFO] [1733125118.091490413]: [[1733125118091260159 ns]] Tick completed[0m
+[33m[ WARN] [1733125118.305536582]: VIOLATION: Bump interrupt received outside of tick at time 1733125118291750110[0m
+[33m[ WARN] [1733125118.315592116]: VIOLATION: Pose interrupt received outside of tick at time 1733125118315297656[0m
+[0m[ INFO] [1733125118.331965327]: [[1733125118331626965 ns]] New tick started[0m
+[0m[ INFO] [1733125118.556758738]: [[1733125118532858854 ns]] Bump interrupt received: (5,0)->(5,1) = false[0m
+[0m[ INFO] [1733125118.604621912]: [[1733125118604055708 ns]] Tick completed[0m
+[33m[ WARN] [1733125118.823608097]: VIOLATION: Bump interrupt received outside of tick at time 1733125118805320913[0m
+[33m[ WARN] [1733125118.834966669]: VIOLATION: Pose interrupt received outside of tick at time 1733125118834484783[0m
+[0m[ INFO] [1733125118.851007752]: [[1733125118850139908 ns]] New tick started[0m
+[0m[ INFO] [1733125119.073226128]: [[1733125119052331919 ns]] Bump interrupt received: (4,1)->(5,1) = true[0m
+[0m[ INFO] [1733125119.099611810]: [[1733125119099329729 ns]] Tick completed[0m
+[33m[ WARN] [1733125119.329443875]: VIOLATION: Bump interrupt received outside of tick at time 1733125119299872119[0m
+[33m[ WARN] [1733125119.340455428]: VIOLATION: Pose interrupt received outside of tick at time 1733125119340133209[0m
+[0m[ INFO] [1733125119.355953191]: [[1733125119355424251 ns]] New tick started[0m
+[0m[ INFO] [1733125119.573514306]: [[1733125119556428244 ns]] Bump interrupt received: (4,0)->(4,1) = false[0m
+[0m[ INFO] [1733125119.595794153]: [[1733125119595571813 ns]] Tick completed[0m
+[33m[ WARN] [1733125119.825697110]: VIOLATION: Bump interrupt received outside of tick at time 1733125119796048087[0m
+[33m[ WARN] [1733125119.835511361]: VIOLATION: Pose interrupt received outside of tick at time 1733125119835177516[0m
+[0m[ INFO] [1733125119.852067347]: [[1733125119851591860 ns]] New tick started[0m
+[0m[ INFO] [1733125120.063780044]: [[1733125120052517607 ns]] Bump interrupt received: (4,0)->(5,0) = true[0m
+[0m[ INFO] [1733125120.091407160]: [[1733125120091153265 ns]] Tick completed[0m
+[33m[ WARN] [1733125120.309765680]: VIOLATION: Bump interrupt received outside of tick at time 1733125120291671938[0m
+[33m[ WARN] [1733125120.315755530]: VIOLATION: Pose interrupt received outside of tick at time 1733125120315260506[0m
+[0m[ INFO] [1733125120.334564345]: [[1733125120333684214 ns]] New tick started[0m
+[0m[ INFO] [1733125120.546095138]: [[1733125120535155985 ns]] Bump interrupt received: (5,0)->(5,1) = false[0m
+[0m[ INFO] [1733125120.572205288]: [[1733125120571852775 ns]] Tick completed[0m
+[33m[ WARN] [1733125120.783628233]: VIOLATION: Bump interrupt received outside of tick at time 1733125120773043263[0m
+[33m[ WARN] [1733125120.795755076]: VIOLATION: Pose interrupt received outside of tick at time 1733125120795177369[0m
+[0m[ INFO] [1733125120.812046548]: [[1733125120811842882 ns]] New tick started[0m
+[0m[ INFO] [1733125121.025423410]: [[1733125121014251989 ns]] Bump interrupt received: (4,1)->(5,1) = true[0m
+[0m[ INFO] [1733125121.052094409]: [[1733125121051864340 ns]] Tick completed[0m
+[33m[ WARN] [1733125121.280481403]: VIOLATION: Bump interrupt received outside of tick at time 1733125121255879702[0m
+[33m[ WARN] [1733125121.291335979]: VIOLATION: Pose interrupt received outside of tick at time 1733125121291057809[0m
+[0m[ INFO] [1733125121.308155764]: [[1733125121307891978 ns]] New tick started[0m
+[0m[ INFO] [1733125121.523410033]: [[1733125121508438798 ns]] Bump interrupt received: (4,0)->(4,1) = false[0m
+[0m[ INFO] [1733125121.547278740]: [[1733125121546988522 ns]] Tick completed[0m
+[33m[ WARN] [1733125121.776839593]: VIOLATION: Bump interrupt received outside of tick at time 1733125121747602249[0m
+[33m[ WARN] [1733125121.788330061]: VIOLATION: Pose interrupt received outside of tick at time 1733125121787842469[0m
+[0m[ INFO] [1733125121.805145061]: [[1733125121804693651 ns]] New tick started[0m
+[0m[ INFO] [1733125122.022290848]: [[1733125122006806447 ns]] Bump interrupt received: (4,0)->(5,0) = true[0m
+[0m[ INFO] [1733125122.059746962]: [[1733125122059442555 ns]] Tick completed[0m
+[33m[ WARN] [1733125122.278145830]: VIOLATION: Bump interrupt received outside of tick at time 1733125122260054706[0m
+[33m[ WARN] [1733125122.286338126]: VIOLATION: Pose interrupt received outside of tick at time 1733125122286043074[0m
+[0m[ INFO] [1733125122.299716306]: [[1733125122299715388 ns]] New tick started[0m
+[0m[ INFO] [1733125122.515103268]: [[1733125122499924347 ns]] Bump interrupt received: (5,0)->(5,1) = false[0m
+[0m[ INFO] [1
+=== Violations from ece642rtle_forward_monitor ===
+=== Violations from ece642rtle_wall_monitor ===
+=== Violations from ece642rtle_face_monitor ===
+[33m[ WARN] [1733125115.037151653]: VIOLATION: Bump check before position initialization at time 1733125115015129455[0m
+[0m[ INFO] [1733125115.051912876]: [[1733125115051253751 ns]] Updated position: (4,0), orientation: 0[0m
+[0m[ INFO] [1733125115.292808142]: [[1733125115268859759 ns]] Valid bump check for wall (4,0)->(4,1)[0m
+[0m[ INFO] [1733125115.308303336]: [[1733125115307864911 ns]] Updated position: (4,0), orientation: 0[0m
+[0m[ INFO] [1733125115.555601008]: [[1733125115523540908 ns]] Valid bump check for wall (4,0)->(4,1)[0m
+[0m[ INFO] [1733125115.823723354]: [[1733125115790468633 ns]] Valid bump check for wall (4,0)->(4,1)[0m
+=== Violations from ece642rtle_solved_monitor ===
+=== Violations from ece642rtle_atend_monitor ===
+[33m[ WARN] [1733125115.051783855]: VIOLATION: atEnd check before position initialization at time 1733125115036373374[0m
+[0m[ INFO] [1733125115.051815690]: [[1733125115051253751 ns]] Position updated: (4,0)[0m
+[0m[ INFO] [1733125115.308244233]: [[1733125115292269480 ns]] Valid atEnd check at (4,0)[0m
+[0m[ INFO] [1733125115.308258027]: [[1733125115307864911 ns]] Position updated: (4,0)[0m
+[0m[ INFO] [1733125115.571802530]: [[1733125115555058976 ns]] Valid atEnd check at (4,0)[0m
+[0m[ INFO] [1733125115.835756326]: [[1733125115823219450 ns]] Valid atEnd check at (4,0)[0m
