@@ -4,21 +4,25 @@
 kill_processes() {
     echo "Shutting down and checking for violations..."
     
-    # Kill other processes first
+    # Kill turtle processes first
     for p in "$@"; do
         if [[ -n $(ps -p $p) ]]; then
             echo "Killing process $p"
             kill $p
-            sleep 1
+            sleep 2  # Increased sleep time
         fi
     done
     
     # Give monitors time to finish processing
     sleep 5
     
-    # Now stop monitors and check violations
-    pkill -f "ece642rtle_.*_monitor"
-    sleep 2
+    # Send SIGINT to monitors so they can process violations
+    echo "Stopping monitors..."
+    pkill -INT -f "ece642rtle_.*_monitor"
+    sleep 3  # Wait for violation processing
+    
+    # Now force kill any remaining monitor processes
+    pkill -9 -f "ece642rtle_.*_monitor" 2>/dev/null || true
     
     # Check for violations file
     if [ -f "$turtledir/monitors/VIOLATIONS.txt" ]; then
@@ -28,7 +32,13 @@ kill_processes() {
         VIOL_COUNT=$(grep -c "\[ WARN\]" "$turtledir/monitors/VIOLATIONS.txt")
         echo "TOTAL VIOLATIONS: $VIOL_COUNT"
     else
-        echo "No VIOLATIONS.txt found"
+        echo "No VIOLATIONS.txt found. Checking individual monitor outputs..."
+        for m in $turtledir/monitors/*.output.tmp; do
+            if [ -f "$m" ]; then
+                echo "=== Checking $m ==="
+                grep "\[ WARN\]" "$m" || true
+            fi
+        done
     fi
     
     exit 0
@@ -77,19 +87,13 @@ sleep 5
 # Set maze file parameter
 rosparam set /maze_file "$maze_file"
 
-# Start all monitors
+# Start monitors
 echo "Starting monitors..."
-if [ ! -d "$turtledir/monitors" ]; then
-    echo "Error: monitors directory not found at $turtledir/monitors"
-    exit 1
-fi
 cd "$turtledir/monitors"
-if [ ! -f "run_642_monitors.sh" ]; then
-    echo "Error: run_642_monitors.sh not found in monitors directory"
-    exit 1
-fi
+# Clear any existing monitor outputs
+rm -f *.output.tmp VIOLATIONS.txt
 
-# Run all monitors
+# Start monitors with properly captured PID
 ./run_642_monitors.sh \
     ece642rtle_step_monitor \
     ece642rtle_turn_monitor \
@@ -100,7 +104,7 @@ fi
     ece642rtle_solved_monitor \
     ece642rtle_atend_monitor &
 MONITOR_PID=$!
-sleep 5  # Increased sleep time
+sleep 10  # Give monitors more time to start up properly
 
 # Add monitor to trap
 trap 'kill_processes $MONITOR_PID $ROSCORE_PID' SIGINT
