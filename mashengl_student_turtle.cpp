@@ -175,18 +175,20 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         return next_move;
     }
 
-    // Initialize variables for decision-making
-    static coordinate current_pos = {START_POS, START_POS};
-    static int facing_direction = 1;  // Start facing NORTH
-    static int rotations_checked = 0;
-    static uint8_t min_visits = UINT8_MAX;
-    static int best_direction = -1;
+    // Static variables for decision-making and state tracking
+    static coordinate current_pos = {START_POS, START_POS}; // Track current position
+    static int facing_direction = 1;  // Track facing direction (NORTH initially)
+    static int rotations_checked = 0; // Tracks directions checked during planning
+    static uint8_t min_visits = UINT8_MAX; // Minimum visits to determine the best path
+    static int best_direction = -1;  // Best direction identified for movement
 
     // Plan the next move
     if (rotations_checked < 4) {
-        // Check each direction for the least visited path
+        // Explore all four directions to determine the least visited
         coordinate next_pos = getNextPosition(current_pos, facing_direction);
         int visits = getVisitCount(next_pos);
+
+        // Safely cast visits to uint8_t after capping the value
         uint8_t safe_visits = static_cast<uint8_t>(
             std::min(visits, static_cast<int>(UINT8_MAX))
         );
@@ -195,13 +197,15 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
             min_visits = safe_visits;
             best_direction = facing_direction;
         }
-        facing_direction = (facing_direction + 1) % 4;  // Rotate to the next direction
+
+        // Rotate to the next direction for exploration
+        facing_direction = (facing_direction + 1) % 4;
         rotations_checked++;
-        next_move.action = RIGHT;  // Signal a right turn
+        next_move.action = RIGHT;
     } else {
-        // Execute the move in the best direction found
+        // Plan movement based on the best direction found
         if (best_direction != facing_direction) {
-            // Turn towards the best direction
+            // Turn toward the best direction
             int turn = (best_direction - facing_direction + 4) % 4;
             next_move.action = (turn == 1) ? RIGHT : LEFT;
             facing_direction = (facing_direction + (turn == 1 ? 1 : 3)) % 4;
@@ -216,13 +220,16 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         } else {
             next_move.validAction = false;  // No valid action
         }
-        rotations_checked = 0;  // Reset for the next planning cycle
+
+        // Reset state for the next planning cycle
+        rotations_checked = 0;
         min_visits = UINT8_MAX;
         best_direction = -1;
     }
 
     return next_move;
 }
+
 
 
 // turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
