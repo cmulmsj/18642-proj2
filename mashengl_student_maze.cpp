@@ -9,6 +9,10 @@
 
 #include "student.h"
 
+// Global variables for tick synchronization
+static bool tick_active = false;
+static bool action_done = false;
+
 bool checkObstacle(QPointF pos, int direction) {
     int x = static_cast<int>(std::floor(pos.x()));
     int y = static_cast<int>(std::floor(pos.y()));
@@ -90,16 +94,11 @@ bool checkObstacle(QPointF pos, int direction) {
 // }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // Enforce tick-based gating
-    static bool tick_active = false;
     if (!tick_active) {
         ROS_WARN("moveTurtle called outside of active tick");
         return false;
     }
-
-    // Introduce state flag to separate movement and rotation
-    static bool action_done = false;
-
+    
     // Check for wall and goal first
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
