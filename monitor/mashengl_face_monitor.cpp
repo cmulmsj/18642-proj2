@@ -1,13 +1,38 @@
 #include "monitor_interface.h"
-#include "monitor_utils.h"
 
+// Monitor state
 static Pose current_pose;
 static Orientation current_orientation;
 static bool pose_initialized = false;
 
-void tickInterrupt(ros::Time t) {
-    // Not needed for face monitoring
+static Endpoints getExpectedWall(int x, int y, Orientation o) {
+    Endpoints wall;
+    switch(o) {
+        case WEST:
+            wall = {x, y, x, y+1};
+            break;
+        case NORTH:
+            wall = {x, y, x+1, y};
+            break;
+        case EAST:
+            wall = {x+1, y, x+1, y+1};
+            break;
+        case SOUTH:
+            wall = {x, y+1, x+1, y+1};
+            break;
+        default:
+            ROS_ERROR("Invalid orientation in getExpectedWall");
+            wall = {0, 0, 0, 0};
+    }
+    return wall;
 }
+
+static bool wallsEqual(const Endpoints& w1, const Endpoints& w2) {
+    return (w1.x1 == w2.x1 && w1.y1 == w2.y1 && w1.x2 == w2.x2 && w1.y2 == w2.y2) ||
+           (w1.x1 == w2.x2 && w1.y1 == w2.y2 && w1.x2 == w2.x1 && w1.y2 == w2.y1);
+}
+
+void tickInterrupt(ros::Time t) {}
 
 void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
     current_pose = {x, y};
@@ -17,9 +42,7 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
              t.toNSec(), x, y, o);
 }
 
-void visitInterrupt(ros::Time t, int visits) {
-    // Not needed for face monitoring
-}
+void visitInterrupt(ros::Time t, int visits) {}
 
 void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
     if (!pose_initialized) {
@@ -27,15 +50,10 @@ void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
         return;
     }
 
-    // Get wall segment that should be in front of turtle
-    Endpoints expected_wall = MonitorUtils::getWallInFront(current_pose.x, current_pose.y, 
-                                                         current_orientation);
+    Endpoints expected = getExpectedWall(current_pose.x, current_pose.y, current_orientation);
+    Endpoints checked = {x1, y1, x2, y2};
     
-    // Get actual wall being checked (in canonical form)
-    Endpoints checked_wall = MonitorUtils::canonicalizeWall(x1, y1, x2, y2);
-    
-    // Compare walls
-    if (!MonitorUtils::wallsEqual(expected_wall, checked_wall)) {
+    if (!wallsEqual(expected, checked)) {
         ROS_WARN("VIOLATION: Checking wall (%d,%d)->(%d,%d) while facing %d at (%d,%d) at time %ld", 
                  x1, y1, x2, y2, current_orientation, current_pose.x, current_pose.y, t.toNSec());
     } else {
@@ -44,13 +62,11 @@ void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
     }
 }
 
-void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
-    // Not needed for face monitoring
-}
+void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {}
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "mashengl_face_monitor");
-    MonitorUtils::logMonitorStart("Face Monitor (mashengl)");
+    ROS_WARN("Monitor Face Monitor (mashengl) is running at %s", ctime(0));
     ros::NodeHandle nh;
     ros::spin();
     return 0;
