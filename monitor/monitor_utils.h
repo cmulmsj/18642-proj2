@@ -2,10 +2,14 @@
 #define MONITOR_UTILS_H
 
 #include "ros/ros.h"
-#include "monitor_interface.h"  // Need to include this for Pose, Endpoints, and Orientation types
 #include <ctime>
 #include <string>
 #include <cstdio>
+
+// Forward declarations of types from monitor_interface.h
+struct Pose;
+struct Endpoints;
+enum Orientation;
 
 class MonitorUtils {
 public:
@@ -14,12 +18,9 @@ public:
         time_t now = time(0);
         char* dt = ctime(&now);
         std::string message = "Monitor " + monitorName + " is running at " + dt;
-        // Remove newline from ctime
         if (!message.empty() && message[message.length()-1] == '\n') {
             message.erase(message.length()-1);
         }
-        
-        // Log to both ROS and stderr
         ROS_WARN("%s", message.c_str());
         fprintf(stderr, "%s\n", message.c_str());
     }
