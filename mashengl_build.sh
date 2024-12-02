@@ -31,8 +31,32 @@ catkin_make -DCATKIN_WHITELIST_PACKAGES="ece642rtle"
 catkin_make ece642rtle_student -Wall -Werror
 
 # Build monitor
-echo "Building turn monitor..."
+echo "Building monitors..."
+catkin_make ece642rtle_logging_monitor
+catkin_make ece642rtle_step_monitor
 catkin_make ece642rtle_turn_monitor
+catkin_make ece642rtle_tick_monitor
+catkin_make ece642rtle_forward_monitor
+catkin_make ece642rtle_wall_monitor
+catkin_make ece642rtle_face_monitor
+catkin_make ece642rtle_solved_monitor
+catkin_make ece642rtle_atend_monitor
+
+# Create a helper script to run all monitors
+echo "Creating monitor runner script..."
+cat > ~/catkin_ws/src/ece642rtle/monitors/run_all_monitors.sh << 'EOF'
+#!/bin/bash
+./run_642_monitors.sh \
+    ece642rtle_step_monitor \
+    ece642rtle_turn_monitor \
+    ece642rtle_tick_monitor \
+    ece642rtle_forward_monitor \
+    ece642rtle_wall_monitor \
+    ece642rtle_face_monitor \
+    ece642rtle_solved_monitor \
+    ece642rtle_atend_monitor
+EOF
+chmod +x ~/catkin_ws/src/ece642rtle/monitors/run_all_monitors.sh
 
 # Run unit tests
 echo "========================================"
