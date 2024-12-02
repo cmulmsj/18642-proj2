@@ -2,7 +2,10 @@
 #define MONITOR_UTILS_H
 
 #include "ros/ros.h"
-// Remove monitor_interface.h include since the monitors will include it
+#include "monitor_interface.h"  // Need to include this for Pose, Endpoints, and Orientation types
+#include <ctime>
+#include <string>
+#include <cstdio>
 
 class MonitorUtils {
 public:
@@ -21,7 +24,7 @@ public:
         fprintf(stderr, "%s\n", message.c_str());
     }
 
-    // All wall and position related functions will be defined in the implementation files
+    // Wall and position related functions
     static Endpoints canonicalizeWall(int x1, int y1, int x2, int y2);
     static bool wallsEqual(const Endpoints& wall1, const Endpoints& wall2);
     static Endpoints getWallInFront(int x, int y, Orientation o);
