@@ -95,33 +95,24 @@ bool checkObstacle(QPointF pos, int direction) {
 //     return true;
 // }
 
+
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // Ensure function is only called during an active tick
-    if (!tick_active) {
-        ROS_WARN("moveTurtle called outside of active tick.");
-        return false;
-    }
-
-    // Ensure only one action is taken per tick
-    if (action_done) {
-        ROS_WARN("Action already completed for this tick.");
-        return false;
-    }
-
-    // Check for obstacles and goal state
+    // Fixed delay for timing
+    ros::Duration(0.2).sleep();
+    
+    // Check for wall and goal first
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
                              static_cast<int>(std::floor(pos.y())));
-
-    // Get the next move from the turtle's decision-making logic
+    
+    // Get next move
     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
-
+    
     if (!next_move.validAction) {
-        ROS_WARN("No valid action returned by studentTurtleStep.");
         return false;
     }
 
-    // Execute the move
+    // Execute move
     switch (next_move.action) {
         case FORWARD:
             if (!wall_detected && !reached_goal) {
@@ -131,92 +122,23 @@ bool moveTurtle(QPointF& pos, int& orientation) {
                     case 2: pos.setX(pos.x() + 1.0); break;  // EAST
                     case 3: pos.setY(pos.y() + 1.0); break;  // SOUTH
                     default:
-                        ROS_ERROR("Invalid orientation during move.");
+                        ROS_ERROR("Invalid orientation");
                         return false;
                 }
                 displayVisits(next_move.visitCount);
-                ROS_INFO("Turtle moved FORWARD to position (%.1f, %.1f).",
-                         pos.x(), pos.y());
-                action_done = true;  // Mark action as done for this tick
-            } else {
-                ROS_WARN("Turtle attempted to move forward but was blocked.");
             }
             break;
-
+            
         case RIGHT:
-            orientation = (orientation + 1) % 4;
-            ROS_INFO("Turtle turned RIGHT. New orientation: %d", orientation);
-            action_done = true;
-            break;
-
         case LEFT:
-            orientation = (orientation + 3) % 4;
-            ROS_INFO("Turtle turned LEFT. New orientation: %d", orientation);
-            action_done = true;
+            // For turns, just update orientation
+            orientation = (orientation + (next_move.action == RIGHT ? 1 : 3)) % 4;
             break;
-
+            
         default:
-            ROS_ERROR("Invalid action returned by studentTurtleStep.");
+            ROS_ERROR("Invalid action");
             return false;
     }
-
+    
     return true;
 }
-// Called at the start of each tick
-void startTick() {
-    tick_active = true;
-    action_done = false;  // Reset for the new tick
-}
-
-// Called at the end of each tick
-void endTick() {
-    tick_active = false;
-}
-
-
-// bool moveTurtle(QPointF& pos, int& orientation) {
-//     // Fixed delay for timing
-//     ros::Duration(0.2).sleep();
-    
-//     // Check for wall and goal first
-//     bool wall_detected = checkObstacle(pos, orientation);
-//     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
-//                              static_cast<int>(std::floor(pos.y())));
-    
-//     // Get next move
-//     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
-    
-//     if (!next_move.validAction) {
-//         return false;
-//     }
-
-//     // Execute move
-//     switch (next_move.action) {
-//         case FORWARD:
-//             if (!wall_detected && !reached_goal) {
-//                 switch (orientation) {
-//                     case 0: pos.setX(pos.x() - 1.0); break;  // WEST
-//                     case 1: pos.setY(pos.y() - 1.0); break;  // NORTH
-//                     case 2: pos.setX(pos.x() + 1.0); break;  // EAST
-//                     case 3: pos.setY(pos.y() + 1.0); break;  // SOUTH
-//                     default:
-//                         ROS_ERROR("Invalid orientation");
-//                         return false;
-//                 }
-//                 displayVisits(next_move.visitCount);
-//             }
-//             break;
-            
-//         case RIGHT:
-//         case LEFT:
-//             // For turns, just update orientation
-//             orientation = (orientation + (next_move.action == RIGHT ? 1 : 3)) % 4;
-//             break;
-            
-//         default:
-//             ROS_ERROR("Invalid action");
-//             return false;
-//     }
-    
-//     return true;
-// }
