@@ -21,10 +21,9 @@ static int visit_grid[GRID_SIZE][GRID_SIZE] = {{0}};
 static bool first_run = true;
 static coordinate current_pos = {START_POS, START_POS};
 static int facing_direction = 1; // Start facing NORTH
-static int scans_completed = 0;  // Track how many directions we've scanned
-static bool need_to_move = false;  // Whether we're ready to move after scanning
-static int target_direction = -1;   // Direction we want to face for movement
-static uint8_t min_visits = UINT8_MAX;  // Track least visited adjacent square
+static int scans_completed = 0;
+static bool ready_to_move = false;
+static int best_direction = -1;
 
 void updateVisitMap(coordinate pos) {
     if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
@@ -47,9 +46,6 @@ coordinate getNextPosition(coordinate pos, int direction) {
         case 1: next.y--; break; // NORTH
         case 2: next.x++; break; // EAST
         case 3: next.y++; break; // SOUTH
-        default:
-            ROS_ERROR("Invalid direction in getNextPosition");
-            break;
     }
     return next;
 }
@@ -73,97 +69,59 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         first_run = false;
         robot_state = PLAN_NEXT;
         scans_completed = 0;
-        need_to_move = false;
-        target_direction = -1;
-        min_visits = UINT8_MAX;
+        ready_to_move = false;
+        best_direction = -1;
         return next_move;
     }
     
-    switch (robot_state) {
-        case STARTUP: {
-            robot_state = PLAN_NEXT;
-            scans_completed = 0;
-            need_to_move = false;
-            target_direction = -1;
-            min_visits = UINT8_MAX;
-            next_move.validAction = false;
-            break;
-        }
-        
-        case PLAN_NEXT: {
-            if (need_to_move) {
-                // If we need to turn to face target direction
-                if (facing_direction != target_direction) {
-                    // Turn right (90 degrees per tick)
-                    next_move.action = RIGHT;
-                    facing_direction = (facing_direction + 1) % 4;
-                } else {
-                    // We're facing the right direction, try to move
-                    if (!bumped_wall) {
-                        next_move.action = FORWARD;
-                        current_pos = getNextPosition(current_pos, facing_direction);
-                        updateVisitMap(current_pos);
-                        next_move.visitCount = static_cast<uint8_t>(
-                            std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
-                        );
-                    }
-                    // Reset scanning state after move attempt
-                    need_to_move = false;
-                    scans_completed = 0;
-                    target_direction = -1;
-                    min_visits = UINT8_MAX;
-                }
-            } else {
-                // During scanning phase
-                if (!bumped_wall) {
-                    // Found potential path, check visit count
-                    coordinate next_pos = getNextPosition(current_pos, facing_direction);
-                    uint8_t visits = static_cast<uint8_t>(
-                        std::min(getVisitCount(next_pos), static_cast<int>(UINT8_MAX))
-                    );
-                    if (visits < min_visits) {
-                        min_visits = visits;
-                        target_direction = facing_direction;
-                    }
-                }
-                
-                // Turn right to continue scanning (90 degrees per tick)
-                next_move.action = RIGHT;
-                facing_direction = (facing_direction + 1) % 4;
-                scans_completed++;
-                
-                // After full scan, prepare to move if we found a path
-                if (scans_completed >= 4) {
-                    if (target_direction != -1) {
-                        need_to_move = true;
-                    } else {
-                        // No valid path found, reset scan
-                        scans_completed = 0;
-                        min_visits = UINT8_MAX;
-                    }
-                }
+    // Main state machine
+    if (ready_to_move) {
+        // If we need to turn to face best_direction
+        if (facing_direction != best_direction) {
+            next_move.action = RIGHT;
+            facing_direction = (facing_direction + 1) % 4;
+        } else {
+            // We're facing the right direction, try to move
+            if (!bumped_wall) {
+                next_move.action = FORWARD;
+                current_pos = getNextPosition(current_pos, facing_direction);
+                updateVisitMap(current_pos);
+                next_move.visitCount = static_cast<uint8_t>(
+                    std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
+                );
             }
-            break;
+            // Reset for next scan
+            ready_to_move = false;
+            scans_completed = 0;
+            best_direction = -1;
         }
-        
-        case MOVING: {
-            robot_state = PLAN_NEXT;
-            next_move.validAction = false;
-            break;
-        }
-        
-        default: {
-            ROS_ERROR("Invalid robot state");
-            next_move.validAction = false;
-            break;
+    } else {
+        // During scanning phase
+        if (!bumped_wall) {
+            // Found a potential path
+            best_direction = facing_direction;
+            ready_to_move = true;
+            next_move.action = RIGHT;
+            facing_direction = (facing_direction + 1) % 4;
+        } else {
+            // Hit a wall, turn right and continue scanning
+            next_move.action = RIGHT;
+            facing_direction = (facing_direction + 1) % 4;
+            scans_completed++;
+            
+            // If we've checked all directions and found no path
+            if (scans_completed >= 4) {
+                scans_completed = 0;
+                best_direction = -1;
+            }
         }
     }
     
     ROS_INFO("Position: (%d,%d), Facing: %d, State: %d, Action: %d, Scans: %d, "
-             "Target Dir: %d, Wall: %d, Need Move: %d", 
+             "Best Dir: %d, Ready Move: %d, Wall: %d", 
              current_pos.x, current_pos.y, facing_direction, robot_state, 
-             next_move.action, scans_completed, target_direction, 
-             bumped_wall, need_to_move);
+             next_move.action, scans_completed, best_direction, 
+             ready_to_move, bumped_wall);
     
     return next_move;
 }
