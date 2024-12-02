@@ -117,9 +117,8 @@
 //     return true;
 // }
 
-/* mashengl_student_maze.cpp */
 
-#include "student.h"
+##include "student.h"
 
 bool checkObstacle(QPointF pos, int direction) {
     int x = static_cast<int>(std::floor(pos.x()));
@@ -156,7 +155,7 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     static const ros::Duration TICK_DURATION(0.2);
     ros::Duration(TICK_DURATION).sleep();
     
-    // Check current state
+    // Check current state - only check wall in direction we're facing
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
                              static_cast<int>(std::floor(pos.y())));
