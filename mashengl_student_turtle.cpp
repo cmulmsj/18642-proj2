@@ -261,6 +261,17 @@ bool can_move_to(coordinate next) {
     return next.x < GRID_SIZE && next.y < GRID_SIZE;
 }
 
+void check_current_direction(bool wall_detected) {
+    coordinate next = next_position(orientation);
+    if (!wall_detected && can_move_to(next)) {
+        uint8_t visits = visit_map[next.x][next.y];
+        if (visits < min_visits) {
+            min_visits = visits;
+            least_visited_dir = orientation;
+        }
+    }
+}
+
 turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
     turtleMove result = {FORWARD, true, 0};
 
@@ -287,10 +298,10 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
 
     switch (current_state) {
         case INIT:
-            current_state = SCAN;
             scan_count = 0;
             least_visited_dir = -1;
             min_visits = UINT8_MAX;
+            current_state = SCAN;
             result.validAction = false;
             break;
 
@@ -301,14 +312,7 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
             }
             
             // Check current direction
-            coordinate next = next_position(orientation);
-            if (!wall_detected && can_move_to(next)) {
-                uint8_t visits = visit_map[next.x][next.y];
-                if (visits < min_visits) {
-                    min_visits = visits;
-                    least_visited_dir = orientation;
-                }
-            }
+            check_current_direction(wall_detected);
             
             if (scan_count < 3) {
                 // Continue scanning
@@ -325,7 +329,7 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
                         has_rotated_in_tick = true;
                         orientation = (orientation + 1) % 4;
                     } else {
-                        current_state = EXECUTE;
+                        current_state = DECIDE;
                         result.validAction = false;
                     }
                 } else {
@@ -334,6 +338,15 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
                     result.validAction = false;
                 }
             }
+            break;
+
+        case DECIDE:
+            if (!wall_detected && !has_moved_in_tick) {
+                current_state = EXECUTE;
+            } else {
+                current_state = INIT;
+            }
+            result.validAction = false;
             break;
 
         case EXECUTE:
