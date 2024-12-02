@@ -227,6 +227,7 @@
 #else
 #include "student.h"
 #include "ros/ros.h"
+#endif
 
 // Global state variables
 static MazeState current_state = INIT;
@@ -249,6 +250,9 @@ coordinate next_position(int dir) {
         case NORTH: next.y--; break;
         case EAST:  next.x++; break;
         case SOUTH: next.y++; break;
+        default:
+            ROS_ERROR("Invalid direction in next_position");
+            break;
     }
     return next;
 }
@@ -339,6 +343,12 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
 
         case COMPLETE:
             result.validAction = false;
+            break;
+
+        default:
+            ROS_ERROR("Invalid state in studentTurtleStep");
+            result.validAction = false;
+            current_state = INIT;
             break;
     }
 
