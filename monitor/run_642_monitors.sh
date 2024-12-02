@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Don't kill existing monitors at start - let the parent script handle process management
-
 # Directory where this script is located
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
@@ -11,8 +9,11 @@ for monitor in "$@"; do
     > "${monitor}.output.tmp"
 done
 
+# Store monitor names in an array
+MONITORS=("$@")
+
 # Start each monitor
-for monitor in "$@"; do
+for monitor in "${MONITORS[@]}"; do
     echo "Starting $monitor..."
     rosrun ece642rtle "$monitor" > "${monitor}.output.tmp" 2>&1 &
     sleep 2  # Increased sleep between monitor starts
@@ -23,7 +24,7 @@ collect_violations() {
     rm -f VIOLATIONS.txt
     
     # Process outputs
-    for monitor in "$@"; do
+    for monitor in "${MONITORS[@]}"; do
         if [ -f "${monitor}.output.tmp" ]; then
             echo "=== Violations from $monitor ===" >> VIOLATIONS.txt
             grep -C 5 "\[ WARN\]" "${monitor}.output.tmp" >> VIOLATIONS.txt
@@ -31,8 +32,8 @@ collect_violations() {
     done
 }
 
-# Set up signal handler
-trap "collect_violations $@" SIGINT SIGTERM
+# Set up signal handler - properly formatted
+trap collect_violations SIGINT SIGTERM
 
 # Keep running until parent terminates
 wait
