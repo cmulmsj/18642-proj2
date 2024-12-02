@@ -232,10 +232,11 @@
 // Global state variables
 static MazeState current_state = INIT;
 static uint8_t visit_map[GRID_SIZE][GRID_SIZE] = {{0}};
-static coordinate pos = {START_POS, START_POS};  // Starting position
-static int orientation = 0;        // 0:West, 1:North, 2:East, 3:South
-static int scan_count = 0;        // Track scan progress
-static int best_dir = -1;         // Chosen direction for next move
+static coordinate pos = {START_POS, START_POS};
+static int orientation = WEST;  // Start facing west
+static int scan_count = 0;
+static int best_dir = -1;
+static bool initialized = false;
 
 void update_visits(coordinate p) {
     if (p.x < GRID_SIZE && p.y < GRID_SIZE) {
@@ -264,6 +265,14 @@ bool is_valid_position(coordinate p) {
 turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
     turtleMove result = {FORWARD, true, 0};
 
+    // Initialization handling
+    if (!initialized) {
+        update_visits(pos);
+        result.visitCount = visit_map[pos.x][pos.y];
+        initialized = true;
+        return result;
+    }
+
     if (at_goal) {
         current_state = COMPLETE;
         result.validAction = false;
@@ -272,27 +281,23 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
 
     switch (current_state) {
         case INIT:
-            // Initialize first position
-            update_visits(pos);
-            result.visitCount = visit_map[pos.x][pos.y];
-            scan_count = 0;
             current_state = SCAN;
             result.validAction = false;
+            scan_count = 0;
+            best_dir = -1;
             break;
 
         case SCAN:
+            // During scanning phase
             if (scan_count < 4) {
-                // During scanning, rotate and check walls
                 coordinate next = next_position(orientation);
                 
-                // Check if this direction is better than current best
                 if (!wall_detected && is_valid_position(next) && 
                     (best_dir == -1 || 
                      visit_map[next.x][next.y] < visit_map[next_position(best_dir).x][next_position(best_dir).y])) {
                     best_dir = orientation;
                 }
                 
-                // Rotate to check next direction
                 result.action = RIGHT;
                 orientation = (orientation + 1) % 4;
                 scan_count++;
@@ -305,16 +310,16 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
 
         case DECIDE:
             if (best_dir == -1) {
-                // No valid direction found, restart scan
-                scan_count = 0;
+                // No valid direction found
                 current_state = SCAN;
+                scan_count = 0;
                 result.validAction = false;
             } else if (best_dir != orientation) {
-                // Need to rotate to face chosen direction
+                // Need to rotate to best direction
                 result.action = RIGHT;
                 orientation = (orientation + 1) % 4;
             } else {
-                // Ready to move in chosen direction
+                // Ready to move
                 current_state = EXECUTE;
                 result.validAction = false;
             }
@@ -322,21 +327,19 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
 
         case EXECUTE:
             if (!wall_detected) {
-                // Move forward in chosen direction
+                // Move forward
                 pos = next_position(orientation);
                 update_visits(pos);
                 result.action = FORWARD;
                 result.visitCount = visit_map[pos.x][pos.y];
-                
-                // Reset for next scan
+                current_state = SCAN;
                 scan_count = 0;
                 best_dir = -1;
-                current_state = SCAN;
             } else {
-                // Hit unexpected wall, restart scan
+                // Hit wall, restart scan
+                current_state = SCAN;
                 scan_count = 0;
                 best_dir = -1;
-                current_state = SCAN;
                 result.validAction = false;
             }
             break;
@@ -347,8 +350,8 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
 
         default:
             ROS_ERROR("Invalid state in studentTurtleStep");
-            result.validAction = false;
             current_state = INIT;
+            result.validAction = false;
             break;
     }
 
