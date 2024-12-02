@@ -117,7 +117,9 @@
 //     return true;
 // }
 
+/* mashengl_student_maze.cpp */
 
+#include "student.h"
 
 bool checkObstacle(QPointF pos, int direction) {
     int x = static_cast<int>(std::floor(pos.x()));
