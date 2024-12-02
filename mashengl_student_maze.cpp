@@ -90,25 +90,37 @@ bool checkObstacle(QPointF pos, int direction) {
 // }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // Fixed delay for timing
-    ros::Duration(0.2).sleep();
+    // Start new tick cycle
+    static const ros::Duration TICK_DURATION(0.2);
+    ros::Duration(TICK_DURATION).sleep();
     
-    // Check for wall and goal first
+    // Get current state first before any actions
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
                              static_cast<int>(std::floor(pos.y())));
     
-    // Get next move
+    // Get next move within this tick
     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
     
     if (!next_move.validAction) {
         return false;
     }
 
-    // Execute move
+    // Handle rotation and movement in separate ticks
+    static bool in_rotation = false;
+    static int target_orientation = orientation;
+    
+    if (in_rotation) {
+        // Complete rotation before allowing movement
+        orientation = target_orientation;
+        in_rotation = false;
+        return true;
+    }
+    
+    // Execute move based on action type
     switch (next_move.action) {
         case FORWARD:
-            if (!wall_detected && !reached_goal) {
+            if (!wall_detected && !reached_goal && !in_rotation) {
                 switch (orientation) {
                     case 0: pos.setX(pos.x() - 1.0); break;  // WEST
                     case 1: pos.setY(pos.y() - 1.0); break;  // NORTH
@@ -124,7 +136,10 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             
         case RIGHT:
         case LEFT:
-            orientation = (orientation + (next_move.action == RIGHT ? 1 : 3)) % 4;
+            if (!in_rotation) {
+                in_rotation = true;
+                target_orientation = (orientation + (next_move.action == RIGHT ? 1 : 3)) % 4;
+            }
             break;
             
         default:
