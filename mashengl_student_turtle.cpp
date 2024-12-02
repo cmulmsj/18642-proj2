@@ -60,9 +60,14 @@ coordinate getNextPosition(coordinate pos, int direction) {
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     turtleMove next_move = {FORWARD, true, 0};
     
+    ROS_INFO("*** START OF STEP ***");
+    ROS_INFO("Current state - Pos:(%d,%d), Facing:%d, Bumped:%d, AtGoal:%d, FirstRun:%d, ReadyMove:%d, Scans:%d",
+             current_pos.x, current_pos.y, facing_direction, bumped_wall, at_goal, first_run, ready_to_move, scans_completed);
+    
     // Stop if maze complete
     if (at_goal) {
         next_move.validAction = false;
+        ROS_INFO("At goal, stopping");
         return next_move;
     }
     
@@ -78,15 +83,20 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         ready_to_move = false;
         best_direction = -1;
         min_visit_count = UINT8_MAX;
+        
+        ROS_INFO("First run complete, starting scan");
         return next_move;
     }
     
     // Main state machine
     if (ready_to_move) {
+        ROS_INFO("Ready to move, best_direction=%d, facing=%d", best_direction, facing_direction);
+        
         // If we need to turn to face best_direction
         if (facing_direction != best_direction) {
             next_move.action = RIGHT;
             facing_direction = (facing_direction + 1) % 4;
+            ROS_INFO("Turning right to face best direction");
         } else {
             // We're facing the right direction, try to move
             if (!bumped_wall) {
@@ -96,14 +106,20 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
                 next_move.visitCount = static_cast<uint8_t>(
                     std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
                 );
+                ROS_INFO("Moving forward in direction %d", facing_direction);
+            } else {
+                ROS_INFO("Blocked by wall, cannot move forward");
             }
             // Reset for next scan
             ready_to_move = false;
             scans_completed = 0;
             best_direction = -1;
             min_visit_count = UINT8_MAX;
+            ROS_INFO("Reset scan state");
         }
     } else {
+        ROS_INFO("Scanning - direction=%d, scans_completed=%d", facing_direction, scans_completed);
+        
         // During scanning phase
         if (!bumped_wall) {
             // Found an available direction, check its visit count
@@ -112,11 +128,18 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
                 std::min(getVisitCount(next_pos), static_cast<int>(UINT8_MAX))
             );
             
+            ROS_INFO("No wall in direction %d, visit count=%d, current min=%d",
+                     facing_direction, visit_count, min_visit_count);
+            
             // Update best direction if this is the least visited
             if (visit_count < min_visit_count) {
                 min_visit_count = visit_count;
                 best_direction = facing_direction;
+                ROS_INFO("New best direction found: %d with visit count %d",
+                         best_direction, min_visit_count);
             }
+        } else {
+            ROS_INFO("Wall detected in direction %d", facing_direction);
         }
         
         // Continue scanning
@@ -128,19 +151,18 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         if (scans_completed >= 4) {
             if (best_direction != -1) {
                 ready_to_move = true;
+                ROS_INFO("Scan complete, preparing to move in direction %d", best_direction);
             } else {
                 // No valid path found, reset scan
                 scans_completed = 0;
                 min_visit_count = UINT8_MAX;
+                ROS_INFO("No valid path found, resetting scan");
             }
         }
     }
     
-    ROS_INFO("Position: (%d,%d), Facing: %d, State: %d, Action: %d, Scans: %d, "
-             "Best Dir: %d, Min Visits: %d, Ready Move: %d, Wall: %d", 
-             current_pos.x, current_pos.y, facing_direction, robot_state, 
-             next_move.action, scans_completed, best_direction, 
-             min_visit_count, ready_to_move, bumped_wall);
+    ROS_INFO("*** END OF STEP *** NextMove: action=%d, valid=%d, visits=%d",
+             next_move.action, next_move.validAction, next_move.visitCount);
     
     return next_move;
 }
