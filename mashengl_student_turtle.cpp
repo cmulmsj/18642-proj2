@@ -220,7 +220,13 @@
  * LAST UPDATE: 11/08/2024
  */
 
+#ifdef testing
+#include "student_mock.h"
+#define ROS_INFO mock_ros_info
+#define ROS_ERROR mock_ros_error
+#else
 #include "student.h"
+#include "ros/ros.h"
 
 // Global state variables
 static MazeState current_state = INIT;
