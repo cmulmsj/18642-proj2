@@ -234,6 +234,8 @@ static int scan_count = 0;
 static bool has_moved_in_tick = false;
 static bool has_rotated_in_tick = false;
 static bool is_initialized = false;
+static int least_visited_dir = -1;
+static uint8_t min_visits = UINT8_MAX;
 
 void update_visits(coordinate p) {
     if (p.x < GRID_SIZE && p.y < GRID_SIZE) {
@@ -270,7 +272,7 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
         return result;
     }
     
-    // Reset per-tick flags at start of tick
+    // Reset per-tick flags
     if (!has_moved_in_tick && !has_rotated_in_tick) {
         has_moved_in_tick = false;
         has_rotated_in_tick = false;
@@ -287,6 +289,8 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
         case INIT:
             current_state = SCAN;
             scan_count = 0;
+            least_visited_dir = -1;
+            min_visits = UINT8_MAX;
             result.validAction = false;
             break;
 
@@ -296,25 +300,39 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
                 break;
             }
             
-            if (scan_count < 4) {
-                // Check current direction before rotating
-                coordinate next = next_position(orientation);
-                if (!wall_detected && can_move_to(next) && !has_moved_in_tick) {
-                    current_state = EXECUTE;
-                    result.action = FORWARD;
-                    has_moved_in_tick = true;
-                } else {
-                    // Rotate if can't move forward
-                    orientation = (orientation + 1) % 4;
-                    result.action = RIGHT;
-                    has_rotated_in_tick = true;
-                    scan_count++;
+            // Check current direction
+            coordinate next = next_position(orientation);
+            if (!wall_detected && can_move_to(next)) {
+                uint8_t visits = visit_map[next.x][next.y];
+                if (visits < min_visits) {
+                    min_visits = visits;
+                    least_visited_dir = orientation;
                 }
+            }
+            
+            if (scan_count < 3) {
+                // Continue scanning
+                orientation = (orientation + 1) % 4;
+                result.action = RIGHT;
+                has_rotated_in_tick = true;
+                scan_count++;
             } else {
-                // Reset scan after checking all directions
-                scan_count = 0;
-                current_state = INIT;
-                result.validAction = false;
+                // Scanning complete, prepare to move
+                if (least_visited_dir != -1) {
+                    // If not facing best direction, rotate towards it
+                    if (orientation != least_visited_dir) {
+                        result.action = RIGHT;
+                        has_rotated_in_tick = true;
+                        orientation = (orientation + 1) % 4;
+                    } else {
+                        current_state = EXECUTE;
+                        result.validAction = false;
+                    }
+                } else {
+                    // No valid direction found, restart scan
+                    current_state = INIT;
+                    result.validAction = false;
+                }
             }
             break;
 
@@ -326,11 +344,10 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
                 result.action = FORWARD;
                 result.visitCount = visit_map[pos.x][pos.y];
                 has_moved_in_tick = true;
-                current_state = SCAN;
-                scan_count = 0;
+                current_state = INIT;  // Go back to scanning after movement
             } else {
                 // Can't move, go back to scanning
-                current_state = SCAN;
+                current_state = INIT;
                 result.validAction = false;
             }
             break;
