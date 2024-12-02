@@ -182,7 +182,7 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     // Fixed delay for timing
     ros::Duration(0.2).sleep();
     
-    // Check for wall and goal
+    // Check for wall and goal within tick
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
                              static_cast<int>(std::floor(pos.y())));
@@ -194,7 +194,7 @@ bool moveTurtle(QPointF& pos, int& orientation) {
         return false;
     }
 
-    // Execute move
+    // Execute move within same tick
     switch (next_move.action) {
         case FORWARD:
             if (!wall_detected && !reached_goal) {
