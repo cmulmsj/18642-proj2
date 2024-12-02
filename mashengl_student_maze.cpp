@@ -9,10 +9,6 @@
 
 #include "student.h"
 
-// Global variables for tick synchronization
-static bool tick_active = false;
-static bool action_done = false;
-
 bool checkObstacle(QPointF pos, int direction) {
     int x = static_cast<int>(std::floor(pos.x()));
     int y = static_cast<int>(std::floor(pos.y()));
