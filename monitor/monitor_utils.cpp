@@ -1,11 +1,10 @@
+#include "monitor_interface.h"  // Include this first
 #include "monitor_utils.h"
-#include "monitor_interface.h"
+#include <cmath>
 
 Endpoints MonitorUtils::canonicalizeWall(int x1, int y1, int x2, int y2) {
     Endpoints wall;
     // Ensure wall segments are stored in canonical format:
-    // If y coordinates are equal, x1 should be less than x2
-    // If x coordinates are equal, y1 should be less than y2
     if (y1 == y2) {
         if (x1 <= x2) {
             wall = {x1, y1, x2, y2};
@@ -52,11 +51,10 @@ Endpoints MonitorUtils::getWallInFront(int x, int y, Orientation o) {
 }
 
 Endpoints MonitorUtils::wallBetween(const Pose& p1, const Pose& p2) {
-    // Ensure points are adjacent
     int dx = p2.x - p1.x;
     int dy = p2.y - p1.y;
     
-    if (abs(dx) + abs(dy) != 1) {
+    if (std::abs(dx) + std::abs(dy) != 1) {
         ROS_ERROR("Non-adjacent points in wallBetween");
         return {0, 0, 0, 0};
     }
