@@ -46,6 +46,9 @@ coordinate getNextPosition(coordinate pos, int direction) {
         case 1: next.y--; break; // NORTH
         case 2: next.x++; break; // EAST
         case 3: next.y++; break; // SOUTH
+        default:
+            ROS_ERROR("Invalid direction in getNextPosition");
+            break;
     }
     return next;
 }
