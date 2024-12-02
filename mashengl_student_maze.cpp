@@ -90,8 +90,8 @@ bool checkObstacle(QPointF pos, int direction) {
 // }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    // Add fixed delay to control timing
-    ros::Duration(0.2).sleep();  // 200ms delay
+    // Add fixed delay
+    ros::Duration(0.2).sleep();
     
     // Check for wall and goal
     bool wall_detected = checkObstacle(pos, orientation);
@@ -105,23 +105,15 @@ bool moveTurtle(QPointF& pos, int& orientation) {
         return false;
     }
     
-    // Execute move - but ensure rotation and movement don't happen in same tick
-    static bool rotated_last_tick = false;
-    
+    // Execute move
     switch (next_move.action) {
         case FORWARD:
-            if (rotated_last_tick) {
-                // Skip this tick if we just rotated
-                rotated_last_tick = false;
-                break;
-            }
-            
             if (!wall_detected) {
                 switch (orientation) {
-                    case 0: pos.setX(pos.x() - 1.0); break;
-                    case 1: pos.setY(pos.y() - 1.0); break;
-                    case 2: pos.setX(pos.x() + 1.0); break;
-                    case 3: pos.setY(pos.y() + 1.0); break;
+                    case 0: pos.setX(pos.x() - 1.0); break;  // WEST
+                    case 1: pos.setY(pos.y() - 1.0); break;  // NORTH
+                    case 2: pos.setX(pos.x() + 1.0); break;  // EAST
+                    case 3: pos.setY(pos.y() + 1.0); break;  // SOUTH
                     default:
                         ROS_ERROR("Invalid orientation in moveTurtle");
                         return false;
@@ -132,12 +124,10 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             
         case RIGHT:
             orientation = (orientation + 1) % 4;
-            rotated_last_tick = true;
             break;
             
         case LEFT:
             orientation = (orientation + 3) % 4;
-            rotated_last_tick = true;
             break;
             
         default:
