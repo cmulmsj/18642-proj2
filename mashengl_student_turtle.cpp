@@ -226,12 +226,11 @@
 #endif
 
 // Global state variables
-static turtleState state = S1_BEGIN;
+static MazeState state = INIT;
 static uint8_t visit_map[GRID_SIZE][GRID_SIZE] = {{0}};
 static coordinate pos = {START_POS, START_POS};
 static int orientation = WEST;
 static bool is_initialized = false;
-static int scan_count = 0;
 static uint8_t min_visits = UINT8_MAX;
 static int best_dir = -1;
 
@@ -255,6 +254,10 @@ coordinate next_position(int dir) {
     return next;
 }
 
+bool is_valid_position(coordinate next) {
+    return next.x < GRID_SIZE && next.y < GRID_SIZE;
+}
+
 turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
     turtleMove result = {FORWARD, true, 0};
 
@@ -263,103 +266,87 @@ turtleMove studentTurtleStep(bool wall_detected, bool at_goal) {
         update_visits(pos);
         result.visitCount = visit_map[pos.x][pos.y];
         is_initialized = true;
+        state = INIT;
         return result;
     }
 
+    // Handle completion
     if (at_goal) {
-        state = S3_END;
+        state = COMPLETE;
         result.validAction = false;
         return result;
     }
 
     switch (state) {
-        case S1_BEGIN:
+        case INIT:
             min_visits = UINT8_MAX;
             best_dir = -1;
-            scan_count = 0;
-            state = S2_CHECK_END;
+            state = SCAN;
             result.validAction = false;
             break;
 
-        case S2_CHECK_END:
-            if (at_goal) {
-                state = S3_END;
-            } else {
-                state = S4_BUMPED_1;
-            }
-            result.validAction = false;
-            break;
-
-        case S3_END:
-            result.validAction = false;
-            break;
-
-        case S4_BUMPED_1:
-        case S5_BUMPED_2:
-        case S6_BUMPED_3:
-        case S7_BUMPED_4:
-            // Check current direction before rotating
+        case SCAN:
+            // Check current direction
             if (!wall_detected) {
                 coordinate next = next_position(orientation);
-                if (next.x < GRID_SIZE && next.y < GRID_SIZE &&
-                    visit_map[next.x][next.y] < min_visits) {
-                    min_visits = visit_map[next.x][next.y];
-                    best_dir = orientation;
+                if (is_valid_position(next)) {
+                    if (visit_map[next.x][next.y] < min_visits) {
+                        min_visits = visit_map[next.x][next.y];
+                        best_dir = orientation;
+                    }
                 }
             }
             
-            // Turn right to check next direction
+            // Rotate to check next direction
             result.action = RIGHT;
             orientation = (orientation + 1) % 4;
-            scan_count++;
             
-            // Move to next state
-            state = (turtleState)(((int)state) + 1);
-            if (scan_count >= 4) {
-                state = S8_MOVE_1;
+            if (orientation == WEST) {  // Completed full rotation
+                state = DECIDE;
+                result.validAction = false;
             }
             break;
 
-        case S8_MOVE_1:
+        case DECIDE:
             if (best_dir == -1) {
-                state = S1_BEGIN;
+                // No valid direction found, start over
+                state = INIT;
                 result.validAction = false;
             } else if (best_dir != orientation) {
+                // Need to rotate to best direction
                 result.action = RIGHT;
                 orientation = (orientation + 1) % 4;
-                state = S9_MOVE_2;
             } else {
-                state = S10_MOVE_3;
+                // Ready to move in best direction
+                state = EXECUTE;
                 result.validAction = false;
             }
             break;
 
-        case S9_MOVE_2:
-            if (best_dir == orientation && !wall_detected) {
-                state = S10_MOVE_3;
-            } else {
-                state = S1_BEGIN;
-            }
-            result.validAction = false;
-            break;
-
-        case S10_MOVE_3:
+        case EXECUTE:
             if (!wall_detected) {
+                // Move forward
                 pos = next_position(orientation);
                 update_visits(pos);
                 result.action = FORWARD;
                 result.visitCount = visit_map[pos.x][pos.y];
-                state = S1_BEGIN;
+                state = INIT;  // Prepare for next exploration
             } else {
-                state = S1_BEGIN;
+                // Unexpected wall, restart exploration
+                state = INIT;
                 result.validAction = false;
             }
             break;
 
+        case COMPLETE:
+            result.validAction = false;
+            break;
+
         default:
             ROS_ERROR("Invalid state");
-            state = S1_BEGIN;
+            state = INIT;
             result.validAction = false;
+            break;
     }
 
     return result;
