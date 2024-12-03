@@ -40,7 +40,7 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    static const ros::Duration TICK_DURATION(0.2);
+    static const ros::Duration TICK_DURATION(0.5);
     ros::Duration(TICK_DURATION).sleep();
     
     // Single set of state checks per tick
