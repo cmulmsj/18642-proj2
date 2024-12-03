@@ -185,16 +185,11 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     
     // Initialize on first run
     if (first_run) {
-        first_run = false;
-        // Initialize visit count for starting position
         updateVisitMap(current_pos);
-        // Start scanning immediately instead of moving forward
-        next_move.action = RIGHT;
-        facing_direction = (facing_direction + 1) % 4;
-        scan_count = 1;
         next_move.visitCount = static_cast<uint8_t>(
             std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
         );
+        first_run = false;
         return next_move;
     }
     
@@ -213,9 +208,6 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
         next_move.action = RIGHT;
         facing_direction = (facing_direction + 1) % 4;
         scan_count++;
-        next_move.visitCount = static_cast<uint8_t>(
-            std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
-        );
     }
     // Movement phase - after scanning complete
     else {
@@ -243,10 +235,12 @@ turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
                 min_visit_count = UINT8_MAX;
             }
         }
-        next_move.visitCount = static_cast<uint8_t>(
-            std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
-        );
     }
+    
+    // Always update the visit count in the move
+    next_move.visitCount = static_cast<uint8_t>(
+        std::min(getVisitCount(current_pos), static_cast<int>(UINT8_MAX))
+    );
     
     return next_move;
 }
