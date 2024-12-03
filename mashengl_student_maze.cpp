@@ -140,7 +140,7 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    static const ros::Duration TICK_DURATION(0.2);
+    static const ros::Duration TICK_DURATION(0.5);
 
     // Start new tick
     if (!tick_state.is_active) {
