@@ -1,48 +1,6 @@
 #!/bin/bash
 
 # Function to kill all processes and check violations
-# kill_processes() {
-#     echo "Shutting down and checking for violations..."
-    
-#     # Kill turtle processes first
-#     for p in "$@"; do
-#         if [[ -n $(ps -p $p) ]]; then
-#             echo "Killing process $p"
-#             kill $p
-#             sleep 2  # Increased sleep time
-#         fi
-#     done
-    
-#     # Give monitors time to finish processing
-#     sleep 5
-    
-#     # Send SIGINT to monitors so they can process violations
-#     echo "Stopping monitors..."
-#     pkill -INT -f "ece642rtle_.*_monitor"
-#     sleep 3  # Wait for violation processing
-    
-#     # Now force kill any remaining monitor processes
-#     pkill -9 -f "ece642rtle_.*_monitor" 2>/dev/null || true
-    
-#     # Check for violations file
-#     if [ -f "$turtledir/monitors/VIOLATIONS.txt" ]; then
-#         echo "=================== VIOLATIONS FOUND ==================="
-#         cat "$turtledir/monitors/VIOLATIONS.txt"
-#         echo "===================================================="
-#         VIOL_COUNT=$(grep -c "\[ WARN\]" "$turtledir/monitors/VIOLATIONS.txt")
-#         echo "TOTAL VIOLATIONS: $VIOL_COUNT"
-#     else
-#         echo "No VIOLATIONS.txt found. Checking individual monitor outputs..."
-#         for m in $turtledir/monitors/*.output.tmp; do
-#             if [ -f "$m" ]; then
-#                 echo "=== Checking $m ==="
-#                 grep "\[ WARN\]" "$m" || true
-#             fi
-#         done
-#     fi
-    
-#     exit 0
-# }
 kill_processes() {
     echo "Shutting down and processing violations..."
     
