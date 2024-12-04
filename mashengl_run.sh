@@ -44,46 +44,62 @@
 #     exit 0
 # }
 kill_processes() {
-    echo "Shutting down and checking for violations..."
+    echo "Shutting down and processing violations..."
     
-    # Kill turtle processes first
+    # Stop the turtle processes first
     for p in "$@"; do
-        if [[ -n $(ps -p $p) ]]; then
-            echo "Killing process $p"
-            kill $p
-            sleep 2
+        if ps -p $p > /dev/null 2>&1; then
+            kill $p 2>/dev/null || true
+            sleep 1
         fi
     done
     
-    # Give monitors time to finish processing
-    sleep 5
-    
-    # Send SIGINT to monitors and wait for them to finish
-    pkill -INT -f "ece642rtle_.*_monitor"
+    # Give time for final messages
     sleep 3
     
-    # Final cleanup
+    # Ensure VIOLATIONS.txt exists and is readable
+    cd "$turtledir/monitors"
+    touch VIOLATIONS.txt
+
+    # Terminate monitors gracefully
+    pkill -TERM -f "ece642rtle_.*_monitor" 2>/dev/null || true
+    sleep 2
+    
+    # Force kill any remaining monitors
     pkill -9 -f "ece642rtle_.*_monitor" 2>/dev/null || true
     
     echo "=================== FINAL VIOLATIONS SUMMARY ==================="
-    if [ -f "$turtledir/monitors/VIOLATIONS.txt" ]; then
-        cat "$turtledir/monitors/VIOLATIONS.txt"
+    
+    # Collect warnings from all output files if VIOLATIONS.txt is empty
+    if [ ! -s VIOLATIONS.txt ]; then
+        for output in *.output.tmp; do
+            if [ -f "$output" ]; then
+                grep "[ WARN]" "$output" >> VIOLATIONS.txt
+            fi
+        done
+    fi
+    
+    if [ -s VIOLATIONS.txt ]; then
+        cat VIOLATIONS.txt
         echo "===================================================="
-        VIOL_COUNT=$(grep -c "\[ WARN\]" "$turtledir/monitors/VIOLATIONS.txt")
+        VIOL_COUNT=$(grep -c "\[ WARN\]" VIOLATIONS.txt)
         echo "TOTAL VIOLATIONS: $VIOL_COUNT"
         
-        # Show violations by monitor type
+        # Count by monitor type
         echo -e "\nViolations by monitor:"
         for monitor in turn tick forward wall face solved atend step; do
-            count=$(grep -c "VIOLATION.*\[${monitor^^}\]" "$turtledir/monitors/VIOLATIONS.txt")
+            count=$(grep -ci "\[${monitor}\].*VIOLATION" VIOLATIONS.txt)
             if [ $count -gt 0 ]; then
                 echo "${monitor^} Monitor: $count violations"
             fi
         done
     else
-        echo "No VIOLATIONS.txt found"
+        echo "No violations found"
     fi
     
+    # Clean up temporary files
+    rm -f *.output.tmp
+
     exit 0
 }
 
