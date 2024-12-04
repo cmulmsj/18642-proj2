@@ -40,58 +40,30 @@
 
 #!/bin/bash
 
-# Directory where this script is located
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$DIR"
-
 # Store monitor names in array
 MONITORS=("$@")
 
-# Cleanup function for existing processes
-cleanup() {
-    pkill -f "ece642rtle_.*_monitor" || true
-    rm -f *.output.tmp
-    rm -f VIOLATIONS.txt
-}
+# Cleanup any existing monitor processes and files
+pkill -f "ece642rtle_.*_monitor" 2>/dev/null || true
+rm -f *.output.tmp VIOLATIONS.txt
+sleep 2
 
-# Run cleanup on start
-cleanup
-sleep 1
+# Create fresh VIOLATIONS.txt
+touch VIOLATIONS.txt
 
-# Create named pipes for each monitor
+# Start each monitor and redirect output
 for monitor in "${MONITORS[@]}"; do
-    # Create named pipe if it doesn't exist
-    PIPE="/tmp/${monitor}_pipe"
-    [[ -p $PIPE ]] || mkfifo $PIPE
-done
-
-# Start monitors and set up output handling
-for monitor in "${MONITORS[@]}"; do
-    PIPE="/tmp/${monitor}_pipe"
-    
-    # Start monitor and tee output to both pipe and temp file
-    rosrun ece642rtle "$monitor" 2>&1 | tee "$monitor.output.tmp" > "$PIPE" &
-    
-    # Read from pipe and display in real time, prefixed with monitor name
-    # Also save warnings to VIOLATIONS.txt
-    (while read -r line; do
-        # Display all output
+    # Start monitor and tee output to both terminal and file
+    rosrun ece642rtle "$monitor" 2>&1 | tee -a "$monitor.output.tmp" | while read -r line; do
+        # Echo all output to terminal
         echo "[$monitor] $line"
         
         # Save warnings to VIOLATIONS.txt
-        if [[ $line == *"WARN"* ]]; then
+        if [[ "$line" == *"[ WARN]"* ]]; then
             echo "[$monitor] $line" >> VIOLATIONS.txt
         fi
-    done < "$PIPE") &
+    done &
 done
 
-# Cleanup function for SIGINT/SIGTERM
-trap cleanup EXIT
-
-# Wait for monitors
+# Just wait - let the parent script handle cleanup
 wait
-
-# Clean up pipes
-for monitor in "${MONITORS[@]}"; do
-    rm -f "/tmp/${monitor}_pipe"
-done
