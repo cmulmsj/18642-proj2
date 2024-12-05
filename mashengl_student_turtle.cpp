@@ -172,6 +172,7 @@ coordinate getNextPosition(coordinate pos, int direction) {
     }
     return next;
 }
+#endif
 
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     turtleMove next_move = {FORWARD, true, 0};
