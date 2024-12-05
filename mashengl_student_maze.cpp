@@ -232,6 +232,14 @@
 
 #include "student.h"
 
+struct TurtleState {
+    bool initialized;
+    int cycles;
+    QPointF next_pos;
+    int next_orientation;
+    bool move_pending;
+} state = {false, 0, QPointF(START_POS, START_POS), 1, false};
+
 bool checkObstacle(QPointF pos, int direction) {
     int x = static_cast<int>(std::floor(pos.x()));
     int y = static_cast<int>(std::floor(pos.y()));
@@ -263,23 +271,26 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    static bool initialized = false;
-    static int cycles = 0;
+    // Handle initialization
+    if (!state.initialized) {
+        state.initialized = true;
+        state.cycles = TIMEOUT;
+        return true;
+    }
     
     // Handle timeout cycles
-    if (cycles > 0) {
-        cycles--;
+    if (state.cycles > 0) {
+        // Apply pending position update at start of a new tick cycle
+        if (state.move_pending && state.cycles == TIMEOUT - 1) {
+            pos = state.next_pos;
+            orientation = state.next_orientation;
+            state.move_pending = false;
+        }
+        state.cycles--;
         return true;
     }
     
-    // Handle initialization
-    if (!initialized) {
-        initialized = true;
-        cycles = TIMEOUT;
-        return true;
-    }
-    
-    // Get checks after initialization
+    // Get checks
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
                              static_cast<int>(std::floor(pos.y())));
@@ -294,15 +305,18 @@ bool moveTurtle(QPointF& pos, int& orientation) {
         return false;
     }
     
-    // Execute single action
+    // Prepare next position/orientation but don't apply yet
+    state.next_pos = pos;
+    state.next_orientation = orientation;
+    
     switch (next_move.action) {
         case FORWARD:
             if (!wall_detected && !reached_goal) {
                 switch (orientation) {
-                    case 0: pos.setX(pos.x() - 1.0); break;
-                    case 1: pos.setY(pos.y() - 1.0); break;
-                    case 2: pos.setX(pos.x() + 1.0); break;
-                    case 3: pos.setY(pos.y() + 1.0); break;
+                    case 0: state.next_pos.setX(pos.x() - 1.0); break;
+                    case 1: state.next_pos.setY(pos.y() - 1.0); break;
+                    case 2: state.next_pos.setX(pos.x() + 1.0); break;
+                    case 3: state.next_pos.setY(pos.y() + 1.0); break;
                     default:
                         ROS_ERROR("Invalid orientation");
                         return false;
@@ -312,11 +326,11 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             break;
             
         case RIGHT:
-            orientation = (orientation + 1) % 4;
+            state.next_orientation = (orientation + 1) % 4;
             break;
             
         case LEFT:
-            orientation = (orientation + 3) % 4;
+            state.next_orientation = (orientation + 3) % 4;
             break;
             
         default:
@@ -324,7 +338,9 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             return false;
     }
     
-    cycles = TIMEOUT;
+    // Mark position update as pending
+    state.move_pending = true;
+    state.cycles = TIMEOUT;
     return true;
 }
 
