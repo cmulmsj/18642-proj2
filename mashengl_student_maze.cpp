@@ -143,11 +143,15 @@ bool checkObstacle(QPointF pos, int direction) {
 bool moveTurtle(QPointF& pos, int& orientation) {
     static const ros::Duration TICK_SLEEP(0.015);
     static const ros::Duration MSG_WAIT(0.002);
+    
     // Handle countdown
     if (tick_state.countdown > 0) {
         tick_state.countdown--;
         return true;
     }
+    
+    // Sleep before starting new tick
+    TICK_SLEEP.sleep();
     
     // Start new tick
     tick_state.is_active = true;
@@ -159,8 +163,8 @@ bool moveTurtle(QPointF& pos, int& orientation) {
                              static_cast<int>(std::floor(pos.y())));
     
     if (reached_goal) {
-        // Small sleep to ensure message processing
-        ros::Duration(0.018).sleep();
+        // Wait for messages
+        MSG_WAIT.sleep();
         tick_state.is_active = false;
         return false;
     }
@@ -168,8 +172,8 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
     
     if (!next_move.validAction) {
-        // Small sleep to ensure message processing
-        ros::Duration(0.018).sleep();
+        // Wait for messages
+        MSG_WAIT.sleep();
         tick_state.is_active = false;
         return false;
     }
@@ -206,13 +210,13 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             return false;
     }
     
-    // Ensure message processing time
+    // Wait for messages before ending tick
     MSG_WAIT.sleep();
     
-    // End tick and set countdown
-    tick_state.is_active = false;
+    // Keep tick active slightly longer
     tick_state.countdown = TIMEOUT;
     tick_state.move_completed = true;
+    tick_state.is_active = false;
     
     return true;
 }
