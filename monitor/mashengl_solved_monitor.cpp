@@ -18,23 +18,6 @@ static SolvedMonitorMailbox mailbox = {};
 static SolvedMonitorState state = {};
 static bool first_run = true;
 
-void tickInterrupt(ros::Time t) {
-    if (first_run) {
-        first_run = false;
-        fprintf(stderr, "I'm running Solved Monitor (mashengl) to STDERR\n");
-        ROS_WARN("Monitor Solved Monitor (mashengl) is running");
-    }
-
-    if (mailbox.pose_updated) {
-        state.current_pose = mailbox.latest_pose;
-        mailbox.pose_updated = false;
-    }
-    if (mailbox.orientation_updated) {
-        state.current_orientation = mailbox.latest_orientation;
-        mailbox.orientation_updated = false;
-    }
-}
-
 void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
     mailbox.latest_pose = {x, y};
     mailbox.latest_orientation = o;
@@ -53,6 +36,8 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
     ROS_INFO("[[%ld ns]] Position update: (%d,%d), orientation: %d", 
              t.toNSec(), x, y, o);
 }
+
+void tickInterrupt(ros::Time t) {}
 
 void visitInterrupt(ros::Time t, int visits) {}
 
