@@ -73,7 +73,7 @@
 // Constants
 const int GRID_SIZE = 30;
 const int START_POS = 13;  // Starting position (middle of grid)
-static const int TIMEOUT = 2;  // Timeout cycles for controlling speed
+static const int TIMEOUT = 40;  // Timeout cycles for controlling speed
 
 // External functions
 bool bumped(int x1, int y1, int x2, int y2);
