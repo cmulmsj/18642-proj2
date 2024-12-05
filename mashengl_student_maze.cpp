@@ -104,7 +104,9 @@ static struct {
     bool is_active;
     int countdown;
     bool move_completed;
-} tick_state = {false, 0, false};
+    ros::Time tick_start;
+    static const ros::Duration TICK_DURATION;
+} tick_state = {false, 0, false, ros::Time(0), ros::Duration(0.020)}; // Extended to 20ms
 
 bool checkObstacle(QPointF pos, int direction) {
     if (!tick_state.is_active) {
@@ -141,6 +143,8 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
+    static const ros::Duration MIN_TICK_LENGTH(0.018); // Minimum tick duration
+    
     // Handle countdown
     if (tick_state.countdown > 0) {
         tick_state.countdown--;
@@ -150,6 +154,7 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     // Start new tick
     tick_state.is_active = true;
     tick_state.move_completed = false;
+    tick_state.tick_start = ros::Time::now();
     
     // Get state checks inside active tick
     bool wall_detected = checkObstacle(pos, orientation);
@@ -157,6 +162,11 @@ bool moveTurtle(QPointF& pos, int& orientation) {
                              static_cast<int>(std::floor(pos.y())));
     
     if (reached_goal) {
+        // Make sure we stay in tick long enough
+        ros::Duration elapsed = ros::Time::now() - tick_state.tick_start;
+        if (elapsed < MIN_TICK_LENGTH) {
+            (MIN_TICK_LENGTH - elapsed).sleep();
+        }
         tick_state.is_active = false;
         return false;
     }
@@ -164,6 +174,11 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
     
     if (!next_move.validAction) {
+        // Make sure we stay in tick long enough
+        ros::Duration elapsed = ros::Time::now() - tick_state.tick_start;
+        if (elapsed < MIN_TICK_LENGTH) {
+            (MIN_TICK_LENGTH - elapsed).sleep();
+        }
         tick_state.is_active = false;
         return false;
     }
@@ -198,6 +213,12 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             ROS_ERROR("Invalid action");
             tick_state.is_active = false;
             return false;
+    }
+    
+    // Ensure minimum tick duration before ending
+    ros::Duration elapsed = ros::Time::now() - tick_state.tick_start;
+    if (elapsed < MIN_TICK_LENGTH) {
+        (MIN_TICK_LENGTH - elapsed).sleep();
     }
     
     // End tick and set countdown
