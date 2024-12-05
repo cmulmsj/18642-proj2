@@ -104,14 +104,26 @@ typedef struct {
 } turtleMove;
 
 // Tick state tracking structure
+// struct TickState {
+//     bool is_active;
+//     bool wall_detected;
+//     bool goal_reached;
+//     bool needs_check;
+    
+//     TickState() : is_active(false), wall_detected(false), 
+//                   goal_reached(false), needs_check(true) {}
+// };
+
 struct TickState {
     bool is_active;
     bool wall_detected;
     bool goal_reached;
     bool needs_check;
+    size_t delay_counter;
     
     TickState() : is_active(false), wall_detected(false), 
-                  goal_reached(false), needs_check(true) {}
+                  goal_reached(false), needs_check(true),
+                  delay_counter(5) {}
 };
 
 // Core functions
