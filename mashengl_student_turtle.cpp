@@ -146,8 +146,8 @@ static int facing_direction = 1; // Start facing NORTH
 static int scan_count = 0;
 static int best_direction = -1;
 static uint8_t min_visit_count = UINT8_MAX;
-static size_t delay_counter = 5;  // Initial delay value
-static const size_t DELAY_RESET = 5;  // Reset value for delay
+static size_t delay_counter = 40;  // Initial delay value
+static const size_t DELAY_RESET = 40;  // Reset value for delay
 
 void updateVisitMap(coordinate pos) {
     if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
