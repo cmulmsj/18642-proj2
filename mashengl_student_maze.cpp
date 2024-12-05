@@ -99,14 +99,7 @@
 
 #include "student.h"
 
-TickState tick_state;
-
 bool checkObstacle(QPointF pos, int direction) {
-    // Only perform check if we're in an active tick and need a check
-    if (!tick_state.is_active || !tick_state.needs_check) {
-        return tick_state.wall_detected;
-    }
-    
     int x = static_cast<int>(std::floor(pos.x()));
     int y = static_cast<int>(std::floor(pos.y()));
     int x1 = x, y1 = y;
@@ -133,37 +126,25 @@ bool checkObstacle(QPointF pos, int direction) {
             ROS_ERROR("Invalid direction");
             return true;
     }
-    
-    tick_state.needs_check = false;
-    tick_state.wall_detected = bumped(x1, y1, x2, y2);
-    return tick_state.wall_detected;
+    return bumped(x1, y1, x2, y2);
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    static const ros::Duration TICK_DURATION(0.1); // Reduced from 0.5
+    // Get state checks
+    bool wall_detected = checkObstacle(pos, orientation);
+    bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
+                             static_cast<int>(std::floor(pos.y())));
     
-    // Start new tick
-    tick_state.is_active = true;
-    tick_state.needs_check = true;
-    
-    // Perform state checks
-    tick_state.wall_detected = checkObstacle(pos, orientation);
-    tick_state.goal_reached = atend(static_cast<int>(std::floor(pos.x())), 
-                                  static_cast<int>(std::floor(pos.y())));
-    
-    turtleMove next_move = studentTurtleStep(tick_state.wall_detected, 
-                                           tick_state.goal_reached);
+    turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
     
     if (!next_move.validAction) {
-        tick_state.is_active = false;
-        ros::Duration(TICK_DURATION).sleep();
         return false;
     }
     
-    // Execute action
+    // Execute single action
     switch (next_move.action) {
         case FORWARD:
-            if (!tick_state.wall_detected && !tick_state.goal_reached) {
+            if (!wall_detected && !reached_goal) {
                 switch (orientation) {
                     case 0: pos.setX(pos.x() - 1.0); break;
                     case 1: pos.setY(pos.y() - 1.0); break;
@@ -171,7 +152,6 @@ bool moveTurtle(QPointF& pos, int& orientation) {
                     case 3: pos.setY(pos.y() + 1.0); break;
                     default:
                         ROS_ERROR("Invalid orientation");
-                        tick_state.is_active = false;
                         return false;
                 }
                 displayVisits(next_move.visitCount);
@@ -188,13 +168,9 @@ bool moveTurtle(QPointF& pos, int& orientation) {
             
         default:
             ROS_ERROR("Invalid action");
-            tick_state.is_active = false;
             return false;
     }
     
-    // End tick with sleep
-    tick_state.is_active = false;
-    ros::Duration(TICK_DURATION).sleep();
     return true;
 }
 
