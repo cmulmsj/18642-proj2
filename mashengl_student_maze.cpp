@@ -141,6 +141,8 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
+    static const ros::Duration TICK_SLEEP(0.015);
+    static const ros::Duration MSG_WAIT(0.002);
     // Handle countdown
     if (tick_state.countdown > 0) {
         tick_state.countdown--;
@@ -205,7 +207,7 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     }
     
     // Ensure message processing time
-    ros::Duration(0.018).sleep();
+    MSG_WAIT.sleep();
     
     // End tick and set countdown
     tick_state.is_active = false;
