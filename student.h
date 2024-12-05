@@ -87,14 +87,6 @@ enum turtleAction {
     RIGHT
 };
 
-enum RobotState {
-    INIT,
-    CHECK_WALL,
-    SCAN,
-    MOVE,
-    DONE
-};
-
 typedef struct {
     uint8_t x;
     uint8_t y;
@@ -112,6 +104,7 @@ bool moveTurtle(QPointF& pos, int& orientation);
 bool checkObstacle(QPointF pos, int direction);
 
 #endif // STUDENT_H
+
 
 // #ifndef STUDENT_H
 // #define STUDENT_H
