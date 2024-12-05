@@ -130,6 +130,11 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
+    static const ros::Duration TICK_DURATION(0.2);
+    
+    // Synchronize tick start
+    ros::Duration(TICK_DURATION).sleep();
+    
     // Get state checks
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
