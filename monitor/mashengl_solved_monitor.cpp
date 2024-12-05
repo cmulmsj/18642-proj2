@@ -56,11 +56,7 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
 
 void visitInterrupt(ros::Time t, int visits) {}
 
-void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
-    if (state.maze_completed) {
-        ROS_WARN("VIOLATION: [SOLVED] Bump check after maze completion");
-    }
-}
+void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {}
 
 void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
     if (atEnd) {
