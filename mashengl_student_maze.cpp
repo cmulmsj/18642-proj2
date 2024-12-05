@@ -130,7 +130,6 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    static RobotState current_state = INIT;
     static int cycles = 0;
     
     // Handle timeout cycles
