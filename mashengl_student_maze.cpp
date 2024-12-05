@@ -130,15 +130,24 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
-    static const ros::Duration TICK_DURATION(0.2);
+    static RobotState current_state = INIT;
+    static int cycles = 0;
     
-    // Synchronize tick start
-    ros::Duration(TICK_DURATION).sleep();
+    // Handle timeout cycles
+    if (cycles > 0) {
+        cycles--;
+        return true;
+    }
+    cycles = TIMEOUT;
     
     // Get state checks
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
                              static_cast<int>(std::floor(pos.y())));
+    
+    if (reached_goal) {
+        return false;
+    }
     
     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
     
@@ -178,6 +187,7 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     
     return true;
 }
+
 
 // bool moveTurtle(QPointF& pos, int& orientation) {
 //     static const ros::Duration TICK_DURATION(0.5);
