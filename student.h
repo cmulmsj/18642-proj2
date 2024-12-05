@@ -54,6 +54,7 @@
 // extern RobotState robot_state;
 
 // #endif // STUDENT_H
+// student.h
 
 #ifndef STUDENT_H
 #define STUDENT_H
@@ -72,6 +73,7 @@
 // Constants
 const int GRID_SIZE = 30;
 const int START_POS = 13;  // Starting position (middle of grid)
+static const int TIMEOUT = 2;  // Timeout cycles for controlling speed
 
 // External functions
 bool bumped(int x1, int y1, int x2, int y2);
@@ -83,6 +85,14 @@ enum turtleAction {
     FORWARD,
     LEFT,
     RIGHT
+};
+
+enum RobotState {
+    INIT,
+    CHECK_WALL,
+    SCAN,
+    MOVE,
+    DONE
 };
 
 typedef struct {
@@ -102,7 +112,6 @@ bool moveTurtle(QPointF& pos, int& orientation);
 bool checkObstacle(QPointF pos, int direction);
 
 #endif // STUDENT_H
-
 
 // #ifndef STUDENT_H
 // #define STUDENT_H
