@@ -146,7 +146,8 @@ static int facing_direction = 1; // Start facing NORTH
 static int scan_count = 0;
 static int best_direction = -1;
 static uint8_t min_visit_count = UINT8_MAX;
-static const size_t TIME_DELAY = 5;
+static size_t delay_counter = 5;  // Initial delay value
+static const size_t DELAY_RESET = 5;  // Reset value for delay
 
 void updateVisitMap(coordinate pos) {
     if (pos.x < GRID_SIZE && pos.y < GRID_SIZE) {
@@ -179,15 +180,15 @@ coordinate getNextPosition(coordinate pos, int direction) {
 turtleMove studentTurtleStep(bool bumped_wall, bool at_goal) {
     turtleMove next_move = {FORWARD, true, 0};
     
-    // Check delay counter and return if still waiting
-    if (tick_state.delay_counter > 0) {
-        tick_state.delay_counter--;
+    // Handle delay timing
+    if (delay_counter > 0) {
+        delay_counter--;
         next_move.validAction = false;
         return next_move;
     }
     
-    // Reset delay counter for next action
-    tick_state.delay_counter = TIME_DELAY;
+    // Reset delay for next action
+    delay_counter = DELAY_RESET;
     
     if (at_goal) {
         next_move.validAction = false;
