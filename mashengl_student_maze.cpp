@@ -263,6 +263,7 @@ bool checkObstacle(QPointF pos, int direction) {
 }
 
 bool moveTurtle(QPointF& pos, int& orientation) {
+    static bool initialized = false;
     static int cycles = 0;
     
     // Handle timeout cycles
@@ -271,7 +272,14 @@ bool moveTurtle(QPointF& pos, int& orientation) {
         return true;
     }
     
-    // Get state checks
+    // Handle initialization
+    if (!initialized) {
+        initialized = true;
+        cycles = TIMEOUT;
+        return true;
+    }
+    
+    // Get checks after initialization
     bool wall_detected = checkObstacle(pos, orientation);
     bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
                              static_cast<int>(std::floor(pos.y())));
@@ -319,7 +327,6 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     cycles = TIMEOUT;
     return true;
 }
-
 
 
 // bool moveTurtle(QPointF& pos, int& orientation) {
