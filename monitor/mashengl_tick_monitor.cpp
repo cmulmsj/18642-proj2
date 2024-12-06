@@ -1,89 +1,64 @@
 #include "monitor_interface.h"
 
-// Mailbox structure for incoming interrupts
-struct TickMonitorMailbox {
-    bool pose_received;
-    bool visit_received;
-    bool bump_received;
-    ros::Time last_time;
-};
+struct InterruptState {
+    bool position;
+    bool visit;
+    bool wall;
+} tick_state = {false, false, false};
 
-// Working state
-struct TickMonitorState {
-    bool tick_active;
-    bool pose_seen;
-    bool visit_seen;
-    bool bump_seen;
-};
-
-static TickMonitorMailbox mailbox = {};
-static TickMonitorState state = {};
-static bool first_run = true;
+namespace {
+    class MonitorStartup {
+    public:
+        MonitorStartup() {
+            fprintf(stderr, "Starting Tick Monitor (mashengl)\n");
+            ROS_WARN("Monitor Tick Monitor (mashengl) is running");
+        }
+    } monitor_init;
+}
 
 void tickInterrupt(ros::Time t) {
-    if (first_run) {
-        first_run = false;
-        fprintf(stderr, "I'm running Tick Monitor (mashengl) to STDERR\n");
-        ROS_WARN("Monitor Tick Monitor (mashengl) is running");
+    if (tick_state.position) {
+        ROS_WARN("VIOLATION: [TICK] Multiple position updates within tick at %ld", 
+                 t.toNSec());
     }
-
-    if (!state.tick_active) {
-        // Start new tick
-        state.tick_active = true;
-        state.pose_seen = false;
-        state.visit_seen = false;
-        state.bump_seen = false;
-        ROS_INFO("[[%ld ns]] New tick started", t.toNSec());
-    } else {
-        // End current tick
-        state.tick_active = false;
-        mailbox = {}; // Clear mailbox
-        ROS_INFO("[[%ld ns]] Tick completed", t.toNSec());
+    if (tick_state.visit) {
+        ROS_WARN("VIOLATION: [TICK] Multiple visit updates within tick at %ld", 
+                 t.toNSec());
+    }
+    if (tick_state.wall) {
+        ROS_WARN("VIOLATION: [TICK] Multiple wall checks within tick at %ld", 
+                 t.toNSec());
     }
     
-    mailbox.last_time = t;
+    tick_state = {false, false, false};
 }
 
 void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
-    if (!state.tick_active) {
-        ROS_WARN("VIOLATION: [TICK] Pose interrupt received outside of tick");
-        return;
+    if (tick_state.position) {
+        ROS_WARN("VIOLATION: [TICK] Multiple position updates within tick at %ld", 
+                 t.toNSec());
     }
-    
-    if (state.pose_seen) {
-        ROS_WARN("VIOLATION: [TICK] Multiple pose interrupts within single tick");
-    }
-    state.pose_seen = true;
-    ROS_INFO("[[%ld ns]] Pose interrupt received: x=%d, y=%d", t.toNSec(), x, y);
+    tick_state.position = true;
+    ROS_INFO("[[%ld ns]] Position update received: x=%d, y=%d", t.toNSec(), x, y);
 }
 
 void visitInterrupt(ros::Time t, int visits) {
-    if (!state.tick_active) {
-        ROS_WARN("VIOLATION: [TICK] Visit interrupt received outside of tick");
-        return;
+    if (tick_state.visit) {
+        ROS_WARN("VIOLATION: [TICK] Multiple visit updates within tick at %ld", 
+                 t.toNSec());
     }
-    
-    if (state.visit_seen) {
-        ROS_WARN("VIOLATION: [TICK] Multiple visit interrupts within single tick");
-    }
-    state.visit_seen = true;
-    ROS_INFO("[[%ld ns]] Visit interrupt received: visits=%d", t.toNSec(), visits);
+    tick_state.visit = true;
+    ROS_INFO("[[%ld ns]] Visit update received: visits=%d", t.toNSec(), visits);
 }
 
 void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
-    if (!state.tick_active) {
-        ROS_WARN("VIOLATION: [TICK] Bump interrupt received outside of tick");
-        return;
+    if (tick_state.wall) {
+        ROS_WARN("VIOLATION: [TICK] Multiple wall checks within tick at %ld", 
+                 t.toNSec());
     }
-    
-    if (state.bump_seen) {
-        ROS_WARN("VIOLATION: [TICK] Multiple bump interrupts within single tick");
-    }
-    state.bump_seen = true;
-    ROS_INFO("[[%ld ns]] Bump interrupt received: (%d,%d)->(%d,%d) = %s", 
+    tick_state.wall = true;
+    ROS_INFO("[[%ld ns]] Wall check: (%d,%d)->(%d,%d) = %s", 
              t.toNSec(), x1, y1, x2, y2, bumped ? "true" : "false");
 }
 
-void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
-    // Not needed for tick monitoring
-}
+void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {}
