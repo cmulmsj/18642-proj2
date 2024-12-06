@@ -268,89 +268,71 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     bool state_changed = false;
 
     if (first_move) {
-        // Ensure the turtle starts at the correct known position
-        // If the monitor expects the turtle at (0,0) facing West (0), do that:
-        pos.setX(0.0);
-        pos.setY(0.0);
-        orientation = 0; // WEST if that's what orientation 0 means
+        // Initialize to correct starting position from student.h
+        pos.setX(START_POS);
+        pos.setY(START_POS);
+        orientation = 1; // Start facing NORTH per your original implementation
         first_move = false;
         cycles = TIMEOUT;
         return true; 
     }
 
-    // If waiting out cycles, no action taken
+    // Rest of the function stays the same...
     if (cycles > 0) {
         cycles--;
         return false;
     }
 
-    // Compute current integer coordinates from pos
     int current_x = static_cast<int>(std::floor(pos.x()));
     int current_y = static_cast<int>(std::floor(pos.y()));
-
-    // Check if at goal BEFORE moving
     bool reached_goal = atend(current_x, current_y);
+    
     if (reached_goal) {
-        return false; // Turtle is at the end, no move needed
-    }
-
-    // Check for walls in the direction the turtle is facing
-    bool wall_detected = checkObstacle(pos, orientation);
-
-    // Now decide next action
-    turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
-    if (!next_move.validAction) {
-        // No action means no state change
         return false;
     }
 
-    // Execute the move
+    bool wall_detected = checkObstacle(pos, orientation);
+    turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
+
+    if (!next_move.validAction) {
+        return false;
+    }
+
     switch (next_move.action) {
         case FORWARD:
             if (!wall_detected && !reached_goal) {
-                // Move the turtle according to orientation
                 switch (orientation) {
-                    case 0: // WEST
-                        pos.setX(pos.x() - 1.0);
-                        break;
-                    case 1: // NORTH
-                        pos.setY(pos.y() - 1.0);
-                        break;
-                    case 2: // EAST
-                        pos.setX(pos.x() + 1.0);
-                        break;
-                    case 3: // SOUTH
-                        pos.setY(pos.y() + 1.0);
-                        break;
+                    case 0: pos.setX(pos.x() - 1.0); break;
+                    case 1: pos.setY(pos.y() - 1.0); break;
+                    case 2: pos.setX(pos.x() + 1.0); break;
+                    case 3: pos.setY(pos.y() + 1.0); break;
                     default:
                         ROS_ERROR("Invalid orientation");
                         return false;
                 }
-                // After moving, update visits
                 displayVisits(next_move.visitCount);
                 state_changed = true;
             }
             break;
-
+            
         case RIGHT:
             orientation = (orientation + 1) % 4;
             state_changed = true;
             break;
-
+            
         case LEFT:
             orientation = (orientation + 3) % 4;
             state_changed = true;
             break;
-
+            
         default:
             ROS_ERROR("Invalid action");
             return false;
     }
-
+    
     cycles = TIMEOUT;
     return state_changed;
 }
-
 
 
 // bool moveTurtle(QPointF& pos, int& orientation) {
