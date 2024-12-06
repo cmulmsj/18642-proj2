@@ -12,7 +12,17 @@ struct TurnMonitorState {
 
 static TurnMonitorMailbox mailbox = {};
 static TurnMonitorState state = {};
-static bool first_run = true;
+
+// Monitor initialization
+namespace {
+    class MonitorInit {
+    public:
+        MonitorInit() {
+            fprintf(stderr, "I'm running Turn Monitor (mashengl) to STDERR\n");
+            ROS_WARN("Monitor Turn Monitor (mashengl) is running");
+        }
+    } init;
+}
 
 // Lookup table for valid 90-degree turns
 static const bool valid_turns[4][4] = {
@@ -24,12 +34,6 @@ static const bool valid_turns[4][4] = {
 };
 
 void tickInterrupt(ros::Time t) {
-    if (first_run) {
-        first_run = false;
-        fprintf(stderr, "I'm running Turn Monitor (mashengl) to STDERR\n");
-        ROS_WARN("Monitor Turn Monitor (mashengl) is running");
-    }
-
     // Update state from mailbox
     if (mailbox.orientation_updated) {
         Orientation new_orientation = mailbox.latest_orientation;
@@ -64,7 +68,5 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
 }
 
 void visitInterrupt(ros::Time t, int visits) {}
-
 void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {}
-
 void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {}
