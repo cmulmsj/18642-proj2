@@ -268,16 +268,14 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     bool state_changed = false;
 
     if (first_move) {
-        // Initialize to correct starting position from student.h
-        pos.setX(START_POS);
-        pos.setY(START_POS);
-        orientation = 1; // Start facing NORTH per your original implementation
+        // Don't modify the starting position - let ROS set it
+        // Just initialize other state
         first_move = false;
         cycles = TIMEOUT;
         return true; 
     }
 
-    // Rest of the function stays the same...
+    // Rest of function stays the same
     if (cycles > 0) {
         cycles--;
         return false;
@@ -302,10 +300,10 @@ bool moveTurtle(QPointF& pos, int& orientation) {
         case FORWARD:
             if (!wall_detected && !reached_goal) {
                 switch (orientation) {
-                    case 0: pos.setX(pos.x() - 1.0); break;
-                    case 1: pos.setY(pos.y() - 1.0); break;
-                    case 2: pos.setX(pos.x() + 1.0); break;
-                    case 3: pos.setY(pos.y() + 1.0); break;
+                    case 0: pos.setX(pos.x() - 1.0); break; // WEST
+                    case 1: pos.setY(pos.y() - 1.0); break; // NORTH
+                    case 2: pos.setX(pos.x() + 1.0); break; // EAST
+                    case 3: pos.setY(pos.y() + 1.0); break; // SOUTH
                     default:
                         ROS_ERROR("Invalid orientation");
                         return false;
@@ -333,7 +331,6 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     cycles = TIMEOUT;
     return state_changed;
 }
-
 
 // bool moveTurtle(QPointF& pos, int& orientation) {
 //     static const ros::Duration TICK_DURATION(0.5);
