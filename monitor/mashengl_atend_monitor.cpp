@@ -2,33 +2,29 @@
 
 struct AtEndMonitorState {
     bool initialized;
-    bool maze_completed;
     int current_x;
     int current_y;
 };
 
-static AtEndMonitorState state = {false, false, 0, 0};
-static bool first_run = true;
+static AtEndMonitorState state = {false, 0, 0};
 
-void tickInterrupt(ros::Time t) {
-    if (first_run) {
-        first_run = false;
-        fprintf(stderr, "I'm running AtEnd Monitor (mashengl) to STDERR\n");
-        ROS_WARN("Monitor AtEnd Monitor (mashengl) is running");
-    }
-
-    // Output success message if maze is completed
-    if (state.maze_completed) {
-        ROS_WARN("Successful atEnd");
-    }
+// Monitor initialization
+namespace {
+    class MonitorInit {
+    public:
+        MonitorInit() {
+            fprintf(stderr, "I'm running AtEnd Monitor (mashengl) to STDERR\n");
+            ROS_WARN("Monitor AtEnd Monitor (mashengl) is running");
+        }
+    } init;
 }
 
+void tickInterrupt(ros::Time t) {}
+
 void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
-    // Directly update state with new position
     state.current_x = x;
     state.current_y = y;
     state.initialized = true;
-    
     ROS_INFO("[[%ld ns]] Position updated: (%d,%d)", t.toNSec(), x, y);
 }
 
@@ -48,9 +44,4 @@ void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
     } else {
         ROS_INFO("[[%ld ns]] Valid atEnd check at (%d,%d)", t.toNSec(), x, y);
     }
-
-    if (atEnd) {
-        state.maze_completed = true;
-    }
 }
-
