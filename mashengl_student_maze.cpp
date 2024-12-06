@@ -43,62 +43,62 @@ bool checkObstacle(QPointF pos, int direction) {
 bool moveTurtle(QPointF& pos, int& orientation) {
     static bool first_move = true;
     static int cycles = 0;
-    
+    bool state_changed = false;
+
     if (first_move) {
+        // Don't modify the starting position - let ROS set it
+        // Just initialize other state
         first_move = false;
         cycles = TIMEOUT;
-        return true;
+        return true; 
     }
 
+    // Rest of function stays the same
     if (cycles > 0) {
         cycles--;
         return false;
     }
 
-    // Check goal first - this should happen before any moves
-    bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
-                            static_cast<int>(std::floor(pos.y())));
+    int current_x = static_cast<int>(std::floor(pos.x()));
+    int current_y = static_cast<int>(std::floor(pos.y()));
+    bool reached_goal = atend(current_x, current_y);
+    
     if (reached_goal) {
         return false;
     }
 
-    // Single wall check
     bool wall_detected = checkObstacle(pos, orientation);
-    
-    // Get next move
     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
+
     if (!next_move.validAction) {
         return false;
     }
 
-    // Execute exactly one action per tick
-    bool did_move = false;
     switch (next_move.action) {
         case FORWARD:
             if (!wall_detected && !reached_goal) {
                 switch (orientation) {
-                    case 0: pos.setX(pos.x() - 1.0); break;
-                    case 1: pos.setY(pos.y() - 1.0); break;
-                    case 2: pos.setX(pos.x() + 1.0); break;
-                    case 3: pos.setY(pos.y() + 1.0); break;
+                    case 0: pos.setX(pos.x() - 1.0); break; // WEST
+                    case 1: pos.setY(pos.y() - 1.0); break; // NORTH
+                    case 2: pos.setX(pos.x() + 1.0); break; // EAST
+                    case 3: pos.setY(pos.y() + 1.0); break; // SOUTH
                     default:
                         ROS_ERROR("Invalid orientation");
                         return false;
                 }
-                // Update visits exactly once after move
                 displayVisits(next_move.visitCount);
-                did_move = true;
+                state_changed = true;
             }
             break;
             
         case RIGHT:
             orientation = (orientation + 1) % 4;
-            did_move = true;
+            state_changed = true;
             break;
             
         case LEFT:
             orientation = (orientation + 3) % 4;
-            did_move = true;
+            state_changed = true;
             break;
             
         default:
@@ -107,7 +107,7 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     }
     
     cycles = TIMEOUT;
-    return did_move;
+    return state_changed;
 }
 
 
