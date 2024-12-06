@@ -267,43 +267,45 @@ bool moveTurtle(QPointF& pos, int& orientation) {
     static int cycles = 0;
     bool state_changed = false;
 
+    // Handle first move initialization
     if (first_move) {
-        // Don't modify the starting position - let ROS set it
-        // Just initialize other state
         first_move = false;
         cycles = TIMEOUT;
         return true; 
     }
 
-    // Rest of function stays the same
+    // Handle timeout cycles
     if (cycles > 0) {
         cycles--;
         return false;
     }
 
-    int current_x = static_cast<int>(std::floor(pos.x()));
-    int current_y = static_cast<int>(std::floor(pos.y()));
-    bool reached_goal = atend(current_x, current_y);
-    
+    // Get all state information once at the start
+    QPointF current_pos = pos;  // Cache current position
+    bool reached_goal = atend(static_cast<int>(std::floor(current_pos.x())), 
+                            static_cast<int>(std::floor(current_pos.y())));
     if (reached_goal) {
         return false;
     }
 
-    bool wall_detected = checkObstacle(pos, orientation);
+    // Do single wall check
+    bool wall_detected = checkObstacle(current_pos, orientation);
+    
+    // Get next move based on cached state
     turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
-
     if (!next_move.validAction) {
         return false;
     }
 
+    // Execute single action using cached position
     switch (next_move.action) {
         case FORWARD:
             if (!wall_detected && !reached_goal) {
                 switch (orientation) {
-                    case 0: pos.setX(pos.x() - 1.0); break; // WEST
-                    case 1: pos.setY(pos.y() - 1.0); break; // NORTH
-                    case 2: pos.setX(pos.x() + 1.0); break; // EAST
-                    case 3: pos.setY(pos.y() + 1.0); break; // SOUTH
+                    case 0: pos.setX(current_pos.x() - 1.0); break;
+                    case 1: pos.setY(current_pos.y() - 1.0); break;
+                    case 2: pos.setX(current_pos.x() + 1.0); break;
+                    case 3: pos.setY(current_pos.y() + 1.0); break;
                     default:
                         ROS_ERROR("Invalid orientation");
                         return false;
