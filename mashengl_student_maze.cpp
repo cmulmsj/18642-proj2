@@ -43,90 +43,71 @@ bool checkObstacle(QPointF pos, int direction) {
 bool moveTurtle(QPointF& pos, int& orientation) {
     static bool first_move = true;
     static int cycles = 0;
-    bool state_changed = false;
-
-    // Handle the first move: initialize and trigger an initial pose update
+    
     if (first_move) {
         first_move = false;
         cycles = TIMEOUT;
-        return true; 
+        return true;
     }
 
-    // If waiting out cycles, do nothing
     if (cycles > 0) {
         cycles--;
         return false;
     }
 
-    // Check for walls in the direction the turtle is facing
-    bool wall_detected = checkObstacle(pos, orientation);
-
-    // Decide the next action based on wall detection and goal status
-    // Since we are handling 'atend' after moving, pass 'false' for 'at_goal'
-    turtleMove next_move = studentTurtleStep(wall_detected, false); 
-    if (!next_move.validAction) {
-        // No valid action means no state change
+    // Check goal first - this should happen before any moves
+    bool reached_goal = atend(static_cast<int>(std::floor(pos.x())), 
+                            static_cast<int>(std::floor(pos.y())));
+    if (reached_goal) {
         return false;
     }
 
-    // Execute the chosen action
+    // Single wall check
+    bool wall_detected = checkObstacle(pos, orientation);
+    
+    // Get next move
+    turtleMove next_move = studentTurtleStep(wall_detected, reached_goal);
+    if (!next_move.validAction) {
+        return false;
+    }
+
+    // Execute exactly one action per tick
+    bool did_move = false;
     switch (next_move.action) {
         case FORWARD:
-            if (!wall_detected) {
-                // Update position based on current orientation
+            if (!wall_detected && !reached_goal) {
                 switch (orientation) {
-                    case 0: // WEST
-                        pos.setX(pos.x() - 1.0);
-                        break;
-                    case 1: // NORTH
-                        pos.setY(pos.y() - 1.0);
-                        break;
-                    case 2: // EAST
-                        pos.setX(pos.x() + 1.0);
-                        break;
-                    case 3: // SOUTH
-                        pos.setY(pos.y() + 1.0);
-                        break;
+                    case 0: pos.setX(pos.x() - 1.0); break;
+                    case 1: pos.setY(pos.y() - 1.0); break;
+                    case 2: pos.setX(pos.x() + 1.0); break;
+                    case 3: pos.setY(pos.y() + 1.0); break;
                     default:
                         ROS_ERROR("Invalid orientation");
                         return false;
                 }
-                // After moving, update the visit count
+                // Update visits exactly once after move
                 displayVisits(next_move.visitCount);
-                state_changed = true;
+                did_move = true;
             }
             break;
-
+            
         case RIGHT:
-            // Update orientation by turning right
             orientation = (orientation + 1) % 4;
-            state_changed = true;
+            did_move = true;
             break;
-
+            
         case LEFT:
-            // Update orientation by turning left
             orientation = (orientation + 3) % 4;
-            state_changed = true;
+            did_move = true;
             break;
-
+            
         default:
             ROS_ERROR("Invalid action");
             return false;
     }
-
-    // After executing the move or turn, check if the turtle has reached the goal
-    int current_x = static_cast<int>(std::floor(pos.x()));
-    int current_y = static_cast<int>(std::floor(pos.y()));
-    bool reached_goal_after_move = atend(current_x, current_y);
     
-    if (reached_goal_after_move) {
-        // If the turtle has reached the goal, no further action is needed
-        return false;
-    }
-
-    // Reset the cycle countdown after an action has been taken
     cycles = TIMEOUT;
-    return state_changed; // Return true only if a state change occurred
+    return did_move;
 }
 
 
