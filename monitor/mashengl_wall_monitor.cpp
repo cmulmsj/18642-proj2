@@ -1,14 +1,12 @@
 #include "monitor_interface.h"
 #include <queue>
 
-// Mailbox for wall monitor
 struct WallMonitorMailbox {
     std::queue<std::pair<Endpoints, bool>> bump_checks;
     Pose latest_pose;
     bool pose_updated;
 };
 
-// Working state
 struct WallMonitorState {
     static const int MAX_BUMP_MEMORY = 4;
     std::queue<std::pair<Endpoints, bool>> bump_memory;
@@ -18,7 +16,17 @@ struct WallMonitorState {
 
 static WallMonitorMailbox mailbox = {};
 static WallMonitorState state = {};
-static bool first_run = true;
+
+// Monitor initialization
+namespace {
+    class MonitorInit {
+    public:
+        MonitorInit() {
+            fprintf(stderr, "I'm running Wall Monitor (mashengl) to STDERR\n");
+            ROS_WARN("Monitor Wall Monitor (mashengl) is running");
+        }
+    } init;
+}
 
 static Endpoints canonicalizeWall(int x1, int y1, int x2, int y2) {
     Endpoints wall;
@@ -78,12 +86,6 @@ static bool bumpedInMemory(const Endpoints& wall) {
 }
 
 void tickInterrupt(ros::Time t) {
-    if (first_run) {
-        first_run = false;
-        fprintf(stderr, "I'm running Wall Monitor (mashengl) to STDERR\n");
-        ROS_WARN("Monitor Wall Monitor (mashengl) is running");
-    }
-
     // Process any pending updates from mailbox
     if (mailbox.pose_updated) {
         state.current_pose = mailbox.latest_pose;
@@ -106,6 +108,7 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
     if (!state.initialized) {
         state.initialized = true;
         state.current_pose = {x, y};
+        ROS_INFO("[[%ld ns]] Initial position: (%d,%d)", t.toNSec(), x, y);
         return;
     }
 
@@ -125,9 +128,7 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
     }
 }
 
-void visitInterrupt(ros::Time t, int visits) {
-    // Not needed for wall monitoring
-}
+void visitInterrupt(ros::Time t, int visits) {}
 
 void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
     Endpoints wall = canonicalizeWall(x1, y1, x2, y2);
@@ -137,6 +138,4 @@ void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {
              t.toNSec(), x1, y1, x2, y2, bumped ? "true" : "false");
 }
 
-void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
-    // Not needed for wall monitoring
-}
+void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {}
