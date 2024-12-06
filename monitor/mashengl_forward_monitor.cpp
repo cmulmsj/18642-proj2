@@ -16,7 +16,17 @@ struct ForwardMonitorState {
 
 static ForwardMonitorMailbox mailbox = {};
 static ForwardMonitorState state = {};
-static bool first_run = true;
+
+// Monitor initialization
+namespace {
+    class MonitorInit {
+    public:
+        MonitorInit() {
+            fprintf(stderr, "I'm running Forward Monitor (mashengl) to STDERR\n");
+            ROS_WARN("Monitor Forward Monitor (mashengl) is running");
+        }
+    } init;
+}
 
 static Orientation getMovementDirection(const Pose& from, const Pose& to) {
     int dx = to.x - from.x;
@@ -32,12 +42,6 @@ static Orientation getMovementDirection(const Pose& from, const Pose& to) {
 }
 
 void tickInterrupt(ros::Time t) {
-    if (first_run) {
-        first_run = false;
-        fprintf(stderr, "I'm running Forward Monitor (mashengl) to STDERR\n");
-        ROS_WARN("Monitor Forward Monitor (mashengl) is running");
-    }
-
     // Reset turn flag at start of tick
     state.has_turned = false;
 }
@@ -86,4 +90,3 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
 void visitInterrupt(ros::Time t, int visits) {}
 void bumpInterrupt(ros::Time t, int x1, int y1, int x2, int y2, bool bumped) {}
 void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {}
-
