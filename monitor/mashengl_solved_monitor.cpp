@@ -16,7 +16,17 @@ struct SolvedMonitorState {
 
 static SolvedMonitorMailbox mailbox = {};
 static SolvedMonitorState state = {};
-static bool first_run = true;
+
+// Monitor initialization
+namespace {
+    class MonitorInit {
+    public:
+        MonitorInit() {
+            fprintf(stderr, "I'm running Solved Monitor (mashengl) to STDERR\n");
+            ROS_WARN("Monitor Solved Monitor (mashengl) is running");
+        }
+    } init;
+}
 
 void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
     mailbox.latest_pose = {x, y};
@@ -32,6 +42,10 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
             ROS_WARN("VIOLATION: [SOLVED] Rotation after maze completion");
         }
     }
+    
+    // Update state
+    state.current_pose = {x, y};
+    state.current_orientation = o;
     
     ROS_INFO("[[%ld ns]] Position update: (%d,%d), orientation: %d", 
              t.toNSec(), x, y, o);
@@ -50,4 +64,3 @@ void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
                  t.toNSec(), x, y);
     }
 }
-
