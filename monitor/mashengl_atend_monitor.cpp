@@ -4,9 +4,10 @@ struct AtEndMonitorState {
     bool initialized;
     int current_x;
     int current_y;
+    bool reached_end;
 };
 
-static AtEndMonitorState state = {false, 0, 0};
+static AtEndMonitorState state = {false, 0, 0, false};
 
 // Monitor initialization
 namespace {
@@ -19,7 +20,11 @@ namespace {
     } init;
 }
 
-void tickInterrupt(ros::Time t) {}
+void tickInterrupt(ros::Time t) {
+    if (state.reached_end) {
+        ROS_WARN("Successful atEnd");
+    }
+}
 
 void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
     state.current_x = x;
@@ -43,5 +48,8 @@ void atEndInterrupt(ros::Time t, int x, int y, bool atEnd) {
                  x, y, state.current_x, state.current_y);
     } else {
         ROS_INFO("[[%ld ns]] Valid atEnd check at (%d,%d)", t.toNSec(), x, y);
+        if (atEnd) {
+            state.reached_end = true;
+        }
     }
 }
