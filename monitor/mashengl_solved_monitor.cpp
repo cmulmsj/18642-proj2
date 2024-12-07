@@ -29,10 +29,9 @@ namespace {
 }
 
 void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
-    mailbox.latest_pose = {x, y};
-    mailbox.latest_orientation = o;
-    mailbox.pose_updated = true;
-    mailbox.orientation_updated = true;
+    state.current_pose = {x, y};
+    state.current_orientation = o;
+    
 
     if (state.maze_completed) {
         if (x != state.current_pose.x || y != state.current_pose.y) {
@@ -43,9 +42,10 @@ void poseInterrupt(ros::Time t, int x, int y, Orientation o) {
         }
     }
     
-    // Update state
-    state.current_pose = {x, y};
-    state.current_orientation = o;
+    mailbox.latest_pose = {x, y};
+    mailbox.latest_orientation = o;
+    mailbox.pose_updated = true;
+    mailbox.orientation_updated = true;
     
     ROS_INFO("[[%ld ns]] Position update: (%d,%d), orientation: %d", 
              t.toNSec(), x, y, o);
