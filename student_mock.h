@@ -13,7 +13,6 @@
 // Constants
 #define GRID_SIZE 30
 #define START_POS 13
-#define UINT8_MAX 255
 
 // Mock function declarations
 void mock_reset_state();
